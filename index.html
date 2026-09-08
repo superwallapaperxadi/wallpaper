@@ -6,7 +6,7 @@
   <title>Aethelgard Monolith Core — Cyber Executive Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
   <!-- Ethers v5 for Multi-Chain Crypto Wallet Interrogation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 
@@ -15,15 +15,18 @@
       --bg: #000000;
       --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --font-sanskrit: 'Noto Serif Devanagari', 'Cinzel', serif;
+      --font-serif: 'Cinzel', serif;
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-light: rgba(255, 255, 255, 0.2);
-      --glass-surface: rgba(10, 10, 14, 0.78);
-      --glass-surface-dense: rgba(12, 12, 16, 0.96);
+      --glass-surface: rgba(10, 10, 14, 0.82);
+      --glass-surface-dense: rgba(12, 13, 18, 0.96);
       --accent-blue: #38bdf8;
       --accent-cyan: #00f0ff;
       --accent-green: #10b981;
-      --accent-gold: #f59e0b;
-      --accent-purple: #a855f7;
+      --gold-royal: #e5c07b;
+      --gold-bright: #fcd34d;
+      --gold-dark: #b45309;
     }
 
     * {
@@ -44,12 +47,12 @@
       position: relative;
     }
 
-    /* === PRO VIGNETTE OVERLAY (Optimized GPU blend) === */
+    /* === PRO VIGNETTE OVERLAY (Clean GPU Blend) === */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
-      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%);
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%);
       pointer-events: none;
       z-index: 3;
     }
@@ -93,10 +96,11 @@
     .c-bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
     .c-br { bottom: -1px; right: -1px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
 
+    /* HUD Layout — Raised bottom row for Lively Wallpaper taskbar clearance */
     .hud {
       position: absolute;
       inset: 0;
-      padding: 38px 46px;
+      padding: 36px 46px 64px 46px; /* 64px bottom padding for taskbar clearance */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -135,7 +139,7 @@
       z-index: 9999 !important;
     }
 
-    /* === DOCKS CLUSTER === */
+    /* === DOCKS CLUSTER (Hover to Expand + Pin / Unpin) === */
     .docks-cluster {
       display: flex;
       align-items: center;
@@ -144,39 +148,40 @@
 
     .apps-dock {
       position: relative;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       background: var(--glass-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 40px;
-      padding: 4px 6px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      padding: 4px 10px 4px 6px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .apps-dock:hover {
-      border-color: var(--border-light);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    .apps-dock:hover, .apps-dock.pinned {
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(14, 16, 24, 0.94);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(56, 189, 248, 0.12);
     }
 
     .apps-trigger {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 14px 6px 10px;
-      cursor: default;
+      padding: 5px 10px 5px 8px;
+      cursor: pointer;
       color: rgba(255, 255, 255, 0.65);
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 1.2px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      border-right: 1px solid var(--border-subtle);
-      transition: color 0.2s ease;
+      transition: color 0.25s ease;
+      border-radius: 20px;
     }
 
-    .apps-dock:hover .apps-trigger {
+    .apps-dock:hover .apps-trigger, .apps-dock.pinned .apps-trigger {
       color: #ffffff;
     }
 
@@ -186,18 +191,75 @@
       stroke: currentColor;
       fill: none;
       stroke-width: 2;
+      transition: transform 0.3s ease;
     }
 
+    .apps-dock:hover .apps-trigger svg {
+      transform: rotate(90deg);
+    }
+
+    /* Pin / Unpin Button on Dock */
+    .dock-pin-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+      margin-right: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .dock-pin-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.1);
+    }
+
+    .apps-dock.pinned .dock-pin-btn {
+      color: var(--accent-cyan);
+      filter: drop-shadow(0 0 6px var(--accent-cyan));
+    }
+
+    .dock-pin-btn svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    /* Expandable Apps List on Hover or when Pinned */
     .apps-list {
       display: flex;
       align-items: center;
       gap: 6px;
+      max-width: 0;
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+      transform: translateX(-8px);
+      transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.28s ease,
+                  transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .apps-dock:hover .apps-list,
+    .apps-dock.pinned .apps-list {
+      max-width: 480px;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
       padding-left: 6px;
+      border-left: 1px solid var(--border-subtle);
     }
 
     .app-btn {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border-subtle);
@@ -209,24 +271,24 @@
       transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
       position: relative;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .app-btn:hover {
-      transform: translateY(-2px) scale(1.1);
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      transform: translateY(-2px) scale(1.12);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
     }
 
     .app-btn img, .app-btn svg {
-      width: 18px;
-      height: 18px;
+      width: 17px;
+      height: 17px;
       object-fit: cover;
       border-radius: 50%;
       pointer-events: none;
     }
 
-    /* App Tooltip */
     .app-btn::after {
       content: attr(data-tooltip);
       position: absolute;
@@ -235,9 +297,9 @@
       transform: translateX(-50%) translateY(4px);
       background: rgba(12, 12, 16, 0.95);
       border: 1px solid var(--border-subtle);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.62rem;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.6rem;
       font-family: var(--font-mono);
       letter-spacing: 0.5px;
       color: #ffffff;
@@ -254,8 +316,8 @@
     }
 
     .add-app-btn {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.02);
       border: 1px dashed var(--border-subtle);
@@ -265,6 +327,7 @@
       cursor: pointer;
       color: rgba(255, 255, 255, 0.4);
       transition: all 0.25s ease;
+      flex-shrink: 0;
     }
 
     .add-app-btn:hover {
@@ -274,59 +337,90 @@
       transform: scale(1.08);
     }
 
-    .add-app-btn svg {
-      width: 14px;
-      height: 14px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-    }
+    .add-app-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-    /* === CRYPTO RADAR TRIGGER BUTTON (HUD) === */
+    /* === ROBOTIC CYBER RADAR TRIGGER (HUD) === */
     .crypto-radar-trigger {
       display: flex;
       align-items: center;
-      gap: 9px;
-      background: rgba(14, 16, 24, 0.88);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      gap: 10px;
+      background: rgba(12, 14, 22, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       border-radius: 40px;
-      padding: 7px 16px 7px 12px;
+      padding: 5px 16px 5px 8px;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(56, 189, 248, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 14px rgba(56, 189, 248, 0.1);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .crypto-radar-trigger:hover {
-      border-color: rgba(56, 189, 248, 0.6);
+      border-color: rgba(0, 240, 255, 0.7);
       transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(56, 189, 248, 0.3), inset 0 0 16px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 8px 28px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.2);
     }
 
-    .crypto-radar-radar-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
+    /* Genuine Cyber Radar Scope (Robotic Mechanical Widget) */
+    .mini-radar-scope {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, rgba(5, 10, 18, 0.95) 75%);
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3), inset 0 0 6px rgba(0, 240, 255, 0.25);
     }
 
-    .crypto-radar-radar-icon svg {
-      width: 18px;
-      height: 18px;
-      animation: radarSpin 4s linear infinite;
+    /* Radar Concentric Distance Rings */
+    .mini-radar-scope::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      border: 0.8px dashed rgba(0, 240, 255, 0.35);
+      pointer-events: none;
     }
 
-    @keyframes radarSpin {
+    /* Radar Conical Sweeping Beam */
+    .mini-radar-sweep {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(0, 240, 255, 0.85) 0deg, rgba(0, 240, 255, 0.15) 45deg, transparent 90deg);
+      animation: radarBeamRotate 2.4s linear infinite;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes radarBeamRotate {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+
+    /* Pulsing Detected Target Blips */
+    .mini-radar-blip {
+      position: absolute;
+      width: 3.5px;
+      height: 3.5px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+      top: 6px;
+      right: 7px;
+      animation: blipGlow 2.4s infinite ease-in-out;
+    }
+
+    @keyframes blipGlow {
+      0%, 75% { opacity: 0.2; transform: scale(0.8); }
+      80% { opacity: 1; transform: scale(1.4); }
+      100% { opacity: 0.3; transform: scale(1); }
     }
 
     .crypto-radar-label {
       font-size: 0.68rem;
       font-family: var(--font-mono);
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 1.5px;
       color: #ffffff;
       text-transform: uppercase;
@@ -341,20 +435,14 @@
       border: 1px solid rgba(16, 185, 129, 0.4);
       color: #10b981;
       letter-spacing: 1px;
-      font-weight: 700;
-      animation: livePulse 2s ease-in-out infinite;
+      font-weight: 800;
     }
 
-    @keyframes livePulse {
-      0%, 100% { opacity: 0.8; box-shadow: 0 0 4px rgba(16, 185, 129, 0.3); }
-      50% { opacity: 1; box-shadow: 0 0 10px rgba(16, 185, 129, 0.7); }
-    }
-
-    /* === SEARCH CLUSTER & BING PNG EMBLEM === */
+    /* === SEARCH CLUSTER WITH BING PNG EMBLEM (Pruned Enter Badge) === */
     .search-cluster {
       display: flex;
       align-items: center;
-      min-width: 280px;
+      min-width: 260px;
     }
 
     .search-capsule {
@@ -364,30 +452,29 @@
       background: var(--glass-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 40px;
-      padding: 6px 14px 6px 12px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      padding: 6px 16px 6px 14px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       width: 100%;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
     .search-capsule:focus-within, .search-capsule:hover {
-      border-color: rgba(0, 164, 239, 0.5);
-      box-shadow: 0 8px 26px rgba(0, 164, 239, 0.2);
+      border-color: rgba(0, 164, 239, 0.6);
+      box-shadow: 0 8px 28px rgba(0, 164, 239, 0.25);
     }
 
     .bing-brand-badge {
       display: flex;
       align-items: center;
       gap: 7px;
-      font-size: 0.62rem;
+      font-size: 0.64rem;
       font-family: var(--font-mono);
       letter-spacing: 1.5px;
-      color: rgba(255, 255, 255, 0.65);
+      color: rgba(255, 255, 255, 0.7);
       text-transform: uppercase;
       flex-shrink: 0;
-      transition: color 0.3s ease;
     }
 
     .bing-emblem-img {
@@ -403,7 +490,7 @@
     .search-capsule:focus-within .bing-emblem-img,
     .search-capsule:hover .bing-emblem-img {
       transform: scale(1.1);
-      filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.85));
+      filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.9));
     }
 
     .search-input {
@@ -412,31 +499,20 @@
       border: none;
       outline: none;
       font-family: var(--font-mono);
-      font-size: 0.74rem;
+      font-size: 0.76rem;
       letter-spacing: 0.8px;
       color: #ffffff;
     }
 
     .search-input::placeholder {
-      color: rgba(255, 255, 255, 0.28);
+      color: rgba(255, 255, 255, 0.3);
     }
 
-    .search-hint {
-      font-family: var(--font-mono);
-      font-size: 0.52rem;
-      letter-spacing: 1px;
-      color: rgba(255, 255, 255, 0.35);
-      border: 1px solid var(--border-subtle);
-      padding: 2px 5px;
-      border-radius: 4px;
-      text-transform: uppercase;
-    }
-
-    /* === TOP-RIGHT CLOCK GAUGE === */
+    /* === ROBOTIC CYBER CHRONOMETER GAUGE (YouTube Trending Style) === */
     .top-right-gauge {
       display: flex;
       align-items: center;
-      gap: 18px;
+      gap: 16px;
       pointer-events: auto;
       z-index: 20;
     }
@@ -449,32 +525,48 @@
     }
 
     .dial-cal-day {
-      font-size: 0.66rem;
+      font-size: 0.68rem;
       font-weight: 800;
       letter-spacing: 2px;
-      color: var(--accent-blue);
+      color: var(--accent-cyan);
       font-family: var(--font-mono);
     }
 
     .dial-cal-date {
       font-size: 0.58rem;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 1.5px;
-      color: rgba(255, 255, 255, 0.4);
+      color: rgba(255, 255, 255, 0.45);
       font-family: var(--font-mono);
     }
 
-    .dial-clock-card {
+    /* Robotic Cyber Outer Chassis */
+    .robotic-watch-card {
       position: relative;
-      width: 104px;
-      height: 104px;
+      width: 110px;
+      height: 110px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--glass-surface-dense);
-      border: 1px solid var(--border-subtle);
+      background: rgba(10, 12, 18, 0.95);
+      border: 1.5px solid rgba(56, 189, 248, 0.25);
       border-radius: 50%;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 240, 255, 0.08);
+    }
+
+    /* Outer Segmented Gear Track */
+    .robotic-gear-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px dashed rgba(0, 240, 255, 0.35);
+      animation: gearSpin 40s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes gearSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     .dial-svg-ring {
@@ -487,19 +579,19 @@
 
     .dial-track {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.04);
-      stroke-width: 3.5;
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 4;
     }
 
     .dial-sec-progress {
       fill: none;
-      stroke: var(--accent-blue);
-      stroke-width: 3.5;
+      stroke: var(--accent-cyan);
+      stroke-width: 4;
       stroke-linecap: round;
       stroke-dasharray: 326.72;
       stroke-dashoffset: 326.72;
       transition: stroke-dashoffset 0.05s linear;
-      filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.5));
+      filter: drop-shadow(0 0 6px var(--accent-cyan));
     }
 
     .dial-needle-wrap {
@@ -512,21 +604,14 @@
       transition: transform 0.05s linear;
     }
 
-    .dial-needle-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: #ffffff;
-      box-shadow: 0 0 6px #ffffff;
-    }
-
     .dial-needle {
       position: absolute;
-      top: 6px;
-      width: 2px;
+      top: 5px;
+      width: 2.5px;
       height: 14px;
-      background: linear-gradient(to bottom, #ffffff, transparent);
+      background: linear-gradient(to bottom, #00f0ff, transparent);
       border-radius: 2px;
+      box-shadow: 0 0 8px #00f0ff;
     }
 
     .dial-inner-content {
@@ -538,26 +623,32 @@
     }
 
     .dial-time-main {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       font-weight: 800;
       font-family: var(--font-mono);
       letter-spacing: -0.5px;
       color: #ffffff;
       line-height: 1;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
     }
 
     .dial-sec-badge {
-      font-size: 0.55rem;
+      font-size: 0.58rem;
       font-family: var(--font-mono);
-      color: var(--accent-blue);
+      color: var(--accent-cyan);
       letter-spacing: 1px;
+      font-weight: 700;
       margin-top: 3px;
     }
 
-    /* === CENTER FOCUS CORE === */
+
+    /* ============================================================
+       CENTER CORE: SANSKRIT MANTRAS (FROM MOBILE WALLPAPER) 
+       + CRISP LUXURY DIAMOND-CUT "DO MORE FOCUS" (ZERO BLUR)
+       ============================================================ */
     .center-focus-bay {
       position: absolute;
-      top: 50%;
+      top: 48%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
@@ -566,55 +657,136 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       cursor: crosshair;
+      width: 90%;
+      max-width: 900px;
     }
 
-    .focus-text-primary {
-      font-family: var(--font-main);
-      font-size: clamp(2.8rem, 6.6vw, 5.8rem);
-      font-weight: 900;
-      letter-spacing: clamp(6px, 1.6vw, 16px);
+    /* Mantra 1: Top Vedic Benediction */
+    .mantra-top-benediction {
+      font-family: var(--font-sanskrit);
+      font-size: clamp(0.72rem, 1.4vw, 1.05rem);
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--gold-royal);
+      text-shadow: 0 0 14px rgba(229, 192, 123, 0.45);
+      margin-bottom: 2px;
+    }
+
+    /* Mantra 2: Spiritual Vector */
+    .mantra-spiritual-vector {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 18px;
+      background: rgba(18, 16, 12, 0.7);
+      border: 1px solid rgba(229, 192, 123, 0.25);
+      border-radius: 30px;
+      font-family: var(--font-sanskrit);
+      font-size: clamp(0.68rem, 1.2vw, 0.92rem);
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fef08a;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(229, 192, 123, 0.1);
+    }
+
+    /* Mantra 3 & 4 (Wings) + Mantra 5 (Center Golden Cartouche Plaque) */
+    .mantra-cartouche-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin: 4px 0;
+    }
+
+    .mantra-wing-seal {
+      font-family: var(--font-sanskrit);
+      font-size: clamp(0.72rem, 1.3vw, 0.95rem);
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.7);
       text-transform: uppercase;
-      line-height: 1;
-      text-indent: clamp(6px, 1.6vw, 16px);
-      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 32%, #64748b 50%, #ffffff 68%, #94a3b8 100%);
-      background-size: 240% auto;
+    }
+
+    /* Royal Ornamental Plaque */
+    .mantra-golden-cartouche {
+      position: relative;
+      padding: 7px 24px;
+      background: linear-gradient(135deg, rgba(30, 24, 10, 0.95) 0%, rgba(18, 15, 8, 0.98) 100%);
+      border: 1.5px solid var(--gold-royal);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(229, 192, 123, 0.25), inset 0 0 12px rgba(229, 192, 123, 0.15);
+    }
+
+    .mantra-golden-cartouche::before, .mantra-golden-cartouche::after {
+      content: '◆';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.5rem;
+      color: var(--gold-bright);
+    }
+    .mantra-golden-cartouche::before { left: 8px; }
+    .mantra-golden-cartouche::after { right: 8px; }
+
+    .mantra-cartouche-text {
+      font-family: var(--font-sanskrit);
+      font-size: clamp(0.75rem, 1.3vw, 1.05rem);
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #fef08a 40%, #e5c07b 70%, #d97706 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 20px rgba(56, 189, 248, 0.35));
-      animation: metallicShimmer 2.4s linear infinite;
-      transition: filter 0.25s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      text-shadow: 0 0 10px rgba(229, 192, 123, 0.3);
+    }
+
+    /* CRISP LUXURY DIAMOND-CUT "DO MORE FOCUS" — NO CLOUDY FOG */
+    .focus-text-primary {
+      font-family: var(--font-main);
+      font-size: clamp(3.0rem, 7.2vw, 6.2rem);
+      font-weight: 900;
+      letter-spacing: clamp(6px, 1.8vw, 18px);
+      text-transform: uppercase;
+      line-height: 0.95;
+      text-indent: clamp(6px, 1.8vw, 18px);
+      /* High-contrast precision platinum titanium chrome gradient */
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 25%, #94a3b8 48%, #ffffff 52%, #cbd5e1 75%, #ffffff 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      /* Razor-sharp specular highlight, ZERO blurry fog */
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.45));
+      animation: metallicShimmer 3s linear infinite;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
     }
 
     .center-focus-bay:hover .focus-text-primary {
-      filter: drop-shadow(0 0 75px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 40px rgba(56, 189, 248, 0.6)) drop-shadow(0 0 90px rgba(56, 189, 248, 0.2));
-      transform: scale(1.03);
-      animation: metallicShimmer 1.4s linear infinite;
+      transform: scale(1.025);
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 1)) drop-shadow(0 0 20px rgba(0, 240, 255, 0.5));
     }
 
     @keyframes metallicShimmer {
       0% { background-position: 0% center; }
-      100% { background-position: 240% center; }
+      100% { background-position: 200% center; }
     }
 
-    .focus-sub-text {
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.55);
-      text-indent: 6px;
-      text-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
-      transition: color 0.3s ease, text-shadow 0.3s ease;
+    /* Mantra 6: Foundation Lakshmi Mantra */
+    .mantra-bottom-harmony {
+      font-family: var(--font-sanskrit);
+      font-size: clamp(0.7rem, 1.3vw, 0.98rem);
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: rgba(229, 192, 123, 0.9);
+      padding: 5px 20px;
+      background: rgba(14, 15, 22, 0.6);
+      border: 1px solid rgba(229, 192, 123, 0.2);
+      border-radius: 20px;
+      text-shadow: 0 0 12px rgba(229, 192, 123, 0.3);
     }
 
-    .center-focus-bay:hover .focus-sub-text {
-      color: rgba(255, 255, 255, 0.85);
-      text-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
-    }
 
-    /* === BOTTOM TELEMETRY ROW === */
+    /* === BOTTOM ROW (Raised for Lively Wallpaper Taskbar) === */
     .row-bottom {
       display: flex;
       justify-content: space-between;
@@ -625,21 +797,26 @@
 
     .telemetry {
       font-family: var(--font-mono);
-      font-size: 0.62rem;
+      font-size: 0.64rem;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.4);
+      color: rgba(255, 255, 255, 0.45);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      background: rgba(10, 12, 18, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 6px 16px;
+      backdrop-filter: blur(12px);
     }
 
     .pip {
       width: 6px;
       height: 6px;
-      background: var(--accent-blue);
+      background: var(--accent-cyan);
       border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent-blue);
+      box-shadow: 0 0 10px var(--accent-cyan);
       animation: pipGlow 2s infinite ease-in-out;
     }
 
@@ -649,9 +826,9 @@
     }
 
     .telemetry-label {
-      font-size: 0.56rem;
+      font-size: 0.58rem;
       letter-spacing: 1.8px;
-      color: rgba(255, 255, 255, 0.45);
+      color: rgba(255, 255, 255, 0.5);
     }
 
     .telemetry-val {
@@ -659,42 +836,42 @@
       font-weight: 700;
     }
 
-    /* RESET & SYSTEM CHIP */
+    /* TRIPLE-CLICK RESET STATUS CHIP */
     .hud-status-chip {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(14, 14, 18, 0.75);
+      background: rgba(12, 14, 20, 0.85);
       border: 1px solid var(--border-subtle);
       border-radius: 20px;
-      padding: 5px 14px;
+      padding: 6px 16px;
       font-family: var(--font-mono);
-      font-size: 0.56rem;
+      font-size: 0.58rem;
       letter-spacing: 1.5px;
-      color: rgba(255, 255, 255, 0.55);
+      color: rgba(255, 255, 255, 0.6);
       text-transform: uppercase;
       cursor: pointer;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       transition: all 0.25s ease;
     }
 
     .hud-status-chip:hover {
-      border-color: rgba(56, 189, 248, 0.4);
+      border-color: rgba(56, 189, 248, 0.5);
       color: #ffffff;
-      background: rgba(18, 20, 28, 0.9);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+      background: rgba(18, 22, 32, 0.95);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
     }
 
     .chip-dot {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: #10b981;
-      box-shadow: 0 0 6px #10b981;
+      box-shadow: 0 0 8px #10b981;
     }
 
-    /* === 2-SECOND HOLD CHARGING RING INDICATOR === */
+    /* === 2-SECOND HOLD CHARGING RING === */
     .hold-indicator {
       position: fixed;
       pointer-events: none;
@@ -706,9 +883,7 @@
       justify-content: center;
     }
 
-    .hold-indicator.active {
-      display: flex;
-    }
+    .hold-indicator.active { display: flex; }
 
     .hold-ring-svg {
       width: 60px;
@@ -742,10 +917,9 @@
       letter-spacing: 0.5px;
     }
 
-    /* === DRAG INDICATOR BANNER === */
     .drag-indicator {
       position: fixed;
-      bottom: 24px;
+      bottom: 34px;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
       background: rgba(10, 10, 16, 0.95);
@@ -777,9 +951,9 @@
     .drag-pip {
       width: 7px;
       height: 7px;
-      background: var(--accent-blue);
+      background: var(--accent-cyan);
       border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent-blue);
+      box-shadow: 0 0 10px var(--accent-cyan);
       animation: dragPipPulse 1s ease-in-out infinite;
     }
 
@@ -788,13 +962,13 @@
       50% { opacity: 1; transform: scale(1.5); }
     }
 
-    /* === DOUBLE-CLICK RESET MODAL === */
+    /* === TRIPLE-CLICK RESET ALL MODAL === */
     .reset-modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       z-index: 10005;
       display: flex;
       align-items: center;
@@ -812,19 +986,17 @@
     .reset-modal-box {
       width: 90%;
       max-width: 440px;
-      background: rgba(14, 15, 20, 0.98);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(14, 15, 22, 0.98);
+      border: 1px solid rgba(56, 189, 248, 0.35);
       border-radius: 16px;
       padding: 26px;
-      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.15);
       text-align: center;
       transform: scale(0.95);
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .reset-modal-backdrop.open .reset-modal-box {
-      transform: scale(1);
-    }
+    .reset-modal-backdrop.open .reset-modal-box { transform: scale(1); }
 
     .reset-icon-wrap {
       width: 48px;
@@ -832,7 +1004,7 @@
       border-radius: 50%;
       background: rgba(56, 189, 248, 0.1);
       border: 1px solid rgba(56, 189, 248, 0.3);
-      color: var(--accent-blue);
+      color: var(--accent-cyan);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -841,7 +1013,7 @@
     }
 
     .reset-modal-title {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 800;
       letter-spacing: 1.5px;
       text-transform: uppercase;
@@ -850,17 +1022,14 @@
     }
 
     .reset-modal-desc {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: rgba(255, 255, 255, 0.6);
       line-height: 1.5;
       margin-bottom: 22px;
       font-family: var(--font-mono);
     }
 
-    .reset-modal-actions {
-      display: flex;
-      gap: 10px;
-    }
+    .reset-modal-actions { display: flex; gap: 10px; }
 
     .c-reset-cancel {
       flex: 1;
@@ -870,16 +1039,13 @@
       border: 1px solid var(--border-subtle);
       color: rgba(255, 255, 255, 0.7);
       font-family: var(--font-mono);
-      font-size: 0.66rem;
+      font-size: 0.65rem;
       letter-spacing: 1px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .c-reset-cancel:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-    }
+    .c-reset-cancel:hover { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
 
     .c-reset-confirm {
       flex: 1;
@@ -889,7 +1055,7 @@
       border: 1px solid rgba(56, 189, 248, 0.5);
       color: #ffffff;
       font-family: var(--font-mono);
-      font-size: 0.66rem;
+      font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 1px;
       cursor: pointer;
@@ -902,13 +1068,14 @@
       box-shadow: 0 4px 22px rgba(14, 165, 233, 0.6);
     }
 
-    /* === KILLER CRYPTO RADAR TERMINAL WINDOW === */
+
+    /* === ROBOTIC MULTI-CHAIN CRYPTO RADAR MODAL WINDOW === */
     .crypto-modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      background: rgba(0, 0, 0, 0.68);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       z-index: 10010;
       display: flex;
       align-items: center;
@@ -919,50 +1086,36 @@
       transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .crypto-modal-backdrop.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .crypto-modal-backdrop.open { opacity: 1; pointer-events: auto; }
 
     .crypto-modal-window {
       width: 95%;
       max-width: 860px;
       max-height: 90vh;
-      background: rgba(12, 13, 18, 0.96);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(12, 14, 20, 0.97);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       border-radius: 18px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.92), 0 0 50px rgba(56, 189, 248, 0.15);
       transform: translateY(20px) scale(0.98);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .crypto-modal-backdrop.open .crypto-modal-window {
-      transform: translateY(0) scale(1);
-    }
+    .crypto-modal-backdrop.open .crypto-modal-window { transform: translateY(0) scale(1); }
 
     .crypto-modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 16px 22px;
-      background: rgba(18, 20, 28, 0.9);
+      background: rgba(16, 18, 26, 0.95);
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .crypto-header-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .crypto-traffic-lights {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
+    .crypto-header-left { display: flex; align-items: center; gap: 14px; }
+    .crypto-traffic-lights { display: flex; align-items: center; gap: 7px; }
 
     .c-traffic-btn {
       width: 12px;
@@ -972,60 +1125,16 @@
       cursor: pointer;
       transition: transform 0.15s ease;
     }
-
     .c-traffic-btn:hover { transform: scale(1.15); }
     .c-traffic-btn.c-close { background: #ff5f56; }
     .c-traffic-btn.c-min { background: #ffbd2e; }
 
-    .crypto-terminal-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .c-neon-glyph {
-      color: var(--accent-cyan);
-      font-size: 1rem;
-      filter: drop-shadow(0 0 6px var(--accent-cyan));
-    }
-
-    .c-title-main {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: #ffffff;
-      text-transform: uppercase;
-    }
-
-    .c-title-version {
-      font-family: var(--font-mono);
-      font-size: 0.58rem;
-      padding: 2px 6px;
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      color: var(--accent-blue);
-      border-radius: 4px;
-      letter-spacing: 1px;
-    }
-
-    .crypto-header-status {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-family: var(--font-mono);
-      font-size: 0.58rem;
-      color: rgba(255, 255, 255, 0.55);
-      letter-spacing: 1px;
-    }
-
-    .c-status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-    }
+    .crypto-terminal-title { display: flex; align-items: center; gap: 8px; }
+    .c-neon-glyph { color: var(--accent-cyan); font-size: 1rem; filter: drop-shadow(0 0 6px var(--accent-cyan)); }
+    .c-title-main { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 800; letter-spacing: 2px; color: #ffffff; text-transform: uppercase; }
+    .c-title-version { font-family: var(--font-mono); font-size: 0.58rem; padding: 2px 6px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: var(--accent-blue); border-radius: 4px; letter-spacing: 1px; }
+    .crypto-header-status { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 0.58rem; color: rgba(255, 255, 255, 0.55); letter-spacing: 1px; }
+    .c-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; }
 
     .crypto-modal-body {
       padding: 22px;
@@ -1035,18 +1144,14 @@
       gap: 16px;
     }
 
-    /* Address Input Section */
-    .crypto-input-bar {
-      display: flex;
-      gap: 10px;
-    }
+    .crypto-input-bar { display: flex; gap: 10px; }
 
     .crypto-input-wrapper {
       flex: 1;
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(20, 22, 30, 0.85);
+      background: rgba(20, 22, 32, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       padding: 0 14px;
@@ -1058,28 +1163,9 @@
       box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
     }
 
-    .crypto-search-icon {
-      width: 16px;
-      height: 16px;
-      color: rgba(255, 255, 255, 0.35);
-      flex-shrink: 0;
-    }
-
-    .crypto-input-field {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: #ffffff;
-      padding: 12px 0;
-      letter-spacing: 0.8px;
-    }
-
-    .crypto-input-field::placeholder {
-      color: rgba(255, 255, 255, 0.25);
-    }
+    .crypto-search-icon { width: 16px; height: 16px; color: rgba(255, 255, 255, 0.35); flex-shrink: 0; }
+    .crypto-input-field { flex: 1; background: transparent; border: none; outline: none; font-family: var(--font-mono); font-size: 0.78rem; color: #ffffff; padding: 12px 0; letter-spacing: 0.8px; }
+    .crypto-input-field::placeholder { color: rgba(255, 255, 255, 0.25); }
 
     .c-btn-icon {
       background: transparent;
@@ -1092,7 +1178,6 @@
       padding: 4px;
       transition: color 0.2s ease;
     }
-
     .c-btn-icon:hover { color: #ffffff; }
     .c-btn-icon svg { width: 14px; height: 14px; }
 
@@ -1108,7 +1193,6 @@
       font-weight: 800;
       letter-spacing: 1.5px;
       cursor: pointer;
-      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1124,25 +1208,8 @@
       transform: translateY(-1px);
     }
 
-    .crypto-scan-btn:active {
-      transform: translateY(1px);
-    }
-
-    /* Fast Sample Chips */
-    .crypto-presets-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .c-preset-label {
-      font-family: var(--font-mono);
-      font-size: 0.56rem;
-      letter-spacing: 1.5px;
-      color: rgba(255, 255, 255, 0.35);
-      text-transform: uppercase;
-    }
+    .crypto-presets-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .c-preset-label { font-family: var(--font-mono); font-size: 0.56rem; letter-spacing: 1.5px; color: rgba(255, 255, 255, 0.35); text-transform: uppercase; }
 
     .c-preset-chip {
       background: rgba(255, 255, 255, 0.04);
@@ -1163,47 +1230,82 @@
       color: #ffffff;
     }
 
-    /* Scanner Loading Animation */
+    /* Robotic Cyber Radar Sweep Display */
     .crypto-scanner-loader {
-      background: rgba(14, 16, 24, 0.8);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(10, 12, 18, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.35);
       border-radius: 12px;
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .radar-grid-anim {
+      padding: 22px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.08);
     }
 
-    .radar-sweep-bar {
+    .radar-big-scope {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, rgba(5, 10, 20, 0.95) 75%);
+      border: 1.5px solid rgba(0, 240, 255, 0.6);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .radar-big-scope::before {
+      content: '';
       position: absolute;
-      top: 0;
+      inset: 20px;
+      border-radius: 50%;
+      border: 1px dashed rgba(0, 240, 255, 0.3);
+    }
+
+    .radar-big-scope::after {
+      content: '';
+      position: absolute;
+      inset: 40px;
+      border-radius: 50%;
+      border: 1px dotted rgba(0, 240, 255, 0.2);
+    }
+
+    .radar-big-sweep {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(0, 240, 255, 0.9) 0deg, rgba(0, 240, 255, 0.2) 60deg, transparent 110deg);
+      animation: radarBeamRotate 2s linear infinite;
+      mix-blend-mode: screen;
+    }
+
+    .radar-crosshair-x {
+      position: absolute;
+      top: 50%;
       left: 0;
       width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-      box-shadow: 0 0 15px var(--accent-cyan);
-      animation: radarScanSweep 1.5s ease-in-out infinite;
+      height: 1px;
+      background: rgba(0, 240, 255, 0.3);
     }
 
-    @keyframes radarScanSweep {
-      0% { top: 0; opacity: 0.2; }
-      50% { opacity: 1; }
-      100% { top: 100%; opacity: 0.2; }
+    .radar-crosshair-y {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 1px;
+      height: 100%;
+      background: rgba(0, 240, 255, 0.3);
     }
 
     .radar-pings {
       display: flex;
       gap: 16px;
       font-family: var(--font-mono);
-      font-size: 0.6rem;
-      color: var(--accent-blue);
-      letter-spacing: 1px;
+      font-size: 0.62rem;
+      color: var(--accent-cyan);
+      letter-spacing: 1.2px;
       animation: pulseText 1.2s infinite ease-in-out;
       flex-wrap: wrap;
       justify-content: center;
@@ -1214,7 +1316,6 @@
       50% { opacity: 1; }
     }
 
-    /* Empty State */
     .crypto-empty-state {
       text-align: center;
       padding: 40px 20px;
@@ -1222,31 +1323,10 @@
       border-radius: 14px;
     }
 
-    .c-empty-icon {
-      font-size: 2.2rem;
-      color: rgba(56, 189, 248, 0.35);
-      margin-bottom: 12px;
-    }
+    .c-empty-icon { font-size: 2.2rem; color: rgba(56, 189, 248, 0.35); margin-bottom: 12px; }
+    .c-empty-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; color: #ffffff; }
+    .c-empty-desc { font-family: var(--font-mono); font-size: 0.68rem; color: rgba(255, 255, 255, 0.45); max-width: 480px; margin: 0 auto; line-height: 1.5; }
 
-    .c-empty-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      color: #ffffff;
-    }
-
-    .c-empty-desc {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: rgba(255, 255, 255, 0.45);
-      max-width: 480px;
-      margin: 0 auto;
-      line-height: 1.5;
-    }
-
-    /* Cards Grid */
     .crypto-cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -1283,64 +1363,13 @@
       box-shadow: 0 0 8px var(--card-accent, #38bdf8);
     }
 
-    .c-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .c-card-network-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.64rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #ffffff;
-    }
-
-    .c-network-icon {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--card-accent, #38bdf8);
-      display: inline-block;
-    }
-
-    .c-token-badge {
-      font-family: var(--font-mono);
-      font-size: 0.54rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-subtle);
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .c-card-balance-wrap {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-
-    .c-card-balance {
-      font-family: var(--font-mono);
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.5px;
-    }
-
-    .c-card-unit {
-      font-size: 0.72rem;
-      font-family: var(--font-mono);
-      color: var(--accent-cyan);
-      margin-left: 6px;
-      font-weight: 700;
-    }
+    .c-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .c-card-network-badge { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 1px; color: #ffffff; }
+    .c-network-icon { width: 14px; height: 14px; border-radius: 50%; background: var(--card-accent, #38bdf8); display: inline-block; }
+    .c-token-badge { font-family: var(--font-mono); font-size: 0.54rem; padding: 2px 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); color: rgba(255, 255, 255, 0.7); font-weight: 700; letter-spacing: 0.5px; }
+    .c-card-balance-wrap { display: flex; align-items: baseline; justify-content: space-between; }
+    .c-card-balance { font-family: var(--font-mono); font-size: 1.15rem; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+    .c-card-unit { font-size: 0.72rem; font-family: var(--font-mono); color: var(--accent-cyan); margin-left: 6px; font-weight: 700; }
 
     .c-card-copy-btn {
       background: rgba(255, 255, 255, 0.04);
@@ -1356,34 +1385,11 @@
       gap: 4px;
       transition: all 0.2s ease;
     }
+    .c-card-copy-btn:hover { background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #ffffff; }
 
-    .c-card-copy-btn:hover {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: rgba(56, 189, 248, 0.4);
-      color: #ffffff;
-    }
-
-    /* Footer & Raw Output */
-    .crypto-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-subtle);
-    }
-
-    .c-chains-found {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #10b981;
-    }
-
-    .crypto-footer-actions {
-      display: flex;
-      gap: 10px;
-    }
+    .crypto-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border-subtle); }
+    .c-chains-found { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; color: #10b981; }
+    .crypto-footer-actions { display: flex; gap: 10px; }
 
     .c-btn-secondary {
       background: rgba(255, 255, 255, 0.05);
@@ -1401,33 +1407,12 @@
       gap: 6px;
       transition: all 0.2s ease;
     }
-
-    .c-btn-secondary:hover {
-      background: rgba(56, 189, 248, 0.12);
-      border-color: rgba(56, 189, 248, 0.4);
-    }
-
+    .c-btn-secondary:hover { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4); }
     .c-btn-secondary svg { width: 12px; height: 12px; }
 
-    .crypto-raw-view {
-      margin-top: 10px;
-    }
+    .crypto-raw-view { margin-top: 10px; }
+    .crypto-raw-view textarea { width: 100%; height: 140px; background: #000000; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; font-family: var(--font-mono); font-size: 0.66rem; color: #38bdf8; resize: vertical; outline: none; }
 
-    .crypto-raw-view textarea {
-      width: 100%;
-      height: 140px;
-      background: #000000;
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 10px;
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
-      color: #38bdf8;
-      resize: vertical;
-      outline: none;
-    }
-
-    /* === TOAST NOTIFICATION === */
     .hud-toast {
       position: fixed;
       top: 24px;
@@ -1448,11 +1433,7 @@
       z-index: 10020;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .hud-toast.active {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    .hud-toast.active { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* === IN-HUD BROWSER WINDOW === */
     .minimized-dock-trigger {
@@ -1477,56 +1458,13 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
 
-    .minimized-dock-trigger.active {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(0);
-    }
+    .minimized-dock-trigger.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+    .minimized-dock-trigger:hover { background: #ffffff; color: #000000; border-color: #ffffff; }
 
-    .minimized-dock-trigger:hover {
-      background: #ffffff;
-      color: #000000;
-      border-color: #ffffff;
-    }
-
-    .minimized-dock-trigger:hover .minimized-badge {
-      background: rgba(0, 0, 0, 0.1);
-      color: #000000;
-    }
-
-    .arrow-circle {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .arrow-circle svg {
-      width: 12px;
-      height: 12px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-    }
-
-    .minimized-text {
-      font-size: 0.66rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-family: var(--font-mono);
-    }
-
-    .minimized-badge {
-      font-size: 0.54rem;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2px 7px;
-      border-radius: 12px;
-      font-family: var(--font-mono);
-    }
+    .arrow-circle { width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; }
+    .arrow-circle svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .minimized-text { font-size: 0.66rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-mono); }
+    .minimized-badge { font-size: 0.54rem; background: rgba(255, 255, 255, 0.1); padding: 2px 7px; border-radius: 12px; font-family: var(--font-mono); }
 
     .hud-browser-window {
       position: fixed;
@@ -1544,107 +1482,25 @@
       transform: scale(0.97);
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .hud-browser-window.active { opacity: 1; pointer-events: auto; transform: scale(1); }
 
-    .hud-browser-window.active {
-      opacity: 1;
-      pointer-events: auto;
-      transform: scale(1);
-    }
-
-    .browser-header {
-      height: 48px;
-      background: rgba(16, 16, 20, 0.95);
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      gap: 16px;
-    }
-
-    .window-controls-traffic {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .traffic-btn {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-    }
-
+    .browser-header { height: 48px; background: rgba(16, 16, 20, 0.95); border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 16px; }
+    .window-controls-traffic { display: flex; align-items: center; gap: 7px; }
+    .traffic-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; }
     .traffic-btn.btn-close { background: #ff5f56; }
     .traffic-btn.btn-minimize { background: #ffbd2e; }
     .traffic-btn.btn-expand { background: #27c93f; }
 
-    .browser-omnibar {
-      flex: 1;
-      max-width: 520px;
-      height: 30px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      gap: 8px;
-    }
+    .browser-omnibar { flex: 1; max-width: 520px; height: 30px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); border-radius: 20px; display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+    .browser-omnibar svg { width: 12px; height: 12px; color: rgba(255, 255, 255, 0.35); }
+    .browser-omnibar input { flex: 1; background: transparent; border: none; outline: none; font-family: var(--font-mono); font-size: 0.65rem; color: rgba(255, 255, 255, 0.8); }
 
-    .browser-omnibar svg {
-      width: 12px;
-      height: 12px;
-      color: rgba(255, 255, 255, 0.35);
-    }
-
-    .browser-omnibar input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .window-external-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-external-popout {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 0.6rem;
-      font-family: var(--font-mono);
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-      letter-spacing: 0.8px;
-    }
-
+    .btn-external-popout { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 5px 10px; font-size: 0.6rem; font-family: var(--font-mono); color: rgba(255, 255, 255, 0.7); text-decoration: none; }
     .btn-external-popout svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .browser-body { flex: 1; background: #000000; }
+    .browser-body iframe { width: 100%; height: 100%; border: none; background: #ffffff; }
 
-    .browser-body {
-      flex: 1;
-      background: #000000;
-    }
-
-    .browser-body iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #ffffff;
-    }
-
-    /* === CUSTOM MODAL (Deploy Node) === */
+    /* === CUSTOM APP DEPLOY MODAL === */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1659,11 +1515,7 @@
       pointer-events: none;
       transition: opacity 0.25s ease;
     }
-
-    .modal-backdrop.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
 
     .custom-modal {
       width: 90%;
@@ -1678,64 +1530,20 @@
       gap: 16px;
     }
 
-    .modal-title {
-      font-size: 0.85rem;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #ffffff;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .input-group label {
-      font-size: 0.58rem;
-      font-family: var(--font-mono);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.4);
-    }
-
-    .input-group input, .input-group select {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 8px 12px;
-      color: #ffffff;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      outline: none;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .btn-action {
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 1px;
-      cursor: pointer;
-      text-transform: uppercase;
-    }
-
+    .modal-title { font-size: 0.85rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #ffffff; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-group label { font-size: 0.58rem; font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; color: rgba(255, 255, 255, 0.4); }
+    .input-group input, .input-group select { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 8px 12px; color: #ffffff; font-family: var(--font-mono); font-size: 0.72rem; outline: none; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+    .btn-action { padding: 8px 16px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
     .btn-cancel { background: transparent; border: 1px solid var(--border-subtle); color: rgba(255, 255, 255, 0.5); }
     .btn-save { background: #ffffff; border: 1px solid #ffffff; color: #000000; font-weight: 700; }
 
     @media (max-width: 900px) {
-      .hud { padding: 22px; }
+      .hud { padding: 22px 22px 54px 22px; }
       .view-frame { inset: 10px; }
       .search-cluster { width: 100%; min-width: auto; }
-      .dial-clock-card { width: 88px; height: 88px; }
+      .robotic-watch-card { width: 90px; height: 90px; }
       .hud-browser-window { inset: 14px; }
       .crypto-modal-window { width: 100%; max-height: 96vh; }
       .crypto-cards-grid { grid-template-columns: 1fr; }
@@ -1759,13 +1567,21 @@
     <div class="row-top">
       <div class="left-cluster">
         
-        <!-- DOCKS CLUSTER (Persistent via 2s hold) -->
+        <!-- DOCKS CLUSTER: Hover Expand + Pin / Unpin (Persistent via 2s hold) -->
         <div class="docks-cluster hud-draggable-target" id="docksCluster" data-persist-id="docksCluster">
+          
+          <!-- APPS SHELF DOCK -->
           <div class="apps-dock" id="dockApps">
             <div class="apps-trigger">
               <svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
               <span class="apps-label">Apps</span>
             </div>
+
+            <!-- Pin / Unpin Toggle -->
+            <button class="dock-pin-btn" id="pinBtnApps" data-target="apps" title="Pin / Unpin (Keep Open)">
+              <svg viewBox="0 0 24 24"><path d="M16 4v4l2 3v2h-6v7l-1 1-1-1v-7H4v-2l2-3V4h10z"/></svg>
+            </button>
+
             <div class="apps-list" id="listApps">
               <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google">
                 <svg viewBox="0 0 24 24">
@@ -1807,11 +1623,18 @@
             </div>
           </div>
 
+          <!-- BUSINESS SHELF DOCK -->
           <div class="apps-dock" id="dockBiz">
             <div class="apps-trigger">
               <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zm-11 0h7v7H3z"/></svg>
               <span class="apps-label">Business</span>
             </div>
+
+            <!-- Pin / Unpin Toggle -->
+            <button class="dock-pin-btn" id="pinBtnBiz" data-target="biz" title="Pin / Unpin (Keep Open)">
+              <svg viewBox="0 0 24 24"><path d="M16 4v4l2 3v2h-6v7l-1 1-1-1v-7H4v-2l2-3V4h10z"/></svg>
+            </button>
+
             <div class="apps-list" id="listBiz">
               <a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Meta Ads">
                 <img src="https://i.pinimg.com/1200x/e0/6c/06/e06c061bc3c7558aefe2fbe49e2ca4c3.jpg" alt="Meta Ads" />
@@ -1832,27 +1655,22 @@
             </div>
           </div>
 
-          <!-- CRYPTO RADAR QUICK ACCESS BUTTON -->
-          <div class="crypto-radar-trigger" id="cryptoRadarTrigger" title="Launch Multi-Chain Crypto Radar">
-            <span class="crypto-radar-radar-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="9"/>
-                <circle cx="12" cy="12" r="5" stroke-dasharray="2 2"/>
-                <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
-                <line x1="12" y1="12" x2="18" y2="7" stroke="#38bdf8"/>
-              </svg>
-            </span>
+          <!-- TRUE ROBOTIC CYBER RADAR TRIGGER -->
+          <div class="crypto-radar-trigger" id="cryptoRadarTrigger" title="Launch Robotic Multi-Chain Crypto Radar">
+            <div class="mini-radar-scope">
+              <div class="mini-radar-sweep"></div>
+              <div class="mini-radar-blip"></div>
+            </div>
             <span class="crypto-radar-label">CRYPTO RADAR</span>
             <span class="crypto-radar-badge">LIVE</span>
           </div>
 
         </div>
 
-        <!-- SEARCH CLUSTER WITH BING PNG EMBLEM (Persistent via 2s hold) -->
+        <!-- SEARCH CLUSTER WITH BING PNG (Clean / No Enter Badge) -->
         <div class="search-cluster hud-draggable-target" id="searchCluster" data-persist-id="searchCluster">
           <form id="bingSearchForm" class="search-capsule">
             <div class="bing-brand-badge">
-              <!-- Bing Emblem PNG from user URL -->
               <img src="https://logos-world.net/wp-content/uploads/2021/02/Bing-Emblem.png" alt="Bing" class="bing-emblem-img" id="bingEmblemImg" onerror="this.style.display='none'; document.getElementById('bingSvgFallback').style.display='inline-block';" />
               <svg id="bingSvgFallback" viewBox="0 0 24 24" fill="none" style="display:none; width:18px; height:18px;">
                 <path d="M5 2L5 17.5L8.5 19.5L14.5 16L14.5 12.5L8.5 10L8.5 5L5 2Z" fill="#00D4FF"/>
@@ -1861,27 +1679,27 @@
               <span>Bing</span>
             </div>
             <input type="text" id="bingQuery" class="search-input" placeholder="Search web..." autocomplete="off" spellcheck="false" />
-            <span class="search-hint">↵ Enter</span>
           </form>
         </div>
 
       </div>
 
-      <!-- TOP-RIGHT CLOCK GAUGE (Persistent via 2s hold) -->
+      <!-- ROBOTIC CHRONOMETER WATCH (YouTube Trending Cyber Style) -->
       <div class="top-right-gauge hud-draggable-target" id="clockGauge" data-persist-id="clockGauge">
         <div class="dial-calendar-info">
           <span class="dial-cal-day" id="dialDay">TUE</span>
           <span class="dial-cal-date" id="dialDate">08 SEP 2026</span>
         </div>
 
-        <div class="dial-clock-card">
+        <div class="robotic-watch-card">
+          <div class="robotic-gear-ring"></div>
+          
           <svg class="dial-svg-ring" viewBox="0 0 112 112">
             <circle class="dial-track" cx="56" cy="56" r="52"></circle>
             <circle class="dial-sec-progress" id="dialSecArc" cx="56" cy="56" r="52"></circle>
           </svg>
           
           <div class="dial-needle-wrap" id="dialNeedleWrap">
-            <div class="dial-needle-dot"></div>
             <div class="dial-needle"></div>
           </div>
 
@@ -1893,27 +1711,47 @@
       </div>
     </div>
 
-    <!-- CENTER FOCUS CORE (Persistent via 2s hold) -->
+    <!-- CENTER FOCUS CORE: SANSKRIT MANTRAS (FROM USER WALLPAPER) + CRISP DIAMOND-CUT "DO MORE FOCUS" -->
     <div class="center-focus-bay hud-draggable-target" id="focusCenterBay" data-persist-id="focusCenterBay">
+      <!-- 1. Top Vedic Benediction -->
+      <div class="mantra-top-benediction">ॐ श्री जगत्सृष्टिकर्त्रे नमस्तुभ्यम् !!</div>
+
+      <!-- 2. Spiritual Beauty Vector -->
+      <div class="mantra-spiritual-vector">
+        <span>ॐ दिव्यसौन्दर्यवर्धिन्यै नमः</span>
+      </div>
+
+      <!-- 3 & 4 (Wings) + 5 (Center Golden Cartouche Plaque) -->
+      <div class="mantra-cartouche-row">
+        <span class="mantra-wing-seal">श्रीप्रदा</span>
+        <div class="mantra-golden-cartouche">
+          <span class="mantra-cartouche-text">ॐ ऐश्वर्यप्रदायै नमः</span>
+        </div>
+        <span class="mantra-wing-seal">धनप्रदा</span>
+      </div>
+
+      <!-- MAIN ATTENTION CORE: CRISP METALLIC "DO MORE FOCUS" (ZERO BLUR) -->
       <div class="focus-text-primary" id="focusText">DO MORE FOCUS</div>
-      <div class="focus-sub-text">संस्कृत मंत्र</div>
+
+      <!-- 6. Harmonic Lakshmi Foundation Mantra -->
+      <div class="mantra-bottom-harmony">ॐ जगत्सृष्टिसौन्दर्यलक्ष्मीप्रदायै नमः</div>
     </div>
 
-    <!-- ROW BOTTOM (Persistent via 2s hold) -->
+    <!-- ROW BOTTOM: Raised for Windows Taskbar in Lively Wallpaper -->
     <div class="row-bottom hud-draggable-target" id="telemetryRow" data-persist-id="telemetryRow">
       <div class="telemetry">
         <span class="pip"></span>
         <span class="telemetry-label">SESSION</span>
         <span id="sessionTimer" class="telemetry-val">00:00:00</span>
-        <span style="opacity: 0.3;">|</span>
+        <span style="opacity: 0.35;">|</span>
         <span class="telemetry-label">UPTIME</span>
         <span id="actualUptime" class="telemetry-val">00:00:00</span>
       </div>
 
-      <!-- RESET / SYSTEM STATUS PILL -->
-      <div class="hud-status-chip" id="hudResetChip" title="Double click wallpaper to reset all layout positions">
+      <!-- TRIPLE CLICK RESET PILL -->
+      <div class="hud-status-chip" id="hudResetChip" title="Triple-click wallpaper background to reset all layout positions">
         <span class="chip-dot"></span>
-        <span>SYSTEM READY // DBL-CLICK TO RESET LAYOUT</span>
+        <span>SYSTEM READY // TRIPLE-CLICK TO RESET LAYOUT</span>
       </div>
     </div>
   </div>
@@ -1933,7 +1771,7 @@
     <span id="dragIndicatorText">DRAGGING — RELEASE TO PERSIST POSITION</span>
   </div>
 
-  <!-- DOUBLE-CLICK RESET ALL MODAL -->
+  <!-- TRIPLE-CLICK RESET MODAL -->
   <div class="reset-modal-backdrop" id="resetModalBackdrop">
     <div class="reset-modal-box">
       <div class="reset-icon-wrap">↺</div>
@@ -1946,7 +1784,7 @@
     </div>
   </div>
 
-  <!-- KILLER CRYPTO RADAR TERMINAL MODAL -->
+  <!-- ROBOTIC MULTI-CHAIN CRYPTO RADAR MODAL -->
   <div class="crypto-modal-backdrop" id="cryptoModalBackdrop">
     <div class="crypto-modal-window" id="cryptoModalWindow">
       <div class="crypto-modal-header">
@@ -1957,18 +1795,17 @@
           </div>
           <div class="crypto-terminal-title">
             <span class="c-neon-glyph">◈</span>
-            <span class="c-title-main">MULTI-CHAIN ASSET RADAR</span>
-            <span class="c-title-version">v5.4 PRO</span>
+            <span class="c-title-main">ROBOTIC MULTI-CHAIN ASSET RADAR</span>
+            <span class="c-title-version">v5.5 CYBER</span>
           </div>
         </div>
         <div class="crypto-header-status">
           <span class="c-status-dot"></span>
-          <span class="c-status-text">NODES ACTIVE // 9 ENDPOINTS</span>
+          <span class="c-status-text">RADAR SCOPE: ACTIVE // 9 NODES</span>
         </div>
       </div>
 
       <div class="crypto-modal-body">
-        <!-- INPUT BAR -->
         <div class="crypto-input-bar">
           <div class="crypto-input-wrapper">
             <svg class="crypto-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1985,13 +1822,13 @@
             <button class="c-btn-icon" id="btnCryptoClear" title="Clear">✕</button>
           </div>
           <button class="crypto-scan-btn" id="btnCryptoScan">
-            <span class="btn-scan-text">SCAN ASSETS</span>
+            <span class="btn-scan-text">INTERROGATE</span>
           </button>
         </div>
 
-        <!-- FAST SAMPLE PRESETS -->
+        <!-- FAST SAMPLES -->
         <div class="crypto-presets-row">
-          <span class="c-preset-label">SAMPLES:</span>
+          <span class="c-preset-label">FAST SAMPLES:</span>
           <button class="c-preset-chip" data-addr="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045">EVM (Vitalik)</button>
           <button class="c-preset-chip" data-addr="0x55d398326f99059fF775485246999027B3197955">BSC (USDT Contract)</button>
           <button class="c-preset-chip" data-addr="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t">Tron (USDT Contract)</button>
@@ -1999,32 +1836,32 @@
           <button class="c-preset-chip" data-addr="TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA">Solana (Token)</button>
         </div>
 
-        <!-- SCANNING LOADER -->
+        <!-- ROBOTIC RADAR SWEEP ANIMATION -->
         <div class="crypto-scanner-loader" id="cryptoScannerLoader" style="display:none;">
-          <div class="radar-grid-anim">
-            <div class="radar-sweep-bar"></div>
-            <div class="radar-pings">
-              <span>SCANNING BSC (BEP20 & BNB)...</span>
-              <span>PROBING ETHEREUM (ERC20 & ETH)...</span>
-              <span>QUERYING POLYGON...</span>
-              <span>CHECKING TRON (TRC20 & TRX)...</span>
-              <span>QUERYING BITCOIN & SOLANA...</span>
-            </div>
+          <div class="radar-big-scope">
+            <div class="radar-crosshair-x"></div>
+            <div class="radar-crosshair-y"></div>
+            <div class="radar-big-sweep"></div>
+          </div>
+          <div class="radar-pings">
+            <span>PROBING BSC (BEP20 & BNB)...</span>
+            <span>SCANNING ETHEREUM (ERC20 & ETH)...</span>
+            <span>QUERYING POLYGON...</span>
+            <span>CHECKING TRON (TRC20 & TRX)...</span>
+            <span>TARGETING BITCOIN & SOLANA...</span>
           </div>
         </div>
 
-        <!-- RESULTS CONTAINER -->
         <div class="crypto-results-container" id="cryptoResultsContainer">
           <div class="crypto-empty-state" id="cryptoEmptyState">
-            <div class="c-empty-icon">❖</div>
-            <div class="c-empty-title">Ready for Multi-Chain Interrogation</div>
-            <div class="c-empty-desc">Input any public wallet address above. The system will query 9 network contracts & nodes simultaneously and format verified token balances.</div>
+            <div class="c-empty-icon">◈</div>
+            <div class="c-empty-title">Robotic Radar Standing By</div>
+            <div class="c-empty-desc">Input any public wallet address above. System initiates full parallel interrogation across 9 network endpoints.</div>
           </div>
 
           <div class="crypto-cards-grid" id="cryptoCardsGrid" style="display:none;"></div>
         </div>
 
-        <!-- SUMMARY & RAW TEXT EXPORT FOOTER -->
         <div class="crypto-footer" id="cryptoFooter" style="display:none;">
           <div class="crypto-footer-left">
             <span class="c-chains-found" id="chainsFoundCount">0 Networks Detected</span>
@@ -2155,8 +1992,7 @@
     const sessionStart = performance.now();
     let lastTime = performance.now();
 
-    // Mouse coordinates tracked without triggering style recalculation in event loop
-    const mouse = { x: -1000, y: -1000, prevX: -1000, prevY: -1000, moved: false };
+    const mouse = { x: -1000, y: -1000, moved: false };
 
     window.addEventListener('mousemove', (e) => {
       mouse.x = e.clientX;
@@ -2164,7 +2000,6 @@
       mouse.moved = true;
     }, { passive: true });
 
-    // Toast helper
     let toastTimer = null;
     function showToast(msg) {
       if (toastTimer) clearTimeout(toastTimer);
@@ -2174,37 +2009,6 @@
         hudToast.classList.remove('active');
       }, 2400);
     }
-
-    // -------------------------------------------------------------
-    // OPTIMIZED CRYSTALLINE PARTICLE ENGINE
-    // -------------------------------------------------------------
-    const MAX_CRYSTALS = 90;
-    const CRYSTAL_STRIDE = 7;
-    const crystalBuffer = new Float32Array(MAX_CRYSTALS * CRYSTAL_STRIDE);
-    let crystalCount = 0;
-    let isHoveringCenter = false;
-
-    function spawnCrystallineParticle(x, y) {
-      if (crystalCount >= MAX_CRYSTALS) return;
-      const o = crystalCount * CRYSTAL_STRIDE;
-      crystalBuffer[o] = x + (Math.random() - 0.5) * 160;
-      crystalBuffer[o + 1] = y + (Math.random() - 0.5) * 45;
-      crystalBuffer[o + 2] = (Math.random() - 0.5) * 1.8;
-      crystalBuffer[o + 3] = -Math.random() * 2.2 - 0.5;
-      crystalBuffer[o + 4] = Math.random() * 2.4 + 1.2;
-      crystalBuffer[o + 5] = Math.random() * 0.7 + 0.25;
-      crystalBuffer[o + 6] = 1.0;
-      crystalCount++;
-    }
-
-    focusCenterBay.addEventListener('mouseenter', () => {
-      isHoveringCenter = true;
-      for (let i = 0; i < 12; i++) spawnCrystallineParticle(width / 2, height / 2);
-    });
-
-    focusCenterBay.addEventListener('mouseleave', () => {
-      isHoveringCenter = false;
-    });
 
     // -------------------------------------------------------------
     // OPTIMIZED STAR DUST ENGINE
@@ -2240,12 +2044,11 @@
       const ms = d.getMilliseconds();
       const exactSec = s + ms / 1000;
 
-      // Needle & smooth arc progress on RAF
+      // Robotic needle & smooth arc progress on RAF
       const progress = exactSec / 60;
       dialSecArc.style.strokeDashoffset = circumference * (1 - progress);
       dialNeedleWrap.style.transform = `rotate(${progress * 360}deg)`;
 
-      // Only touch DOM text nodes when values actually change
       if (s !== lastSecLogged) {
         lastSecLogged = s;
         dialSecBadge.textContent = `${String(s).padStart(2, '0')}s`;
@@ -2273,14 +2076,10 @@
       }
     }
 
-    // -------------------------------------------------------------
-    // SILKY SMOOTH 60-120 FPS RENDER LOOP
-    // -------------------------------------------------------------
     function render(now) {
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
 
-      // Single throttled ambient glow update per frame
       if (mouse.moved) {
         ambientGlow.style.setProperty('--mx', `${mouse.x}px`);
         ambientGlow.style.setProperty('--my', `${mouse.y}px`);
@@ -2299,34 +2098,6 @@
         ctx.fillRect(starBuffer[o] * width, starBuffer[o + 1] * height, 1.2, 1.2);
       }
 
-      // Crystalline Particles
-      if (crystalCount > 0) {
-        ctx.save();
-        for (let i = 0; i < crystalCount; i++) {
-          const o = i * CRYSTAL_STRIDE;
-          crystalBuffer[o] += crystalBuffer[o + 2];
-          crystalBuffer[o + 1] += crystalBuffer[o + 3];
-          crystalBuffer[o + 6] -= dt * 1.2;
-
-          if (crystalBuffer[o + 6] <= 0) {
-            const lastO = (crystalCount - 1) * CRYSTAL_STRIDE;
-            for (let k = 0; k < CRYSTAL_STRIDE; k++) crystalBuffer[o + k] = crystalBuffer[lastO + k];
-            crystalCount--;
-            i--;
-            continue;
-          }
-
-          const alpha = crystalBuffer[o + 5] * crystalBuffer[o + 6];
-          const sz = crystalBuffer[o + 4];
-
-          ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
-          ctx.beginPath();
-          ctx.arc(crystalBuffer[o], crystalBuffer[o + 1], sz * 0.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.restore();
-      }
-
       updateClocks(now);
       requestAnimationFrame(render);
     }
@@ -2338,7 +2109,47 @@
 
 
     // =============================================================
-    // 2. 2-SECOND HOLD DRAG SYSTEM & LOCALSTORAGE PERSISTENCE
+    // 2. DOCKS PIN / UNPIN STATE MANAGEMENT (LocalStorage)
+    // =============================================================
+    const STORAGE_KEY_PINNED = 'aethelgard_docks_pinned';
+    const dockApps = document.getElementById('dockApps');
+    const dockBiz = document.getElementById('dockBiz');
+    const pinBtnApps = document.getElementById('pinBtnApps');
+    const pinBtnBiz = document.getElementById('pinBtnBiz');
+
+    function loadPinnedDocks() {
+      try {
+        const pinned = JSON.parse(localStorage.getItem(STORAGE_KEY_PINNED) || '{}');
+        if (pinned.apps) dockApps.classList.add('pinned');
+        if (pinned.biz) dockBiz.classList.add('pinned');
+      } catch(e) {}
+    }
+
+    function toggleDockPin(dockEl, key) {
+      const isPinned = dockEl.classList.toggle('pinned');
+      try {
+        const pinned = JSON.parse(localStorage.getItem(STORAGE_KEY_PINNED) || '{}');
+        pinned[key] = isPinned;
+        localStorage.setItem(STORAGE_KEY_PINNED, JSON.stringify(pinned));
+        showToast(isPinned ? `📌 ${key.toUpperCase()} Dock Pinned (Always Open)` : `Unpinned ${key.toUpperCase()} Dock (Hover to Expand)`);
+      } catch(e) {}
+    }
+
+    pinBtnApps.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDockPin(dockApps, 'apps');
+    });
+
+    pinBtnBiz.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDockPin(dockBiz, 'biz');
+    });
+
+    loadPinnedDocks();
+
+
+    // =============================================================
+    // 3. 2-SECOND HOLD DRAG SYSTEM & LOCALSTORAGE PERSISTENCE
     // =============================================================
     const STORAGE_KEY_POSITIONS = 'aethelgard_hud_coords_v2';
     const HOLD_DURATION_MS = 2000;
@@ -2355,7 +2166,6 @@
     let currentDragging = null;
     let pointerStart = { x: 0, y: 0 };
 
-    // Load and apply saved positions
     function applySavedPositions() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_POSITIONS);
@@ -2364,7 +2174,6 @@
         for (const [id, pos] of Object.entries(positions)) {
           const el = document.getElementById(id);
           if (el && typeof pos.x === 'number' && typeof pos.y === 'number') {
-            // Clamp within screen boundaries
             const x = Math.max(10, Math.min(window.innerWidth - 60, pos.x));
             const y = Math.max(10, Math.min(window.innerHeight - 40, pos.y));
             el.style.position = 'fixed';
@@ -2372,15 +2181,12 @@
             el.style.top = `${y}px`;
             el.style.right = 'auto';
             el.style.bottom = 'auto';
-            el.style.transform = (id === 'focusCenterBay') ? 'none' : el.style.transform;
+            if (id === 'focusCenterBay') el.style.transform = 'none';
           }
         }
-      } catch (err) {
-        console.error('Failed to load saved positions:', err);
-      }
+      } catch (err) {}
     }
 
-    // Save individual element position
     function persistElementPosition(el, x, y) {
       try {
         const id = el.dataset.persistId || el.id;
@@ -2389,12 +2195,9 @@
         current[id] = { x, y };
         localStorage.setItem(STORAGE_KEY_POSITIONS, JSON.stringify(current));
         showToast(`✓ Position Saved for ${id.replace(/([A-Z])/g, ' $1')}`);
-      } catch (err) {
-        console.error('Failed to persist position:', err);
-      }
+      } catch (err) {}
     }
 
-    // Animate the 2-second hold charging ring
     function updateHoldProgress() {
       if (!holdStartTime) return;
       const elapsed = performance.now() - holdStartTime;
@@ -2417,14 +2220,13 @@
       activeHoldTarget = null;
     }
 
-    // Pointer down on draggable targets
     document.querySelectorAll('.hud-draggable-target').forEach(target => {
       target.addEventListener('mousedown', (e) => {
-        if (e.target.closest('input, button, select, form, a, .app-btn, .add-app-btn, .traffic-btn')) return;
+        if (e.target.closest('input, button, select, form, a, .app-btn, .add-app-btn, .dock-pin-btn')) return;
         startHold(target, e.clientX, e.clientY);
       });
       target.addEventListener('touchstart', (e) => {
-        if (e.target.closest('input, button, select, form, a, .app-btn, .add-app-btn, .traffic-btn')) return;
+        if (e.target.closest('input, button, select, form, a, .app-btn, .add-app-btn, .dock-pin-btn')) return;
         const touch = e.touches[0];
         startHold(target, touch.clientX, touch.clientY);
       }, { passive: true });
@@ -2526,28 +2328,21 @@
 
 
     // =============================================================
-    // 3. DOUBLE-CLICK BACKGROUND "RESET ALL" OPTION
+    // 4. TRIPLE-CLICK BACKGROUND "RESET ALL" OPTION
     // =============================================================
     const resetModalBackdrop = document.getElementById('resetModalBackdrop');
     const btnCancelReset = document.getElementById('btnCancelReset');
     const btnConfirmReset = document.getElementById('btnConfirmReset');
     const hudResetChip = document.getElementById('hudResetChip');
 
-    function openResetModal() {
-      resetModalBackdrop.classList.add('open');
-    }
-
-    function closeResetModal() {
-      resetModalBackdrop.classList.remove('open');
-    }
+    function openResetModal() { resetModalBackdrop.classList.add('open'); }
+    function closeResetModal() { resetModalBackdrop.classList.remove('open'); }
 
     btnCancelReset.addEventListener('click', closeResetModal);
 
     btnConfirmReset.addEventListener('click', () => {
-      // Clear persistent positions
       localStorage.removeItem(STORAGE_KEY_POSITIONS);
 
-      // Smooth reset animation
       document.querySelectorAll('.hud-draggable-target').forEach(el => {
         el.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
         el.style.position = '';
@@ -2557,29 +2352,39 @@
         el.style.bottom = '';
         el.style.transform = '';
 
-        setTimeout(() => {
-          el.style.transition = '';
-        }, 520);
+        setTimeout(() => { el.style.transition = ''; }, 520);
       });
 
       closeResetModal();
       showToast('✓ All Layout Positions Reset to Factory Defaults');
     });
 
-    // Trigger reset on desktop double-click
-    window.addEventListener('dblclick', (e) => {
-      if (e.target.closest('input, button, select, form, a, .app-btn, .add-app-btn, .crypto-modal-window, .custom-modal, .reset-modal-box')) return;
-      openResetModal();
+    // Triple-Click Detector on Wallpaper Background
+    let clickCount = 0;
+    let clickTimer = null;
+
+    window.addEventListener('click', (e) => {
+      if (e.target.closest('input, button, select, form, a, .app-btn, .add-app-btn, .dock-pin-btn, .crypto-modal-window, .custom-modal, .reset-modal-box')) return;
+      
+      clickCount++;
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+          clickCount = 0;
+        }, 480);
+      } else if (clickCount >= 3) {
+        clearTimeout(clickTimer);
+        clickCount = 0;
+        openResetModal();
+      }
     });
 
-    // Also click on the status pill in the bottom right
     hudResetChip.addEventListener('click', openResetModal);
 
     applySavedPositions();
 
 
     // =============================================================
-    // 4. KILLER MULTI-CHAIN CRYPTO WALLET RADAR ENGINE
+    // 5. ROBOTIC MULTI-CHAIN CRYPTO RADAR ENGINE
     // =============================================================
     const cryptoRadarTrigger = document.getElementById('cryptoRadarTrigger');
     const cryptoModalBackdrop = document.getElementById('cryptoModalBackdrop');
@@ -2601,7 +2406,6 @@
 
     let latestFormattedText = '';
 
-    // Ethers providers with robust failover endpoints
     let bscProvider, ethProvider, polyProvider;
     try {
       if (typeof ethers !== 'undefined' && ethers.providers) {
@@ -2609,15 +2413,12 @@
         ethProvider = new ethers.providers.JsonRpcProvider('https://cloudflare-eth.com');
         polyProvider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com');
       }
-    } catch(e) {
-      console.warn('Ethers providers initialization warning:', e);
-    }
+    } catch(e) {}
 
     const BEP20_USDT = "0x55d398326f99059fF775485246999027B3197955";
     const ERC20_USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
     const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)"];
 
-    // Helper: timeout-protected promise so no slow RPC hangs the entire scan
     function withTimeout(promise, ms = 7000) {
       return Promise.race([
         promise,
@@ -2625,7 +2426,6 @@
       ]);
     }
 
-    // MAIN PARALLEL CRYPTO BALANCE SCANNER
     async function checkCryptoBalance(address) {
       if (!address || typeof address !== 'string') {
         throw new Error("Invalid Input: Wallet address required");
@@ -2633,9 +2433,8 @@
 
       const cleanAddress = address.trim();
 
-      // Array of all 9 network fetch tasks with resilient execution
       const tasks = [
-        // 1. BEP20 USDT (Binance Smart Chain)
+        // 1. BEP20 USDT
         async () => {
           if (!ethers.utils.isAddress(cleanAddress)) throw new Error();
           return withTimeout((async () => {
@@ -2646,7 +2445,7 @@
           })(), 6500);
         },
 
-        // 2. BNB Native (Binance Smart Chain)
+        // 2. BNB Native
         async () => {
           if (!ethers.utils.isAddress(cleanAddress)) throw new Error();
           return withTimeout((async () => {
@@ -2656,7 +2455,7 @@
           })(), 6500);
         },
 
-        // 3. ERC20 USDT (Ethereum Mainnet)
+        // 3. ERC20 USDT
         async () => {
           if (!ethers.utils.isAddress(cleanAddress)) throw new Error();
           return withTimeout((async () => {
@@ -2667,7 +2466,7 @@
           })(), 6500);
         },
 
-        // 4. ETH Native (Ethereum Mainnet)
+        // 4. ETH Native
         async () => {
           if (!ethers.utils.isAddress(cleanAddress)) throw new Error();
           return withTimeout((async () => {
@@ -2677,7 +2476,7 @@
           })(), 6500);
         },
 
-        // 5. Polygon POL/MATIC
+        // 5. Polygon POL
         async () => {
           if (!ethers.utils.isAddress(cleanAddress)) throw new Error();
           return withTimeout((async () => {
@@ -2687,7 +2486,7 @@
           })(), 6500);
         },
 
-        // 6. TRC20 USDT (Tron Network)
+        // 6. TRC20 USDT
         async () => {
           if (!cleanAddress.startsWith("T")) throw new Error();
           return withTimeout((async () => {
@@ -2704,7 +2503,7 @@
           })(), 6500);
         },
 
-        // 7. TRX Native (Tron Network)
+        // 7. TRX Native
         async () => {
           if (!cleanAddress.startsWith("T")) throw new Error();
           return withTimeout((async () => {
@@ -2716,7 +2515,7 @@
           })(), 6500);
         },
 
-        // 8. Bitcoin (BTC)
+        // 8. Bitcoin
         async () => {
           return withTimeout((async () => {
             const res = await fetch(`https://blockchain.info/rawaddr/${cleanAddress}?cors=true`);
@@ -2726,7 +2525,7 @@
           })(), 6500);
         },
 
-        // 9. Solana (SOL)
+        // 9. Solana
         async () => {
           return withTimeout((async () => {
             const res = await fetch('https://api.mainnet-beta.solana.com', {
@@ -2741,19 +2540,13 @@
         }
       ];
 
-      // Execute all network requests in parallel
       const results = await Promise.allSettled(tasks.map(task => task()));
-
-      // Extract all successful (fulfilled) responses
-      const successfulResults = results
-        .filter(r => r.status === "fulfilled")
-        .map(r => r.value);
+      const successfulResults = results.filter(r => r.status === "fulfilled").map(r => r.value);
 
       if (successfulResults.length === 0) {
         return { success: false, message: "Invalid Address or Network Not Detected" };
       }
 
-      // Format array/string for UI rendering
       const formattedOutput = successfulResults.map(res => 
         `Network: ${res.network}\nCoin/USDT: ${res.balance} ${res.token}`
       ).join("\n\n--------------------\n\n");
@@ -2765,7 +2558,6 @@
       };
     }
 
-    // Render Cards in Cyber Terminal
     function renderCryptoResults(data, formattedText) {
       latestFormattedText = formattedText;
       cryptoCardsGrid.innerHTML = '';
@@ -2797,7 +2589,6 @@
         cryptoCardsGrid.appendChild(card);
       });
 
-      // Bind copy buttons on cards
       cryptoCardsGrid.querySelectorAll('.c-card-copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const txt = btn.dataset.copy;
@@ -2813,7 +2604,6 @@
       cryptoFooter.style.display = 'flex';
     }
 
-    // Execute Scan Trigger
     async function executeWalletScan() {
       const addr = cryptoAddressInput.value.trim();
       if (!addr) {
@@ -2822,10 +2612,9 @@
         return;
       }
 
-      // Save last address to localStorage
       try { localStorage.setItem('aethelgard_last_crypto_addr', addr); } catch(e) {}
 
-      cryptoScannerLoader.style.display = 'block';
+      cryptoScannerLoader.style.display = 'flex';
       cryptoCardsGrid.style.display = 'none';
       cryptoFooter.style.display = 'none';
       cryptoEmptyState.style.display = 'none';
@@ -2860,7 +2649,6 @@
       }
     }
 
-    // Event Listeners for Crypto Radar Modal
     cryptoRadarTrigger.addEventListener('click', () => {
       cryptoModalBackdrop.classList.add('open');
       const saved = localStorage.getItem('aethelgard_last_crypto_addr');
@@ -2900,7 +2688,6 @@
       }
     });
 
-    // Sample Chips
     document.querySelectorAll('.c-preset-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         cryptoAddressInput.value = chip.dataset.addr;
@@ -2908,7 +2695,6 @@
       });
     });
 
-    // Copy formatted report
     btnCopyFormattedReport.addEventListener('click', () => {
       if (!latestFormattedText) return;
       navigator.clipboard.writeText(latestFormattedText).then(() => {
@@ -2916,7 +2702,6 @@
       });
     });
 
-    // Toggle raw text view
     btnToggleRawView.addEventListener('click', () => {
       const isHidden = cryptoRawView.style.display === 'none';
       cryptoRawView.style.display = isHidden ? 'block' : 'none';
@@ -2925,7 +2710,7 @@
 
 
     // =============================================================
-    // 5. IN-HUD BROWSER & BING WEB SEARCH
+    // 6. IN-HUD BROWSER & BING WEB SEARCH
     // =============================================================
     let currentBrowserQuery = '';
 
@@ -2988,7 +2773,7 @@
 
 
     // =============================================================
-    // 6. CUSTOM APP SHELVES (Biz & Apps)
+    // 7. CUSTOM APP SHELVES (Biz & Apps)
     // =============================================================
     const modalBackdrop = document.getElementById('modalBackdrop');
     const addAppBtnApps = document.getElementById('addAppBtn-apps');
