@@ -3,18 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aethelgard Monolith Core</title>
+  <title>Aethelgard Monolith Core — Chrono Matrix</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #000000;
       --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --font-serif: 'Cinzel', serif;
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-light: rgba(255, 255, 255, 0.22);
-      --glass: rgba(14, 14, 18, 0.75);
+      --border-light: rgba(255, 255, 255, 0.2);
+      --glass-surface: rgba(12, 12, 16, 0.76);
+      --gold-accent: #e5c07b;
+      --gold-dim: rgba(229, 192, 123, 0.2);
     }
 
     * {
@@ -36,13 +39,14 @@
       position: relative;
     }
 
-    /* Ambient Field */
-    .ambient-field {
+    /* Ambient Warp Background */
+    .ambient-glow {
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 1;
-      background: radial-gradient(circle 550px at var(--mx, -500px) var(--my, -500px), rgba(255, 255, 255, 0.04), transparent 75%);
+      background: radial-gradient(circle 600px at var(--mx, -500px) var(--my, -500px), rgba(255, 255, 255, 0.04), transparent 80%);
+      transition: opacity 0.3s ease;
     }
 
     canvas#stage {
@@ -53,7 +57,7 @@
       z-index: 2;
     }
 
-    /* View Frame */
+    /* Architectural Frame Lines */
     .view-frame {
       position: fixed;
       inset: 24px;
@@ -64,20 +68,20 @@
 
     .corner {
       position: absolute;
-      width: 10px;
-      height: 10px;
-      border-color: rgba(255, 255, 255, 0.4);
+      width: 12px;
+      height: 12px;
+      border-color: rgba(255, 255, 255, 0.35);
     }
     .c-tl { top: -1px; left: -1px; border-top: 1.5px solid; border-left: 1.5px solid; }
     .c-tr { top: -1px; right: -1px; border-top: 1.5px solid; border-right: 1.5px solid; }
     .c-bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
     .c-br { bottom: -1px; right: -1px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
 
-    /* HUD Architecture */
+    /* Precision Swiss HUD */
     .hud {
       position: absolute;
       inset: 0;
-      padding: 48px 56px;
+      padding: 46px 54px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -89,9 +93,10 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      position: relative;
     }
 
-    /* Docks Cluster */
+    /* Dual Docks Container */
     .docks-cluster {
       display: flex;
       flex-direction: column;
@@ -103,7 +108,7 @@
       display: inline-flex;
       align-items: center;
       padding: 5px 12px 5px 8px;
-      background: var(--glass);
+      background: var(--glass-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 40px;
       backdrop-filter: blur(24px);
@@ -114,7 +119,7 @@
     }
 
     .apps-dock:hover {
-      background: rgba(22, 22, 28, 0.94);
+      background: rgba(20, 20, 26, 0.94);
       border-color: var(--border-light);
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
     }
@@ -169,7 +174,7 @@
     }
 
     .apps-dock:hover .apps-list {
-      max-width: 580px;
+      max-width: 750px;
       opacity: 1;
       pointer-events: auto;
       transform: translateX(0);
@@ -245,7 +250,7 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       border: 1px dashed rgba(255, 255, 255, 0.5);
       cursor: pointer;
       transition: all 0.25s ease;
@@ -281,7 +286,7 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    /* Top Right Ephemeris Telemetry */
+    /* Top Right Telemetry */
     .telemetry-time-block {
       display: flex;
       flex-direction: column;
@@ -339,11 +344,11 @@
       color: rgba(255, 255, 255, 0.25);
     }
 
-    /* Glassmorphic Modal for Adding Apps */
+    /* Modal for Deploying Custom Node */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.86);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: none;
@@ -491,7 +496,7 @@
 </head>
 <body>
 
-  <div class="ambient-field" id="ambientField"></div>
+  <div class="ambient-glow" id="ambientGlow"></div>
 
   <div class="view-frame">
     <div class="corner c-tl"></div>
@@ -506,7 +511,7 @@
     <div class="row-top">
       <div class="docks-cluster">
         
-        <!-- Apps Dock -->
+        <!-- Dock 1: Personal Apps -->
         <div class="apps-dock" id="dockApps">
           <div class="apps-trigger">
             <svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
@@ -552,25 +557,24 @@
                 <path fill="#000000" d="M12 3.8c3.4 0 5.4 2.5 5.4 4.9 0 1.2-.5 2.3-1.2 3-.5.5-.6 1.1-.3 1.7.3.5.8 1.3 1 1.6-.6-.1-1.4-.3-2.1-.7-.7-.4-1.5-.3-2.1.2-.8.6-1.7.9-2.7.9s-1.9-.3-2.7-.9c-.6-.5-1.4-.6-2.1-.2-.7.4-1.5.6-2.1.7.2-.3.7-1.1 1-1.6.3-.6.2-1.2-.3-1.7-.7-.7-1.2-1.8-1.2-3 0-2.4 2-4.9 5.4-4.9z"/>
               </svg>
             </a>
-
-            <!-- Secret Add App Button -->
-            <div class="add-app-btn" id="addAppBtn" title="Register Custom Protocol/URL">
+            
+            <div class="add-app-btn" id="addAppBtn-apps" data-target="apps" title="Register Custom App">
               <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
             </div>
           </div>
         </div>
 
-        <!-- Business Dock -->
+        <!-- Dock 2: Business Apps -->
         <div class="apps-dock" id="dockBiz">
           <div class="apps-trigger">
             <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zm-11 0h7v7H3z"/></svg>
             <span class="apps-label">Business</span>
           </div>
-          <div class="apps-list">
+          <div class="apps-list" id="listBiz">
             <a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Meta Ads">
               <svg viewBox="0 0 24 24"><path fill="#0081FB" d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/></svg>
             </a>
-            <a href="https://ads.google.com?subid=xs-ip-gemini-adlc" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google Ads">
+            <a href="https://ads.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google Ads">
               <svg viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M3.88 12.87L9.67 2.84c.71-1.23 2.28-1.65 3.51-.94l2.12 1.22c1.23.71 1.65 2.28.94 3.51L10.45 16.66c-.71 1.23-2.28 1.65-3.51.94l-2.12-1.22c-1.23-.71-1.65-2.28-.94-3.51z"/>
                 <path fill="#FABB05" d="M20.12 16.88L14.33 6.85c-.71-1.23-2.28-1.65-3.51-.94l-2.12 1.22c-1.23.71-1.65 2.28-.94 3.51l5.79 10.03c.71 1.23 2.28 1.65 3.51.94l2.12-1.22c1.23-.71 1.65-2.28.94-3.51z"/>
@@ -590,6 +594,10 @@
             <a href="https://admin.shopify.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Shopify">
               <svg viewBox="0 0 24 24"><path fill="#95BF47" d="M19.34 6.72c-.11-.3-.39-.48-.68-.45-.29.02-4.08.34-4.08.34s-2.7-2.67-2.98-2.95c-.29-.28-.83-.19-1.04.14l-1.44 2.25-3.02.94c-.38.12-.55.57-.38.93l3.68 12.04 10.37-2.18-2.43-11.06zm-7.79 1.34l1.32-2.07c.8 1.15 1.83 2.19 2.08 2.45l-3.4-.38zm-1.87 2.14l2.79.31-2.16 8.54-1.85-6.05 1.22-.8-.2-.36-.2.36 1.4-2.8z"/></svg>
             </a>
+            
+            <div class="add-app-btn" id="addAppBtn-biz" data-target="biz" title="Register Custom Business App">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
           </div>
         </div>
 
@@ -653,14 +661,15 @@
   <script>
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-    const ambientField = document.getElementById('ambientField');
+    const ambientGlow = document.getElementById('ambientGlow');
     const timeDigitsMinimal = document.getElementById('timeDigitsMinimal');
     const clockDate = document.getElementById('clockDate');
     const sessionTimer = document.getElementById('sessionTimer');
     
     // Modal Nodes
     const modalBackdrop = document.getElementById('modalBackdrop');
-    const addAppBtn = document.getElementById('addAppBtn');
+    const addAppBtnApps = document.getElementById('addAppBtn-apps');
+    const addAppBtnBiz = document.getElementById('addAppBtn-biz');
     const btnCancel = document.getElementById('btnCancel');
     const btnSave = document.getElementById('btnSave');
     const appNameInput = document.getElementById('appName');
@@ -674,11 +683,10 @@
     let height = 0;
 
     // -------------------------------------------------------------
-    // 3D QUANTUM SPHERE CLOCK MATRIX CONFIGURATION
+    // QUANTUM FIBONACCI 3D CHRONO SPHERE LATTICE
     // -------------------------------------------------------------
-    // Sphere consists of nodes on Fibonacci lattice
-    const SPHERE_COUNT = 340;
-    const SPHERE_STRIDE = 7; // [x, y, z, charCode, phase, speed, isFocal]
+    const SPHERE_COUNT = 380;
+    const SPHERE_STRIDE = 7; // [ux, uy, uz, digitNoise, phase, speed, focalType]
     const sphereBuffer = new Float32Array(SPHERE_COUNT * SPHERE_STRIDE);
     const goldenRatio = (1 + Math.sqrt(5)) / 2;
 
@@ -687,19 +695,29 @@
       const theta = 2 * Math.PI * i / goldenRatio;
       const phi = Math.acos(1 - 2 * (i + 0.5) / SPHERE_COUNT);
 
-      sphereBuffer[o] = Math.cos(theta) * Math.sin(phi);     // unit x
-      sphereBuffer[o + 1] = Math.sin(theta) * Math.sin(phi); // unit y
-      sphereBuffer[o + 2] = Math.cos(phi);                  // unit z
-      sphereBuffer[o + 3] = Math.floor(Math.random() * 10);  // current digit
-      sphereBuffer[o + 4] = Math.random() * Math.PI * 2;    // phase
-      sphereBuffer[o + 5] = Math.random() * 0.04 + 0.01;    // twinkle speed
-      sphereBuffer[o + 6] = Math.random() < 0.2 ? 1 : 0;     // focal flag
+      sphereBuffer[o] = Math.cos(theta) * Math.sin(phi);
+      sphereBuffer[o + 1] = Math.sin(theta) * Math.sin(phi);
+      sphereBuffer[o + 2] = Math.cos(phi);
+      sphereBuffer[o + 3] = Math.floor(Math.random() * 10);
+      sphereBuffer[o + 4] = Math.random() * Math.PI * 2;
+      sphereBuffer[o + 5] = Math.random() * 0.035 + 0.015;
+      sphereBuffer[o + 6] = Math.random() < 0.25 ? 1 : 0;
     }
 
     // Shrinking Trail Buffer
-    const TRAIL_MAX = 20;
+    const TRAIL_MAX = 22;
     const trail = new Float32Array(TRAIL_MAX * 3);
     let trailHead = 0;
+
+    // Background Dust Simulation
+    const STAR_COUNT = 60;
+    const starBuffer = new Float32Array(STAR_COUNT * 4); // [x, y, speed, alpha]
+    for (let i = 0; i < STAR_COUNT; i++) {
+      starBuffer[i * 4] = Math.random();
+      starBuffer[i * 4 + 1] = Math.random();
+      starBuffer[i * 4 + 2] = Math.random() * 0.0003 + 0.0001;
+      starBuffer[i * 4 + 3] = Math.random() * 0.4 + 0.1;
+    }
 
     const mouse = {
       x: -1000,
@@ -711,29 +729,26 @@
       hasMoved: false
     };
 
-    // Shake Gesture Tracker inside Dock
-    let shakeCount = 0;
-    let lastShakeDir = 0;
-    let lastShakeTime = 0;
-
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
     const startTime = performance.now();
 
     // -------------------------------------------------------------
-    // LOCAL STORAGE CUSTOM APPS HYDRATION
+    // LOCAL STORAGE CUSTOM NODES MANAGEMENT
     // -------------------------------------------------------------
     function loadSavedApps() {
       try {
-        const saved = JSON.parse(localStorage.getItem('aethelgard_custom_nodes') || '[]');
+        const saved = JSON.parse(localStorage.getItem('aethelgard_nodes_v2') || '[]');
         saved.forEach(app => renderCustomApp(app));
       } catch(e) {}
     }
 
     function renderCustomApp(app) {
-      const targetList = app.dock === 'biz' 
-        ? document.querySelector('#dockBiz .apps-list')
-        : document.querySelector('#dockApps .apps-list');
+      const isBiz = app.dock === 'biz';
+      const targetList = isBiz 
+        ? document.getElementById('listBiz')
+        : document.getElementById('listApps');
+      const addBtn = isBiz ? addAppBtnBiz : addAppBtnApps;
 
       const a = document.createElement('a');
       a.href = app.url;
@@ -742,32 +757,27 @@
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
 
-      if (app.icon.startsWith('data:image') || app.icon.startsWith('http')) {
+      if (app.icon && (app.icon.startsWith('data:image') || app.icon.startsWith('http'))) {
         const img = document.createElement('img');
         img.src = app.icon;
         a.appendChild(img);
       } else {
-        // Fallback Vector
         a.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>`;
       }
 
-      if (app.dock === 'apps') {
-        targetList.insertBefore(a, addAppBtn);
-      } else {
-        targetList.appendChild(a);
-      }
+      targetList.insertBefore(a, addBtn);
     }
 
     function saveCustomApp(app) {
       try {
-        const saved = JSON.parse(localStorage.getItem('aethelgard_custom_nodes') || '[]');
+        const saved = JSON.parse(localStorage.getItem('aethelgard_nodes_v2') || '[]');
         saved.push(app);
-        localStorage.setItem('aethelgard_custom_nodes', JSON.stringify(saved));
+        localStorage.setItem('aethelgard_nodes_v2', JSON.stringify(saved));
         renderCustomApp(app);
       } catch(e) {}
     }
 
-    // File selection handling
+    // Modal Interaction
     triggerFileUpload.addEventListener('click', () => appIconFileInput.click());
     appIconFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -781,11 +791,14 @@
       }
     });
 
-    // Modal Events
-    addAppBtn.addEventListener('click', () => {
+    function openModalForDock(target) {
+      dockTargetSelect.value = target;
       modalBackdrop.classList.add('open');
       appNameInput.focus();
-    });
+    }
+
+    addAppBtnApps.addEventListener('click', () => openModalForDock('apps'));
+    addAppBtnBiz.addEventListener('click', () => openModalForDock('biz'));
 
     btnCancel.addEventListener('click', () => {
       modalBackdrop.classList.remove('open');
@@ -811,25 +824,33 @@
     });
 
     // -------------------------------------------------------------
-    // SHAKE DETECTION INSIDE APPS DOCK
+    // SHAKE DETECTION FOR BOTH APPS AND BUSINESS DOCKS
     // -------------------------------------------------------------
-    const dockApps = document.getElementById('dockApps');
-    dockApps.addEventListener('mousemove', (e) => {
-      const dx = e.movementX;
-      const now = performance.now();
+    function setupDockShakeDetection(dockEl, addBtnEl) {
+      let shakeCount = 0;
+      let lastDir = 0;
+      let lastTime = 0;
 
-      if (Math.abs(dx) > 12) {
-        const dir = Math.sign(dx);
-        if (dir !== lastShakeDir && (now - lastShakeTime) < 350) {
-          shakeCount++;
-          if (shakeCount >= 4) {
-            addAppBtn.classList.add('visible');
+      dockEl.addEventListener('mousemove', (e) => {
+        const dx = e.movementX;
+        const now = performance.now();
+
+        if (Math.abs(dx) > 10) {
+          const dir = Math.sign(dx);
+          if (dir !== lastDir && (now - lastTime) < 320) {
+            shakeCount++;
+            if (shakeCount >= 4) {
+              addBtnEl.classList.add('visible');
+            }
           }
+          lastDir = dir;
+          lastTime = now;
         }
-        lastShakeDir = dir;
-        lastShakeTime = now;
-      }
-    });
+      });
+    }
+
+    setupDockShakeDetection(document.getElementById('dockApps'), addAppBtnApps);
+    setupDockShakeDetection(document.getElementById('dockBiz'), addAppBtnBiz);
 
     function resize() {
       width = canvas.width = window.innerWidth;
@@ -851,7 +872,7 @@
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
 
-      // System Time Gathering
+      // System Clocks
       const d = new Date();
       const h = String(d.getHours()).padStart(2, '0');
       const m = String(d.getMinutes()).padStart(2, '0');
@@ -867,14 +888,23 @@
       const ss = String(secElapsed % 60).padStart(2, '0');
       sessionTimer.textContent = `${sh}:${sm}:${ss}`;
 
+      // 1. Render Background Dust Particles
+      for (let i = 0; i < STAR_COUNT; i++) {
+        const o = i * 4;
+        starBuffer[o + 1] -= starBuffer[o + 2];
+        if (starBuffer[o + 1] < 0) starBuffer[o + 1] = 1;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${starBuffer[o + 3]})`;
+        ctx.fillRect(starBuffer[o] * width, starBuffer[o + 1] * height, 1.2, 1.2);
+      }
+
       // -------------------------------------------------------------
-      // 3D QUANTUM ROTATING NUMBER SPHERE CLOCK
+      // 3D CHRONO SPHERE GEOMETRIC MATRIX
       // -------------------------------------------------------------
       const cx = width / 2;
       const cy = height / 2;
-      const sphereRadius = Math.min(width, height) * 0.28;
+      const sphereRadius = Math.min(width, height) * 0.285;
 
-      // Mathematical smooth rotation driven by time + mouse inertia
       rotY += 0.0035;
       rotX += 0.0018;
 
@@ -883,54 +913,42 @@
       const cosX = Math.cos(rotX);
       const sinX = Math.sin(rotX);
 
-      // Render Ring Trails / Orbit Field
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = '600 13px "JetBrains Mono", monospace';
 
-      // Sort or direct project (Z-buffer style alpha)
       for (let i = 0; i < SPHERE_COUNT; i++) {
         const o = i * SPHERE_STRIDE;
-        let x = sphereBuffer[o];
-        let y = sphereBuffer[o + 1];
-        let z = sphereBuffer[o + 2];
+        const x = sphereBuffer[o];
+        const y = sphereBuffer[o + 1];
+        const z = sphereBuffer[o + 2];
 
-        // 3D Rotation Y
-        let x1 = x * cosY - z * sinY;
-        let z1 = z * cosY + x * sinY;
+        // 3D Rotation Transformations
+        const x1 = x * cosY - z * sinY;
+        const z1 = z * cosY + x * sinY;
+        const y2 = y * cosX - z1 * sinX;
+        const z2 = z1 * cosX + y * sinX;
 
-        // 3D Rotation X
-        let y2 = y * cosX - z1 * sinX;
-        let z2 = z1 * cosX + y * sinX;
-
-        // Perspective Projection
+        // Perspective
         const fov = 2.4;
         const scale = fov / (fov + z2);
         const projX = cx + x1 * sphereRadius * scale;
         const projY = cy + y2 * sphereRadius * scale;
 
-        // Depth Alpha mapping
         const depthAlpha = Math.max((z2 + 1) / 2, 0.06);
         sphereBuffer[o + 4] += sphereBuffer[o + 5];
         const twinkle = Math.sin(sphereBuffer[o + 4]) * 0.3 + 0.7;
         const finalAlpha = depthAlpha * twinkle;
 
-        // Clock Number Matrix logic
+        // Number assignment
         let displayChar;
-        if (i % 6 === 0) {
-          displayChar = s[0]; // Second Tens
-        } else if (i % 6 === 1) {
-          displayChar = s[1]; // Second Units
-        } else if (i % 6 === 2) {
-          displayChar = m[0];
-        } else if (i % 6 === 3) {
-          displayChar = m[1];
-        } else {
-          displayChar = sphereBuffer[o + 3]; // Digital noise matrix
-        }
+        if (i % 6 === 0) displayChar = s[0];
+        else if (i % 6 === 1) displayChar = s[1];
+        else if (i % 6 === 2) displayChar = m[0];
+        else if (i % 6 === 3) displayChar = m[1];
+        else displayChar = sphereBuffer[o + 3];
 
-        const fontSize = Math.max(Math.floor(14 * scale), 7);
+        const fontSize = Math.max(Math.floor(13 * scale), 7);
         ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
         ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha.toFixed(2)})`;
         ctx.fillText(displayChar, projX, projY);
@@ -938,37 +956,51 @@
       ctx.restore();
 
       // -------------------------------------------------------------
-      // CENTER CHRONO CORE
+      // CENTER ATTENTION CORE: SANSKRIT VECTOR + CHRONOMETER
       // -------------------------------------------------------------
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      
-      // Time Sub-second Micro Gauge Ring
+
+      // 1. Orbital Chrono Ring (Real Seconds Gauge)
       const secProgress = (d.getSeconds() + ms / 1000) / 60;
       ctx.beginPath();
-      ctx.arc(cx, cy, sphereRadius * 0.52, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * secProgress);
+      ctx.arc(cx, cy, sphereRadius * 0.54, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * secProgress);
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.6;
       ctx.stroke();
 
-      // Center Core Digital Time
-      ctx.font = '800 clamp(2.4rem, 6vw, 4.8rem) "JetBrains Mono", monospace';
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
-      ctx.shadowBlur = 18;
-      ctx.fillText(`${h}:${m}:${s}`, cx, cy - 8);
+      // Outer Ticked Micro Boundary
+      ctx.beginPath();
+      ctx.arc(cx, cy, sphereRadius * 0.58, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
-      // Micro Fractions / System Status
-      ctx.font = '500 0.7rem "JetBrains Mono", monospace';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      // 2. Centerpiece Top: Sanskrit High Consciousness Vector
+      ctx.font = '600 clamp(0.75rem, 1.4vw, 1.05rem) "Cinzel", serif';
+      ctx.fillStyle = 'rgba(229, 192, 123, 0.9)'; // Subtle Champagne Gold
+      ctx.shadowColor = 'rgba(229, 192, 123, 0.5)';
+      ctx.shadowBlur = 14;
+      ctx.fillText('सर्वं सम्भाव्यते त्वयि', cx, cy - 42);
+
+      // 3. Centerpiece Core: High Density Digits
+      ctx.font = '800 clamp(2.6rem, 5.8vw, 4.4rem) "JetBrains Mono", monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+      ctx.shadowBlur = 22;
+      ctx.fillText(`${h}:${m}:${s}`, cx, cy + 2);
+
+      // 4. Centerpiece Bottom: Precision Chrono Sub-telemetry
+      ctx.font = '500 0.68rem "JetBrains Mono", monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
       ctx.shadowBlur = 0;
-      ctx.letterSpacing = "6px";
-      ctx.fillText(`UTC+05:30 • SEC ${(ms).toString().padStart(3, '0')}`, cx, cy + 34);
+      ctx.letterSpacing = "4px";
+      ctx.fillText(`UTC+05:30 • SEC ${(ms).toString().padStart(3, '0')}`, cx, cy + 44);
       ctx.restore();
 
       // -------------------------------------------------------------
-      // MAGICAL SHRINKING RIBBON TRAIL
+      // MAGICAL SHRINKING LINE RIBBON TRAIL
       // -------------------------------------------------------------
       if (mouse.hasMoved) {
         ctx.save();
@@ -984,7 +1016,7 @@
 
           if (lifeA > 0.05 && lifeB > 0.05) {
             const progress = 1 - (i / TRAIL_MAX);
-            const lineWidth = Math.max(progress * 3.5, 0.4);
+            const lineWidth = Math.max(progress * 3.4, 0.4);
             const alpha = Math.min(lifeA * progress * 0.85, 0.9);
 
             ctx.beginPath();
@@ -1003,7 +1035,7 @@
       requestAnimationFrame(render);
     }
 
-    // Hardware Listeners
+    // Hardware Event Handlers
     window.addEventListener('resize', resize, { passive: true });
 
     window.addEventListener('mousemove', (e) => {
@@ -1011,12 +1043,12 @@
       mouse.x = e.clientX;
       mouse.y = e.clientY;
 
-      ambientField.style.setProperty('--mx', `${e.clientX}px`);
-      ambientField.style.setProperty('--my', `${e.clientY}px`);
+      ambientGlow.style.setProperty('--mx', `${e.clientX}px`);
+      ambientGlow.style.setProperty('--my', `${e.clientY}px`);
 
       // Gentle interactive 3D rotation bias
-      rotY += (e.clientX - mouse.prevX) * 0.0005;
-      rotX += (e.clientY - mouse.prevY) * 0.0005;
+      rotY += (e.clientX - mouse.prevX) * 0.00045;
+      rotX += (e.clientY - mouse.prevY) * 0.00045;
 
       mouse.prevX = e.clientX;
       mouse.prevY = e.clientY;
@@ -1026,8 +1058,8 @@
 
     window.addEventListener('mouseleave', () => {
       mouse.hasMoved = false;
-      ambientField.style.setProperty('--mx', `-500px`);
-      ambientField.style.setProperty('--my', `-500px`);
+      ambientGlow.style.setProperty('--mx', `-500px`);
+      ambientGlow.style.setProperty('--my', `-500px`);
     });
 
     resize();
