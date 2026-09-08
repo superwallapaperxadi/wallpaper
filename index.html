@@ -1,1070 +1,1503 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aethelgard Monolith Core — Chrono Matrix</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #000000;
-      --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-      --font-serif: 'Cinzel', serif;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-light: rgba(255, 255, 255, 0.2);
-      --glass-surface: rgba(12, 12, 16, 0.76);
-      --gold-accent: #e5c07b;
-      --gold-dim: rgba(229, 192, 123, 0.2);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aethelgard Mecha-Core // Autonomous Robotic Chrono-Matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=JetBrains+Mono:wght@200;400;600;800&family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #000000;
+    --cyan-core: #62b6ff;
+    --cyan-glow: rgba(98, 182, 255, 0.45);
+    --gold-core: #e5c07b;
+    --gold-glow: rgba(229, 192, 123, 0.38);
+    --robo-green: #39ff14;
+    --robo-amber: #ffaa00;
+    --glass-hull: rgba(10, 14, 20, 0.78);
+    --glass-border: rgba(98, 182, 255, 0.16);
+    --glass-blur: blur(20px);
+    --btn-metal: #e8e8e8;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-serif: 'Cinzel', serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --mx: 50vw;
+    --my: 50vh;
+  }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
-    body {
-      width: 100vw;
-      height: 100vh;
-      background: var(--bg);
-      overflow: hidden;
-      font-family: var(--font-main);
-      color: #ffffff;
-      cursor: crosshair;
-      position: relative;
-    }
+  body, html {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg-void);
+    font-family: var(--font-sans);
+    color: #ffffff;
+    cursor: crosshair;
+  }
 
-    /* Ambient Warp Background */
-    .ambient-glow {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      background: radial-gradient(circle 600px at var(--mx, -500px) var(--my, -500px), rgba(255, 255, 255, 0.04), transparent 80%);
-      transition: opacity 0.3s ease;
-    }
+  #spotlight {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(circle 650px at var(--mx) var(--my), rgba(98, 182, 255, 0.08), transparent 82%);
+  }
 
-    canvas#stage {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
-    }
+  /* Architectural Hairline Mecha Frame */
+  .viewport-frame {
+    position: fixed;
+    inset: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    pointer-events: none;
+    z-index: 10;
+  }
 
-    /* Architectural Frame Lines */
-    .view-frame {
-      position: fixed;
-      inset: 24px;
-      border: 1px solid var(--border-subtle);
-      pointer-events: none;
-      z-index: 5;
-    }
+  .corner-tick {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: var(--cyan-core);
+    border-style: solid;
+    opacity: 0.85;
+  }
+  .tick-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .tick-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+  .tick-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+  .tick-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
 
-    .corner {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      border-color: rgba(255, 255, 255, 0.35);
-    }
-    .c-tl { top: -1px; left: -1px; border-top: 1.5px solid; border-left: 1.5px solid; }
-    .c-tr { top: -1px; right: -1px; border-top: 1.5px solid; border-right: 1.5px solid; }
-    .c-bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
-    .c-br { bottom: -1px; right: -1px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+  /* Architectural Telemetry Badges */
+  .hud-badge {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+  }
+  .badge-top-left { top: -10px; left: 28px; background: #000; padding: 0 6px; }
+  .badge-bottom-right { bottom: -10px; right: 28px; background: #000; padding: 0 6px; }
 
-    /* Precision Swiss HUD */
-    .hud {
-      position: absolute;
-      inset: 0;
-      padding: 46px 54px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      pointer-events: none;
-      z-index: 10;
-    }
+  /* Main High-Performance Canvas */
+  #stage {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: block;
+  }
 
-    .row-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      position: relative;
-    }
+  .telemetry-core {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    text-align: center;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
-    /* Dual Docks Container */
-    .docks-cluster {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      pointer-events: auto;
-    }
+  .sanskrit-vector {
+    font-family: var(--font-serif);
+    font-size: clamp(0.9rem, 1.8vw, 1.25rem);
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    color: var(--gold-core);
+    text-shadow: 0 0 16px var(--gold-glow), 0 0 35px rgba(229, 192, 123, 0.2);
+    margin-bottom: 6px;
+    opacity: 0.95;
+  }
 
-    .apps-dock {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 12px 5px 8px;
-      background: var(--glass-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 40px;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      width: fit-content;
-      position: relative;
-    }
+  .main-chronometer {
+    font-family: var(--font-mono);
+    font-size: clamp(3rem, 6.8vw, 5.2rem);
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    color: #ffffff;
+    text-shadow: 0 0 28px rgba(255, 255, 255, 0.85), 0 0 60px var(--cyan-glow);
+    line-height: 1;
+  }
 
-    .apps-dock:hover {
-      background: rgba(20, 20, 26, 0.94);
-      border-color: var(--border-light);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
-    }
+  .robo-status-row {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan-core);
+    text-shadow: 0 0 10px var(--cyan-glow);
+  }
 
-    .apps-trigger {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 8px;
-      cursor: pointer;
-    }
+  .robo-pip {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--robo-green);
+    box-shadow: 0 0 8px var(--robo-green);
+    animation: blip 1.4s ease-in-out infinite alternate;
+  }
+  @keyframes blip {
+    0% { opacity: 0.3; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.25); }
+  }
 
-    .apps-trigger svg {
-      width: 13px;
-      height: 13px;
-      fill: none;
-      stroke: rgba(255, 255, 255, 0.6);
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      transition: transform 0.3s ease, stroke 0.3s ease;
-    }
+  .celestial-module {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    z-index: 12;
+    background: var(--glass-hull);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    padding: 10px 18px 10px 12px;
+    border-radius: 48px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75);
+    border-left: 2px solid var(--cyan-core);
+  }
 
-    .apps-dock:hover .apps-trigger svg {
-      transform: rotate(90deg);
-      stroke: #ffffff;
-    }
+  #celestialCanvas {
+    width: 80px;
+    height: 80px;
+    display: block;
+  }
 
-    .apps-label {
-      font-size: 0.64rem;
-      font-weight: 800;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.5);
-      transition: color 0.25s ease;
-    }
+  .celestial-meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 
-    .apps-dock:hover .apps-label {
-      color: #ffffff;
-    }
+  .celestial-digital {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--cyan-glow);
+  }
 
-    .apps-list {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      max-width: 0;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateX(-10px);
-      transition: max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity 0.3s ease,
-                  transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+  .celestial-date {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--gold-core);
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
 
-    .apps-dock:hover .apps-list {
-      max-width: 750px;
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(0);
-      margin-left: 6px;
-    }
+  .docks-zone {
+    position: fixed;
+    top: 42px;
+    left: 42px;
+    z-index: 12;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
-    .app-btn {
-      position: relative;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      cursor: pointer;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
+  .dock-card {
+    background: var(--glass-hull);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    padding: 6px 12px 6px 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    transition: border-color 0.25s, box-shadow 0.25s;
+    border-left: 2px solid var(--gold-core);
+  }
 
-    .app-btn svg, .app-btn img {
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
-      transition: transform 0.22s ease;
-    }
+  .dock-card:hover {
+    border-color: rgba(98, 182, 255, 0.45);
+    box-shadow: 0 12px 38px rgba(98, 182, 255, 0.15);
+  }
 
-    .app-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
-      border-color: rgba(255, 255, 255, 0.55);
-      transform: translateY(-2px) scale(1.08);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
-    }
+  .dock-tag {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    padding-right: 6px;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+  }
 
-    .app-btn:active {
-      transform: scale(0.92);
-    }
+  .dock-items-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-    .app-btn::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: -28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(4px);
-      font-family: var(--font-mono);
-      font-size: 0.58rem;
-      font-weight: 500;
-      letter-spacing: 1px;
-      color: #ffffff;
-      background: rgba(12, 12, 14, 0.95);
-      border: 1px solid var(--border-subtle);
-      padding: 3px 8px;
-      border-radius: 4px;
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 400;
-    }
+  /* Mecha Bevel Button styling */
+  button.mecha-btn, a.mecha-btn {
+    position: relative;
+    height: 38px;
+    padding: 0 14px;
+    border: 2px solid #000000;
+    background: var(--btn-metal);
+    user-select: none;
+    white-space: nowrap;
+    transition: all 0.06s linear;
+    font-family: var(--font-mono);
+    color: #000000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: crosshair;
+    outline: none;
+  }
 
-    .app-btn:hover::after {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+  button.mecha-btn:before, button.mecha-btn:after,
+  a.mecha-btn:before, a.mecha-btn:after {
+    content: "";
+    position: absolute;
+    background: var(--btn-metal);
+    transition: all 0.2s linear;
+    pointer-events: none;
+  }
 
-    /* Secret Shake Triggered Add Button */
-    .add-app-btn {
-      width: 32px;
-      height: 32px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px dashed rgba(255, 255, 255, 0.5);
-      cursor: pointer;
-      transition: all 0.25s ease;
-      flex-shrink: 0;
-      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+  button.mecha-btn:before, a.mecha-btn:before {
+    width: calc(100% + 6px);
+    height: calc(100% - 14px);
+    top: 7px;
+    left: -3px;
+  }
 
-    .add-app-btn.visible {
-      display: flex;
-    }
+  button.mecha-btn:after, a.mecha-btn:after {
+    width: calc(100% - 14px);
+    height: calc(100% + 6px);
+    top: -3px;
+    left: 7px;
+  }
 
-    .add-app-btn:hover {
-      background: #ffffff;
-      border-color: #ffffff;
-      transform: scale(1.1);
-    }
+  button.mecha-btn:hover, a.mecha-btn:hover {
+    cursor: crosshair;
+    background: #ffffff;
+    box-shadow: 0 0 16px var(--cyan-glow);
+  }
 
-    .add-app-btn:hover svg {
-      stroke: #000000;
-    }
+  button.mecha-btn:active, a.mecha-btn:active {
+    transform: scale(0.95);
+  }
 
-    .add-app-btn svg {
-      width: 14px;
-      height: 14px;
-      stroke: #ffffff;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      transition: stroke 0.2s ease;
-    }
+  button.mecha-btn:hover:before, a.mecha-btn:hover:before {
+    height: calc(100% - 24px);
+    top: 12px;
+  }
 
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.6); }
-      to { opacity: 1; transform: scale(1); }
-    }
+  button.mecha-btn:hover:after, a.mecha-btn:hover:after {
+    width: calc(100% - 24px);
+    left: 12px;
+  }
 
-    /* Top Right Telemetry */
-    .telemetry-time-block {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-    }
+  .mecha-btn span, .mecha-btn svg, .mecha-btn img {
+    font-size: 0.72rem;
+    z-index: 3;
+    position: relative;
+    font-weight: 700;
+    display: block;
+  }
 
-    .time-digits-minimal {
-      font-family: var(--font-mono);
-      font-size: 1.8rem;
-      font-weight: 300;
-      letter-spacing: 3px;
-      color: #ffffff;
-      line-height: 1;
-    }
+  .mecha-btn svg, .mecha-btn img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
 
-    .time-date {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.35);
-    }
+  .mecha-btn::after {
+    z-index: 1;
+  }
 
-    .row-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
+  /* Cyber Tooltip */
+  .mecha-tooltip {
+    position: relative;
+  }
+  .mecha-tooltip::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -32px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.85);
+    background: #090c12;
+    border: 1px solid var(--cyan-core);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 40;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.8);
+  }
+  .mecha-tooltip:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 
-    .telemetry {
-      font-family: var(--font-mono);
-      font-size: 0.64rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.35);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+  .deploy-node-btn {
+    display: none;
+    height: 38px;
+    padding: 0 12px;
+    border: 2px dashed var(--gold-core);
+    background: rgba(229, 192, 123, 0.1);
+    color: var(--gold-core);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    cursor: crosshair;
+    transition: all 0.2s ease;
+  }
+  .deploy-node-btn:hover {
+    background: var(--gold-core);
+    color: #000000;
+    box-shadow: 0 0 16px var(--gold-glow);
+  }
+  .deploy-active {
+    display: inline-flex !important;
+    animation: popDeploy 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes popDeploy {
+    from { opacity: 0; transform: scale(0.7); }
+    to { opacity: 1; transform: scale(1); }
+  }
 
-    .pip {
-      width: 5px;
-      height: 5px;
-      background: #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 0 10px #ffffff;
-    }
+  .copilot-zone {
+    position: fixed;
+    bottom: 42px;
+    right: 42px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
 
-    .axiom {
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.25);
-    }
+  .nova-trigger-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 42px;
+    padding: 0 20px;
+    background: var(--glass-hull);
+    border: 2px solid #000000;
+    border-radius: 4px;
+    color: #ffffff;
+    cursor: crosshair;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    box-shadow: 0 0 20px var(--cyan-glow);
+    transition: all 0.2s ease;
+  }
+  .nova-trigger-btn:hover {
+    background: rgba(98, 182, 255, 0.15);
+    border-color: var(--cyan-core);
+    transform: translateY(-2px);
+  }
 
-    /* Modal for Deploying Custom Node */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.86);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
+  .pulse-core {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan-core);
+    box-shadow: 0 0 10px var(--cyan-core);
+    animation: pulseCore 1.6s infinite ease-in-out;
+  }
+  @keyframes pulseCore {
+    0%, 100% { transform: scale(0.8); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 1; }
+  }
 
-    .modal-backdrop.open {
-      display: flex;
-    }
+  /* Nova Chat Terminal */
+  .nova-drawer {
+    display: none;
+    flex-direction: column;
+    width: 380px;
+    height: 500px;
+    margin-bottom: 14px;
+    background: rgba(8, 11, 16, 0.94);
+    border: 1px solid var(--cyan-core);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 8px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(98, 182, 255, 0.18);
+    overflow: hidden;
+  }
+  .drawer-active {
+    display: flex;
+    animation: drawerOpen 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes drawerOpen {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-    .custom-modal {
-      width: 440px;
-      background: rgba(14, 14, 18, 0.95);
-      border: 1px solid var(--border-light);
-      border-radius: 12px;
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
-      animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+  .drawer-header {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-    @keyframes modalSlide {
-      from { opacity: 0; transform: translateY(20px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
+  .drawer-title {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--cyan-core);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    .modal-title {
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: #ffffff;
-    }
+  .icon-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: crosshair;
+    font-size: 1rem;
+    padding: 4px 6px;
+    transition: color 0.2s;
+  }
+  .icon-btn:hover {
+    color: var(--cyan-core);
+  }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+  .drawer-messages {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
 
-    .input-group label {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 2px;
-      color: rgba(255, 255, 255, 0.45);
-      text-transform: uppercase;
-    }
+  .msg-bubble {
+    max-width: 86%;
+    padding: 8px 12px;
+    border-radius: 4px;
+    word-break: break-word;
+  }
+  .msg-user {
+    align-self: flex-end;
+    background: rgba(98, 182, 255, 0.15);
+    border: 1px solid rgba(98, 182, 255, 0.35);
+    color: #ffffff;
+  }
+  .msg-robo {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+  }
 
-    .input-group input, .input-group select {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      color: #ffffff;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      outline: none;
-      transition: border-color 0.2s ease;
-    }
+  .action-callout {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(229, 192, 123, 0.14);
+    border: 1px solid var(--gold-core);
+    color: var(--gold-core);
+    padding: 4px 8px;
+    border-radius: 2px;
+    margin-top: 6px;
+    font-size: 0.68rem;
+  }
 
-    .input-group input:focus, .input-group select:focus {
-      border-color: rgba(255, 255, 255, 0.6);
-    }
+  .drawer-input-row {
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    gap: 8px;
+  }
 
-    .file-upload-wrap {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+  .drawer-input-row input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 3px;
+    color: #ffffff;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    outline: none;
+  }
+  .drawer-input-row input:focus {
+    border-color: var(--cyan-core);
+  }
 
-    .file-upload-wrap input[type="file"] {
-      display: none;
-    }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-box {
+    width: 420px;
+    background: #090c12;
+    border: 1px solid var(--cyan-core);
+    border-radius: 4px;
+    padding: 24px;
+    box-shadow: 0 0 40px rgba(98, 182, 255, 0.25);
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
 
-    .btn-upload {
-      flex: 1;
-      padding: 9px 12px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 1px;
-      color: rgba(255, 255, 255, 0.7);
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+  .modal-title {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--cyan-core);
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-    .btn-upload:hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: #ffffff;
-    }
+  .modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .modal-field label {
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+  }
+  .modal-field input, .modal-field select, .modal-field textarea {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 3px;
+    color: #ffffff;
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    outline: none;
+  }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
+    border-color: var(--cyan-core);
+  }
 
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .btn-action {
-      padding: 8px 18px;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-cancel {
-      background: transparent;
-      border: 1px solid var(--border-subtle);
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .btn-cancel:hover {
-      color: #ffffff;
-      border-color: rgba(255, 255, 255, 0.4);
-    }
-
-    .btn-save {
-      background: #ffffff;
-      border: 1px solid #ffffff;
-      color: #000000;
-    }
-
-    .btn-save:hover {
-      background: rgba(255, 255, 255, 0.85);
-    }
-
-    @media (max-width: 800px) {
-      .hud { padding: 32px; }
-      .view-frame { inset: 12px; }
-      .axiom { display: none; }
-    }
-  </style>
+  .modal-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+</style>
 </head>
 <body>
 
-  <div class="ambient-glow" id="ambientGlow"></div>
+<!-- Ambient Dynamic Spotlight Layer -->
+<div id="spotlight"></div>
 
-  <div class="view-frame">
-    <div class="corner c-tl"></div>
-    <div class="corner c-tr"></div>
-    <div class="corner c-bl"></div>
-    <div class="corner c-br"></div>
+<!-- Viewport Hairline Frame & Architectural Corner Ticks -->
+<div class="viewport-frame">
+  <div class="corner-tick tick-tl"></div>
+  <div class="corner-tick tick-tr"></div>
+  <div class="corner-tick tick-bl"></div>
+  <div class="corner-tick tick-br"></div>
+  <div class="hud-badge badge-top-left">SYS_CORE // VER 3.8.0-RC</div>
+  <div class="hud-badge badge-bottom-right">GIMBAL MATRIX // ACTIVE</div>
+</div>
+
+<!-- Main High-Density Canvas (Robotic Matrix, 3D Lattice, Reticles) -->
+<canvas id="stage"></canvas>
+
+<div class="telemetry-core">
+  <div class="sanskrit-vector">सर्वं सम्भाव्यते त्वयि</div>
+  <div class="main-chronometer" id="mainClock">00:00:00</div>
+  <div class="robo-status-row">
+    <span class="robo-pip"></span>
+    <span id="subStatus">SERVO LOCKED • UTC+05:30 • SEC 00.000</span>
+  </div>
+</div>
+
+<!-- Top-Right: Astronomical Celestial Roman Dial -->
+<div class="celestial-module">
+  <canvas id="celestialCanvas" width="160" height="160"></canvas>
+  <div class="celestial-meta">
+    <div class="celestial-digital" id="celestialClock">00:00:00</div>
+    <div class="celestial-date" id="celestialDate">MON • 01 JAN</div>
+  </div>
+</div>
+
+<div class="docks-zone">
+  <!-- Dock 1: Personal Tactical Apps -->
+  <div class="dock-card" id="dockApps" data-dock="apps">
+    <div class="dock-tag">APPS</div>
+    <div class="dock-items-wrapper" id="dockItemsApps">
+      <a href="https://www.google.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Google">
+        <svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.2s.7 5.5 1.9 7.9l3.7-2.9z"/><path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"/></svg>
+      </a>
+      <a href="https://www.youtube.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="YouTube">
+        <svg viewBox="0 0 24 24"><path fill="#FF0000" d="M23.5 6.2c-.3-1-.9-1.8-1.9-2.1C19.9 3.5 12 3.5 12 3.5s-7.9 0-9.6.6c-1 .3-1.6 1.1-1.9 2.1C0 7.9 0 12 0 12s0 4.1.5 5.8c.3 1 .9 1.8 1.9 2.1 1.7.6 9.6.6 9.6.6s7.9 0 9.6-.6c1-.3 1.6-1.1 1.9-2.1.5-1.7.5-5.8.5-5.8s0-4.1-.5-5.8z"/><polygon fill="#FFFFFF" points="9.6,15.6 15.8,12 9.6,8.4"/></svg>
+      </a>
+      <a href="https://www.instagram.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Instagram">
+        <svg viewBox="0 0 24 24"><path fill="#E1306C" d="M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4 1 .5.5.7.8 1 1.4.2.4.3 1.1.4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-1 1.4-.5.5-.8.7-1.4 1-.4.2-1.1.3-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-1-.5-.5-.7-.8-1-1.4-.2-.4-.3-1.1-.4-2.2-.1-1.3-.1-1.6-.1-4.8s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 1-1.4.5-.5.8-.7 1.4-1 .4-.2 1.1-.3 2.2-.4 1.2-.1 1.6-.1 4.8-.1M12 0C8.7 0 8.3 0 7.1.1 5.8.1 4.9.3 4.2.6c-.8.3-1.5.7-2.1 1.4C1.4 2.6 1 3.3.7 4.1c-.3.8-.5 1.7-.5 2.9C0 8.3 0 8.7 0 12s0 3.7.1 4.9c.1 1.3.3 2.1.6 2.9.3.8.7 1.5 1.4 2.1.7.7 1.4 1.1 2.1 1.4.8.3 1.7.5 2.9.5 1.3.1 1.7.1 4.9.1s3.7 0 4.9-.1c1.3-.1 2.1-.3 2.9-.6.8-.3 1.5-.7 2.1-1.4.7-.7 1.1-1.4 1.4-2.1.3-.8.5-1.7.5-2.9.1-1.3.1-1.7.1-4.9s0-3.7-.1-4.9c-.1-1.3-.3-2.1-.6-2.9-.3-.8-.7-1.5-1.4-2.1-.7-.7-1.4-1.1-2.1-1.4-.8-.3-1.7-.5-2.9-.5C15.7 0 15.3 0 12 0zm0 5.8c-3.4 0-6.2 2.8-6.2 6.2s2.8 6.2 6.2 6.2 6.2-2.8 6.2-6.2S15.4 5.8 12 5.8zm0 10.2c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm6.4-10.8c-.8 0-1.4.6-1.4 1.4s.6 1.4 1.4 1.4 1.4-.6 1.4-1.4-.6-1.4-1.4-1.4z"/></svg>
+      </a>
+      <a href="https://www.pinterest.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Pinterest">
+        <svg viewBox="0 0 24 24"><path fill="#BD081C" d="M12 0C5.4 0 0 5.4 0 12c0 5.1 3.2 9.4 7.6 11.1-.1-1-.2-2.4 0-3.5.2-1 1.5-6.3 1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.1 2.3-3.1 1.1 0 1.6.8 1.6 1.8 0 1.1-.7 2.7-1.1 4.3-.3 1.3.6 2.3 1.9 2.3 2.3 0 4.1-2.4 4.1-6 0-3.1-2.2-5.3-5.5-5.3-3.8 0-6 2.8-6 5.8 0 1.1.4 2.4 1 3.1.1.1.1.3.1.4-.1.4-.3 1.3-.4 1.5-.1.3-.2.4-.5.2-2-.9-3.2-3.8-3.2-6.1 0-5 3.6-9.6 10.5-9.6 5.6 0 9.9 4 9.9 9.3 0 5.5-3.5 10-8.3 10-1.6 0-3.2-.8-3.7-1.8l-1 3.9c-.4 1.4-1.4 3.1-2.1 4.2 1.4.4 2.8.6 4.3.6 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+      </a>
+      <a href="https://web.snapchat.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Snapchat">
+        <svg viewBox="0 0 24 24"><path fill="#FFFC00" d="M12 0C5.4 0 2.2 4.4 2.2 7.7c0 2 .9 3.5 1.5 4.5.2.3.3.6.1.9-.3.6-1 1.8-1.5 2-.4.1-.7.2-1 .3-.3.1-.6.3-.6.6 0 .5.6.8 1.3.9 1.1.2 2.2-.2 2.9-.6.4-.2.8-.2 1.1.1.9.9 2.6 2.3 6 2.3s5.1-1.4 6-2.3c.3-.3.7-.3 1.1-.1.7.4 1.8.8 2.9.6.7-.1 1.3-.4 1.3-.9 0-.3-.3-.5-.6-.6-.3-.1-.6-.2-1-.3-.5-.2-1.2-1.4-1.5-2-.2-.3-.1-.6.1-.9.6-1 1.5-2.5 1.5-4.5C21.8 4.4 18.6 0 12 0z"/></svg>
+      </a>
+    </div>
+    <button class="deploy-node-btn" title="Deploy Custom Robotic Protocol">+ DEPLOY</button>
   </div>
 
-  <canvas id="stage"></canvas>
+  <!-- Dock 2: Business Core Ops -->
+  <div class="dock-card" id="dockBiz" data-dock="biz">
+    <div class="dock-tag">BIZ_OPS</div>
+    <div class="dock-items-wrapper" id="dockItemsBiz">
+      <a href="https://adsmanager.facebook.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Meta Ads">
+        <svg viewBox="0 0 24 24"><path fill="#0081FB" d="M24 12c0-6.6-5.4-12-12-12S0 5.4 0 12c0 6 4.4 11 10.1 11.9V15.5H7.3V12h2.8V9.3c0-2.8 1.7-4.3 4.2-4.3 1.2 0 2.5.2 2.5.2v2.7h-1.4c-1.4 0-1.8.9-1.8 1.8V12h3.1l-.5 3.5h-2.6v8.4C19.6 23 24 18 24 12z"/></svg>
+      </a>
+      <a href="https://ads.google.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Google Ads">
+        <svg viewBox="0 0 24 24"><path fill="#FBBC04" d="M3.7 13.9L8.6 5.4c1.1-1.9 3.6-2.6 5.5-1.5l4.9 2.8-9.8 17c-1.9 1.1-4.4.4-5.5-1.5L.4 16.8c-.8-1.5-.5-3.3.7-4.4l2.6 1.5z"/><path fill="#4285F4" d="M22.8 16.9l-4.9-2.8 4.9-8.5c1.1-1.9.4-4.4-1.5-5.5-1.9-1.1-4.4-.4-5.5 1.5l-4.9 8.5 4.9 2.8 6.5-11.3 1.5.9c1.9 1.1 2.6 3.6 1.5 5.5l-2.5 4.4z"/><circle fill="#34A853" cx="7.7" cy="18.9" r="3.8"/></svg>
+      </a>
+      <a href="https://analytics.google.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Analytics">
+        <svg viewBox="0 0 24 24"><path fill="#F9AB00" d="M21.5 19.5h-19c-.8 0-1.5-.7-1.5-1.5V6c0-.8.7-1.5 1.5-1.5h19c.8 0 1.5.7 1.5 1.5v12c0 .8-.7 1.5-1.5 1.5z"/><path fill="#E37400" d="M6 16.5H4v-5h2v5zm5 0H9v-9h2v9zm5 0h-2v-13h2v13zm5 0h-2v-7h2v7z"/></svg>
+      </a>
+      <a href="https://dashboard.stripe.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Stripe">
+        <svg viewBox="0 0 24 24"><path fill="#635BFF" d="M13.9 8.7c0-.7.6-1.1 1.6-1.1 1.4 0 3.2.5 4.6 1.2V4.4C18.5 3.8 16.8 3.5 15 3.5c-4.4 0-7.3 2.3-7.3 6.1 0 5.9 8.2 5 8.2 7.5 0 .8-.7 1.2-1.8 1.2-1.6 0-3.7-.7-5.3-1.6v4.5c1.8.8 3.7 1.1 5.5 1.1 4.5 0 7.7-2.2 7.7-6.2-.1-6.3-8.1-5.3-8.1-7.4z"/></svg>
+      </a>
+      <a href="https://admin.shopify.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Shopify">
+        <svg viewBox="0 0 24 24"><path fill="#96BF48" d="M19.3 5.4l-2.2-.6c-.1 0-.1 0-.2.1L15.6 9c-.1.2-.3.2-.4.1-.1 0-.1-.1-.1-.2L13.8 3.7c0-.1-.1-.2-.2-.2h-1.3c-.7 0-1.4.3-1.9.8-.5.5-.8 1.2-.8 1.9 0 .4.1.8.2 1.1l-3 1c-.3.1-.4.4-.3.7l3.6 13.7c.1.3.4.5.7.5h8.9c.3 0 .6-.2.7-.5l3.2-16.1c0-.2-.1-.5-.3-.6z"/></svg>
+      </a>
+    </div>
+    <button class="deploy-node-btn" title="Deploy Custom Robotic Protocol">+ DEPLOY</button>
+  </div>
+</div>
 
-  <div class="hud">
-    <div class="row-top">
-      <div class="docks-cluster">
-        
-        <!-- Dock 1: Personal Apps -->
-        <div class="apps-dock" id="dockApps">
-          <div class="apps-trigger">
-            <svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
-            <span class="apps-label">Apps</span>
-          </div>
-          <div class="apps-list" id="listApps">
-            <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google">
-              <svg viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-              </svg>
-            </a>
-            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="YouTube">
-              <svg viewBox="0 0 24 24">
-                <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
-                <path fill="#FFFFFF" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-            </a>
-            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Instagram">
-              <svg viewBox="0 0 24 24">
-                <defs>
-                  <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#FFDC80"/>
-                    <stop offset="25%" stop-color="#FCAF45"/>
-                    <stop offset="50%" stop-color="#F56040"/>
-                    <stop offset="75%" stop-color="#E1306C"/>
-                    <stop offset="100%" stop-color="#C13584"/>
-                  </linearGradient>
-                </defs>
-                <path fill="url(#ig-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-              </svg>
-            </a>
-            <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Pinterest">
-              <svg viewBox="0 0 24 24">
-                <path fill="#E60023" d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.332 1.357-.053.211-.174.256-.402.154-1.498-.697-2.435-2.887-2.435-4.647 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
-              </svg>
-            </a>
-            <a href="https://web.snapchat.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Snapchat">
-              <svg viewBox="0 0 24 24">
-                <path fill="#FFFC00" d="M12 2.5c-4.2 0-6.8 3.1-6.8 6.2 0 1.4.6 2.8 1.4 3.6.2.2.3.4.2.6-.2.4-.9 1.5-1.2 1.9-.3.4-.2.7.2.7.4 0 1.2-.1 2-.5.3-.1.6 0 .8.2 1.1.9 2.3 1.4 3.4 1.4 1.1 0 2.3-.5 3.4-1.4.2-.2.5-.3.8-.2.8.4 1.6.5 2 .5.4 0 .5-.3.2-.7-.3-.4-1-1.5-1.2-1.9-.1-.2 0-.4.2-.6.8-.8 1.4-2.2 1.4-3.6 0-3.1-2.6-6.2-6.8-6.2z"/>
-                <path fill="#000000" d="M12 3.8c3.4 0 5.4 2.5 5.4 4.9 0 1.2-.5 2.3-1.2 3-.5.5-.6 1.1-.3 1.7.3.5.8 1.3 1 1.6-.6-.1-1.4-.3-2.1-.7-.7-.4-1.5-.3-2.1.2-.8.6-1.7.9-2.7.9s-1.9-.3-2.7-.9c-.6-.5-1.4-.6-2.1-.2-.7.4-1.5.6-2.1.7.2-.3.7-1.1 1-1.6.3-.6.2-1.2-.3-1.7-.7-.7-1.2-1.8-1.2-3 0-2.4 2-4.9 5.4-4.9z"/>
-              </svg>
-            </a>
-            
-            <div class="add-app-btn" id="addAppBtn-apps" data-target="apps" title="Register Custom App">
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dock 2: Business Apps -->
-        <div class="apps-dock" id="dockBiz">
-          <div class="apps-trigger">
-            <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zm-11 0h7v7H3z"/></svg>
-            <span class="apps-label">Business</span>
-          </div>
-          <div class="apps-list" id="listBiz">
-            <a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Meta Ads">
-              <svg viewBox="0 0 24 24"><path fill="#0081FB" d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/></svg>
-            </a>
-            <a href="https://ads.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google Ads">
-              <svg viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M3.88 12.87L9.67 2.84c.71-1.23 2.28-1.65 3.51-.94l2.12 1.22c1.23.71 1.65 2.28.94 3.51L10.45 16.66c-.71 1.23-2.28 1.65-3.51.94l-2.12-1.22c-1.23-.71-1.65-2.28-.94-3.51z"/>
-                <path fill="#FABB05" d="M20.12 16.88L14.33 6.85c-.71-1.23-2.28-1.65-3.51-.94l-2.12 1.22c-1.23.71-1.65 2.28-.94 3.51l5.79 10.03c.71 1.23 2.28 1.65 3.51.94l2.12-1.22c1.23-.71 1.65-2.28.94-3.51z"/>
-                <circle fill="#34A853" cx="5.5" cy="18.5" r="3.5"/>
-              </svg>
-            </a>
-            <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Analytics">
-              <svg viewBox="0 0 24 24">
-                <path fill="#F9AB00" d="M21.5 19.5h-3a1.5 1.5 0 0 1-1.5-1.5v-12a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 23 6v12a1.5 1.5 0 0 1-1.5 1.5z"/>
-                <path fill="#E37400" d="M13.5 19.5h-3A1.5 1.5 0 0 1 9 18v-6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 12v6a1.5 1.5 0 0 1-1.5 1.5z"/>
-                <circle fill="#E37400" cx="4" cy="17" r="2.5"/>
-              </svg>
-            </a>
-            <a href="https://dashboard.stripe.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Stripe">
-              <svg viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C17.652.759 14.85 0 11.802 0 4.887 0 .546 3.633.546 9.878c0 7.747 10.664 6.552 10.664 9.932 0 .979-.89 1.423-2.133 1.423-2.52 0-5.376-1.12-7.228-2.147l-.92 5.568C2.85 25.59 5.892 26.5 8.94 26.5c7.228 0 11.756-3.488 11.756-9.843 0-8.083-10.72-6.704-10.72-9.507z"/></svg>
-            </a>
-            <a href="https://admin.shopify.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Shopify">
-              <svg viewBox="0 0 24 24"><path fill="#95BF47" d="M19.34 6.72c-.11-.3-.39-.48-.68-.45-.29.02-4.08.34-4.08.34s-2.7-2.67-2.98-2.95c-.29-.28-.83-.19-1.04.14l-1.44 2.25-3.02.94c-.38.12-.55.57-.38.93l3.68 12.04 10.37-2.18-2.43-11.06zm-7.79 1.34l1.32-2.07c.8 1.15 1.83 2.19 2.08 2.45l-3.4-.38zm-1.87 2.14l2.79.31-2.16 8.54-1.85-6.05 1.22-.8-.2-.36-.2.36 1.4-2.8z"/></svg>
-            </a>
-            
-            <div class="add-app-btn" id="addAppBtn-biz" data-target="biz" title="Register Custom Business App">
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </div>
-          </div>
-        </div>
-
+<div class="copilot-zone">
+  <div class="nova-drawer" id="novaDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span class="pulse-core"></span>
+        NOVA AI // SYNTHETIC PILOT
       </div>
-
-      <!-- Minimal Ephemeris -->
-      <div class="telemetry-time-block">
-        <div class="time-digits-minimal" id="timeDigitsMinimal">00:00</div>
-        <div class="time-date" id="clockDate">INITIALIZING</div>
+      <div>
+        <button class="icon-btn" id="openSettingsBtn" title="Cognitive Parameters">&#9881;</button>
+        <button class="icon-btn" id="closeDrawerBtn" title="Dismiss">&times;</button>
       </div>
     </div>
-
-    <div class="row-bottom">
-      <div class="telemetry">
-        <span class="pip"></span>
-        <span>QUANTUM EPHEMERIS</span>
-        <span id="sessionTimer" style="color: #ffffff;">00:00:00</span>
+    <div class="drawer-messages" id="chatMsgs">
+      <div class="msg-bubble msg-robo">
+        [INIT_OK] Mecha telemetry online. Gimbals aligned. Say "Open YouTube", "Launch Spotify", or query mecha protocols.
       </div>
-      <div class="axiom">FOCUS IS A VECTOR</div>
+    </div>
+    <div class="drawer-input-row">
+      <input type="text" id="chatInput" placeholder="Command mecha core..." autocomplete="off">
+      <button class="mecha-btn" id="sendChatBtn"><span>EXEC</span></button>
     </div>
   </div>
+  <button class="nova-trigger-btn" id="novaTrigger">
+    <span class="pulse-core"></span>
+    NOVA ROBO-PILOT
+  </button>
+</div>
 
-  <!-- Custom App Registration Modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="custom-modal">
-      <div class="modal-title">Deploy Custom Node</div>
-      
-      <div class="input-group">
-        <label>App Name / Tooltip</label>
-        <input type="text" id="appName" placeholder="e.g., Terminal or Notion" />
-      </div>
-
-      <div class="input-group">
-        <label>Target URL or Windows Protocol</label>
-        <input type="text" id="appUrl" placeholder="e.g., https://notion.so or spotify:" />
-      </div>
-
-      <div class="input-group">
-        <label>Icon Vector / File</label>
-        <div class="file-upload-wrap">
-          <input type="file" id="appIconFile" accept=".svg,image/png,image/jpeg,image/webp" />
-          <button type="button" class="btn-upload" id="triggerFileUpload">Select File (SVG/PNG)</button>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Target Dock</label>
-        <select id="dockTarget">
-          <option value="apps">Apps Shelf</option>
-          <option value="biz">Business Shelf</option>
-        </select>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-action btn-cancel" id="btnCancel">Cancel</button>
-        <button class="btn-action btn-save" id="btnSave">Deploy</button>
-      </div>
+<!-- Custom Node Deployment Modal -->
+<div class="modal-overlay" id="nodeModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>DEPLOY CUSTOM NODE</span>
+      <button class="icon-btn" id="closeNodeModal">&times;</button>
+    </div>
+    <div class="modal-field">
+      <label>DESTINATION DOCK</label>
+      <select id="nodeDockSelect">
+        <option value="apps">Apps Shelf</option>
+        <option value="biz">Business Shelf</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>NODE DESIGNATION</label>
+      <input type="text" id="nodeName" placeholder="Spotify / Terminal / Discord">
+    </div>
+    <div class="modal-field">
+      <label>TARGET URL OR APP PROTOCOL</label>
+      <input type="text" id="nodeUrl" placeholder="https://... or spotify:">
+    </div>
+    <div class="modal-field">
+      <label>CUSTOM ICON (SVG / PNG)</label>
+      <input type="file" id="nodeIconFile" accept="image/*,.svg">
+    </div>
+    <div class="modal-btn-row">
+      <button class="mecha-btn" id="cancelNodeBtn"><span>ABORT</span></button>
+      <button class="mecha-btn" id="saveNodeBtn"><span>COMMIT</span></button>
     </div>
   </div>
+</div>
 
-  <script>
-    const canvas = document.getElementById('stage');
-    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-    const ambientGlow = document.getElementById('ambientGlow');
-    const timeDigitsMinimal = document.getElementById('timeDigitsMinimal');
-    const clockDate = document.getElementById('clockDate');
-    const sessionTimer = document.getElementById('sessionTimer');
-    
-    // Modal Nodes
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const addAppBtnApps = document.getElementById('addAppBtn-apps');
-    const addAppBtnBiz = document.getElementById('addAppBtn-biz');
-    const btnCancel = document.getElementById('btnCancel');
-    const btnSave = document.getElementById('btnSave');
-    const appNameInput = document.getElementById('appName');
-    const appUrlInput = document.getElementById('appUrl');
-    const appIconFileInput = document.getElementById('appIconFile');
-    const triggerFileUpload = document.getElementById('triggerFileUpload');
-    const dockTargetSelect = document.getElementById('dockTarget');
+<!-- Copilot Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>COGNITIVE PARAMETERS</span>
+      <button class="icon-btn" id="closeSettingsModal">&times;</button>
+    </div>
+    <div class="modal-field">
+      <label>GEMINI API KEY</label>
+      <input type="password" id="cfgApiKey" placeholder="AIzaSy...">
+    </div>
+    <div class="modal-field">
+      <label>NEURAL RUNTIME MODEL</label>
+      <input type="text" id="cfgModel" value="gemini-3-flash-preview">
+    </div>
+    <div class="modal-field">
+      <label>DIRECTIVE INSTRUCTION</label>
+      <textarea id="cfgPrompt" rows="3">You are Nova, an ultra-advanced robotic autonomous copilot embedded inside the Aethelgard Mecha-Core live wallpaper. Speak like a concise, hyper-competent synthetic intelligence. If instructed to open an application or site, reply briefly and append the command tag: [ACTION:OPEN_URL|https://full-url-here] or [ACTION:OPEN_URL|protocol:].</textarea>
+    </div>
+    <div class="modal-btn-row">
+      <button class="mecha-btn" id="cancelSettingsBtn"><span>CANCEL</span></button>
+      <button class="mecha-btn" id="saveSettingsBtn"><span>STORE</span></button>
+    </div>
+  </div>
+</div>
 
-    let customIconDataUrl = '';
-    let width = 0;
-    let height = 0;
+<script>
+(() => {
+  'use strict';
 
-    // -------------------------------------------------------------
-    // QUANTUM FIBONACCI 3D CHRONO SPHERE LATTICE
-    // -------------------------------------------------------------
-    const SPHERE_COUNT = 380;
-    const SPHERE_STRIDE = 7; // [ux, uy, uz, digitNoise, phase, speed, focalType]
-    const sphereBuffer = new Float32Array(SPHERE_COUNT * SPHERE_STRIDE);
-    const goldenRatio = (1 + Math.sqrt(5)) / 2;
-
-    for (let i = 0; i < SPHERE_COUNT; i++) {
-      const o = i * SPHERE_STRIDE;
-      const theta = 2 * Math.PI * i / goldenRatio;
-      const phi = Math.acos(1 - 2 * (i + 0.5) / SPHERE_COUNT);
-
-      sphereBuffer[o] = Math.cos(theta) * Math.sin(phi);
-      sphereBuffer[o + 1] = Math.sin(theta) * Math.sin(phi);
-      sphereBuffer[o + 2] = Math.cos(phi);
-      sphereBuffer[o + 3] = Math.floor(Math.random() * 10);
-      sphereBuffer[o + 4] = Math.random() * Math.PI * 2;
-      sphereBuffer[o + 5] = Math.random() * 0.035 + 0.015;
-      sphereBuffer[o + 6] = Math.random() < 0.25 ? 1 : 0;
+  const AudioEngine = (() => {
+    let audioCtx = null;
+    function getContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
     }
 
-    // Shrinking Trail Buffer
-    const TRAIL_MAX = 22;
-    const trail = new Float32Array(TRAIL_MAX * 3);
-    let trailHead = 0;
-
-    // Background Dust Simulation
-    const STAR_COUNT = 60;
-    const starBuffer = new Float32Array(STAR_COUNT * 4); // [x, y, speed, alpha]
-    for (let i = 0; i < STAR_COUNT; i++) {
-      starBuffer[i * 4] = Math.random();
-      starBuffer[i * 4 + 1] = Math.random();
-      starBuffer[i * 4 + 2] = Math.random() * 0.0003 + 0.0001;
-      starBuffer[i * 4 + 3] = Math.random() * 0.4 + 0.1;
+    function chirp(freq = 880, dur = 0.04, type = 'sine') {
+      try {
+        const ctx = getContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.8, ctx.currentTime + dur);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
+      } catch (e) {}
     }
 
-    const mouse = {
-      x: -1000,
-      y: -1000,
-      prevX: -1000,
-      prevY: -1000,
-      rotX: 0,
-      rotY: 0,
-      hasMoved: false
+    function mechanicalClick() {
+      chirp(1400, 0.02, 'triangle');
+    }
+
+    return { chirp, mechanicalClick };
+  })();
+
+  // Attach robotic sound to interactive elements
+  document.querySelectorAll('button, a, input').forEach(el => {
+    el.addEventListener('mouseenter', () => AudioEngine.mechanicalClick());
+  });
+
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+  let width = 0, height = 0;
+
+  function handleResize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', handleResize, { passive: true });
+  handleResize();
+
+  // Pointer lerping and kinematics
+  let mouseX = width / 2, mouseY = height / 2;
+  let targetMouseX = mouseX, targetMouseY = mouseY;
+  let hasPointerMoved = false;
+
+  window.addEventListener('pointermove', (e) => {
+    hasPointerMoved = true;
+    targetMouseX = e.clientX;
+    targetMouseY = e.clientY;
+  }, { passive: true });
+
+  // Fixed Float32Array Ring Buffer for Mouse Laser Trail (Zero-Garbage Collection)
+  const TRAIL_MAX = 36;
+  const trailBuffer = new Float32Array(TRAIL_MAX * 2);
+  let trailHead = 0;
+  for (let i = 0; i < TRAIL_MAX; i++) {
+    trailBuffer[i * 2] = mouseX;
+    trailBuffer[i * 2 + 1] = mouseY;
+  }
+
+  // 3D Fibonacci Quantum Chrono-Sphere Matrix
+  // [x, y, z, baseAngle, pitch, noiseDigit, flickerPhase]
+  const NODE_COUNT = 380;
+  const NODE_STRIDE = 7;
+  const nodeBuffer = new Float32Array(NODE_COUNT * NODE_STRIDE);
+  const SPHERE_RADIUS = 285;
+  const goldenRatio = (1 + Math.sqrt(5)) / 2;
+
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const offset = i * NODE_STRIDE;
+    const theta = 2 * Math.PI * i / goldenRatio;
+    const phi = Math.acos(1 - 2 * (i + 0.5) / NODE_COUNT);
+
+    nodeBuffer[offset] = SPHERE_RADIUS * Math.sin(phi) * Math.cos(theta);     // X
+    nodeBuffer[offset + 1] = SPHERE_RADIUS * Math.sin(phi) * Math.sin(theta); // Y
+    nodeBuffer[offset + 2] = SPHERE_RADIUS * Math.cos(phi);                  // Z
+    nodeBuffer[offset + 3] = theta;
+    nodeBuffer[offset + 4] = phi;
+    nodeBuffer[offset + 5] = Math.floor(Math.random() * 9);                  // Digit
+    nodeBuffer[offset + 6] = Math.random() * Math.PI * 2;                    // Phase
+  }
+
+  // Floating Cybernetic Dust / Energy Grid
+  const DUST_COUNT = 64;
+  const dustBuffer = new Float32Array(DUST_COUNT * 4); // [x, y, speed, alpha]
+  for (let i = 0; i < DUST_COUNT; i++) {
+    dustBuffer[i * 4] = Math.random();
+    dustBuffer[i * 4 + 1] = Math.random();
+    dustBuffer[i * 4 + 2] = Math.random() * 0.0003 + 0.0001;
+    dustBuffer[i * 4 + 3] = Math.random() * 0.4 + 0.1;
+  }
+
+  const celCanvas = document.getElementById('celestialCanvas');
+  const celCtx = celCanvas.getContext('2d');
+  const ROMAN_NUMERALS = ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
+
+  function renderCelestialClock(date, ms) {
+    const w = 160, h = 160;
+    celCtx.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2;
+    const r = 68;
+
+    // Bezel track
+    celCtx.beginPath();
+    celCtx.arc(cx, cy, r, 0, Math.PI * 2);
+    celCtx.strokeStyle = 'rgba(98, 182, 255, 0.22)';
+    celCtx.lineWidth = 1.5;
+    celCtx.stroke();
+
+    // Secondary dashed telemetry ring
+    celCtx.beginPath();
+    celCtx.setLineDash([2, 4]);
+    celCtx.arc(cx, cy, r - 6, 0, Math.PI * 2);
+    celCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    celCtx.stroke();
+    celCtx.setLineDash([]);
+
+    // 12 Quantum Chevrons + Roman Numerals
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * 30) * Math.PI / 180;
+      const x1 = cx + Math.cos(angle) * (r - 1);
+      const y1 = cy + Math.sin(angle) * (r - 1);
+      const x2 = cx + Math.cos(angle) * (r - 7);
+      const y2 = cy + Math.sin(angle) * (r - 7);
+
+      celCtx.beginPath();
+      celCtx.moveTo(x1, y1);
+      celCtx.lineTo(x2, y2);
+      celCtx.strokeStyle = (i % 3 === 0) ? '#62b6ff' : 'rgba(98, 182, 255, 0.4)';
+      celCtx.lineWidth = (i % 3 === 0) ? 2 : 1;
+      celCtx.stroke();
+
+      const textR = r - 18;
+      const tx = cx + Math.sin(angle) * textR;
+      const ty = cy - Math.cos(angle) * textR;
+      celCtx.font = "700 8px 'Cinzel', serif";
+      celCtx.fillStyle = (i % 3 === 0) ? '#e5c07b' : 'rgba(255, 255, 255, 0.55)';
+      celCtx.textAlign = 'center';
+      celCtx.textBaseline = 'middle';
+      celCtx.fillText(ROMAN_NUMERALS[i], tx, ty);
+    }
+
+    const sec = date.getSeconds() + ms / 1000;
+    const min = date.getMinutes() + sec / 60;
+    const hr = (date.getHours() % 12) + min / 60;
+
+    // Hour Vector (Champagne Gold)
+    const hrAngle = (hr * 30 - 90) * Math.PI / 180;
+    celCtx.beginPath();
+    celCtx.moveTo(cx, cy);
+    celCtx.lineTo(cx + Math.cos(hrAngle) * 30, cy + Math.sin(hrAngle) * 30);
+    celCtx.strokeStyle = '#e5c07b';
+    celCtx.lineWidth = 2.4;
+    celCtx.shadowColor = '#e5c07b';
+    celCtx.shadowBlur = 8;
+    celCtx.stroke();
+    celCtx.shadowBlur = 0;
+
+    // Minute Jagged Hand (Quantum Cyan)
+    const minAngle = (min * 6 - 90) * Math.PI / 180;
+    const mLen = 46;
+    celCtx.beginPath();
+    celCtx.moveTo(cx, cy);
+    celCtx.lineTo(cx + Math.cos(minAngle) * (mLen * 0.45) + Math.sin(minAngle) * 3, cy + Math.sin(minAngle) * (mLen * 0.45) - Math.cos(minAngle) * 3);
+    celCtx.lineTo(cx + Math.cos(minAngle) * (mLen * 0.72) - Math.sin(minAngle) * 3, cy + Math.sin(minAngle) * (mLen * 0.72) + Math.cos(minAngle) * 3);
+    celCtx.lineTo(cx + Math.cos(minAngle) * mLen, cy + Math.sin(minAngle) * mLen);
+    celCtx.strokeStyle = '#62b6ff';
+    celCtx.lineWidth = 1.8;
+    celCtx.shadowColor = '#62b6ff';
+    celCtx.shadowBlur = 10;
+    celCtx.stroke();
+    celCtx.shadowBlur = 0;
+
+    // Sub-Second Sweep Arrow
+    const secAngle = (sec * 6 - 90) * Math.PI / 180;
+    celCtx.beginPath();
+    celCtx.moveTo(cx - Math.cos(secAngle) * 9, cy - Math.sin(secAngle) * 9);
+    celCtx.lineTo(cx + Math.cos(secAngle) * 52, cy + Math.sin(secAngle) * 52);
+    celCtx.strokeStyle = '#ffffff';
+    celCtx.lineWidth = 1;
+    celCtx.stroke();
+
+    // Center Pivot Mecha Bolt
+    celCtx.beginPath();
+    celCtx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+    celCtx.fillStyle = '#62b6ff';
+    celCtx.fill();
+  }
+
+  const mainClock = document.getElementById('mainClock');
+  const subStatus = document.getElementById('subStatus');
+  const celestialClock = document.getElementById('celestialClock');
+  const celestialDate = document.getElementById('celestialDate');
+
+  const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+  let rotX = 0;
+  let rotY = 0;
+  let lastTime = performance.now();
+
+  function renderFrame(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
+
+    // Pointer Smooth Lerp
+    mouseX += (targetMouseX - mouseX) * 0.12;
+    mouseY += (targetMouseY - mouseY) * 0.12;
+    document.documentElement.style.setProperty('--mx', `${mouseX}px`);
+    document.documentElement.style.setProperty('--my', `${mouseY}px`);
+
+    // Ring-buffer mouse laser trail
+    trailBuffer[trailHead * 2] = mouseX;
+    trailBuffer[trailHead * 2 + 1] = mouseY;
+    trailHead = (trailHead + 1) % TRAIL_MAX;
+
+    // Clear Screen
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, width, height);
+
+    // 1. Render Mecha Background Dust / Energy Motifs
+    for (let i = 0; i < DUST_COUNT; i++) {
+      const o = i * 4;
+      dustBuffer[o + 1] -= dustBuffer[o + 2];
+      if (dustBuffer[o + 1] < 0) dustBuffer[o + 1] = 1;
+      ctx.fillStyle = `rgba(98, 182, 255, ${dustBuffer[o + 3]})`;
+      ctx.fillRect(dustBuffer[o] * width, dustBuffer[o + 1] * height, 1.4, 1.4);
+    }
+
+    // 2. Render Shrinking Mecha Laser Trail
+    if (hasPointerMoved) {
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      for (let i = 0; i < TRAIL_MAX - 1; i++) {
+        const curr = ((trailHead - i - 1 + TRAIL_MAX) % TRAIL_MAX) * 2;
+        const prev = ((trailHead - i - 2 + TRAIL_MAX) % TRAIL_MAX) * 2;
+        const progress = 1 - (i / TRAIL_MAX);
+        const alpha = Math.max(0, progress * 0.8);
+
+        ctx.beginPath();
+        ctx.moveTo(trailBuffer[curr], trailBuffer[curr + 1]);
+        ctx.lineTo(trailBuffer[prev], trailBuffer[prev + 1]);
+        ctx.strokeStyle = `rgba(98, 182, 255, ${alpha.toFixed(2)})`;
+        ctx.lineWidth = Math.max(0.4, progress * 2.8);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    const cx = width / 2;
+    const cy = height / 2;
+    const date = new Date();
+    const ms = date.getMilliseconds();
+    const sec = date.getSeconds();
+    const min = date.getMinutes();
+    const hr = date.getHours();
+
+    // 3. Robotic Kinetic Gimbal Rings (Direct in Canvas)
+    rotY += dt * 0.35 + ((mouseX / width) - 0.5) * 0.02;
+    rotX += dt * 0.18 + ((mouseY / height) - 0.5) * 0.02;
+
+    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+    const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+
+    // Concentric Servo Reticle Rings
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 218, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Outer counter-rotating robotic degree ticks
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-rotY * 0.5);
+    ctx.strokeStyle = 'rgba(98, 182, 255, 0.25)';
+    ctx.lineWidth = 1.2;
+    for (let deg = 0; deg < 360; deg += 15) {
+      const rad = deg * Math.PI / 180;
+      const len = deg % 45 === 0 ? 9 : 4;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(rad) * 224, Math.sin(rad) * 224);
+      ctx.lineTo(Math.cos(rad) * (224 + len), Math.sin(rad) * (224 + len));
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Dynamic Sub-second Progress Orbital Arc
+    const secRatio = (sec + ms / 1000) / 60;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 218, -Math.PI / 2, -Math.PI / 2 + secRatio * Math.PI * 2);
+    ctx.strokeStyle = 'rgba(98, 182, 255, 0.7)';
+    ctx.lineWidth = 2.4;
+    ctx.shadowColor = 'rgba(98, 182, 255, 0.6)';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    const fov = 420;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const o = i * NODE_STRIDE;
+      const x = nodeBuffer[o];
+      const y = nodeBuffer[o + 1];
+      const z = nodeBuffer[o + 2];
+
+      // Y-axis rotation
+      const x1 = x * cosY + z * sinY;
+      const z1 = -x * sinY + z * cosY;
+
+      // X-axis rotation
+      const y2 = y * cosX - z1 * sinX;
+      const z2 = y * sinX + z1 * cosX;
+
+      // Perspective projection
+      const scale = fov / (fov + z2 + 360);
+      if (scale <= 0) continue;
+
+      const px = cx + x1 * scale;
+      const py = cy + y2 * scale;
+
+      // Depth alpha
+      const depthAlpha = Math.max(0.06, Math.min(0.95, (z2 + SPHERE_RADIUS) / (SPHERE_RADIUS * 2)));
+
+      // Dynamic Node Output: Real digits vs Ambient binary/noise
+      let charVal;
+      let fillCol;
+
+      if (i % 8 === 0) {
+        charVal = String(sec).padStart(2, '0');
+        fillCol = `rgba(98, 182, 255, ${depthAlpha})`;
+        ctx.font = `700 ${Math.max(8, 13 * scale)}px 'JetBrains Mono', monospace`;
+      } else if (i % 12 === 0) {
+        charVal = String(min).padStart(2, '0');
+        fillCol = `rgba(229, 192, 123, ${depthAlpha})`;
+        ctx.font = `700 ${Math.max(8, 12 * scale)}px 'JetBrains Mono', monospace`;
+      } else {
+        charVal = nodeBuffer[o + 5];
+        fillCol = `rgba(255, 255, 255, ${(depthAlpha * 0.45).toFixed(2)})`;
+        ctx.font = `400 ${Math.max(6, 10 * scale)}px 'JetBrains Mono', monospace`;
+      }
+
+      ctx.fillStyle = fillCol;
+      ctx.fillText(charVal, px, py);
+
+      // Micro node anchor tick
+      ctx.beginPath();
+      ctx.arc(px, py + 7 * scale, 0.8 * scale, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(98, 182, 255, ${depthAlpha * 0.6})`;
+      ctx.fill();
+    }
+
+    // 4. Cursor Robotic Target Brackets (Drawn directly in Canvas)
+    if (hasPointerMoved) {
+      ctx.save();
+      const bSize = 14;
+      ctx.strokeStyle = 'rgba(98, 182, 255, 0.4)';
+      ctx.lineWidth = 1.2;
+
+      // Top-left
+      ctx.beginPath();
+      ctx.moveTo(mouseX - bSize, mouseY - bSize / 2);
+      ctx.lineTo(mouseX - bSize, mouseY - bSize);
+      ctx.lineTo(mouseX - bSize / 2, mouseY - bSize);
+      ctx.stroke();
+
+      // Top-right
+      ctx.beginPath();
+      ctx.moveTo(mouseX + bSize / 2, mouseY - bSize);
+      ctx.lineTo(mouseX + bSize, mouseY - bSize);
+      ctx.lineTo(mouseX + bSize, mouseY - bSize / 2);
+      ctx.stroke();
+
+      // Bottom-left
+      ctx.beginPath();
+      ctx.moveTo(mouseX - bSize, mouseY + bSize / 2);
+      ctx.lineTo(mouseX - bSize, mouseY + bSize);
+      ctx.lineTo(mouseX - bSize / 2, mouseY + bSize);
+      ctx.stroke();
+
+      // Bottom-right
+      ctx.beginPath();
+      ctx.moveTo(mouseX + bSize / 2, mouseY + bSize);
+      ctx.lineTo(mouseX + bSize, mouseY + bSize);
+      ctx.lineTo(mouseX + bSize, mouseY + bSize / 2);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Telemetry Sync
+    const timeStr = date.toTimeString().split(' ')[0];
+    mainClock.innerText = timeStr;
+    celestialClock.innerText = timeStr;
+
+    const msPad = String(ms).padStart(3, '0');
+    subStatus.innerText = `SERVO LOCKED • UTC+05:30 • SEC ${String(sec).padStart(2, '0')}.${msPad}`;
+
+    const dName = DAYS[date.getDay()];
+    const mName = MONTHS[date.getMonth()];
+    const dNum = String(date.getDate()).padStart(2, '0');
+    celestialDate.innerText = `${dName} • ${dNum} ${mName}`;
+
+    // Render Celestial Clock
+    renderCelestialClock(date, ms);
+
+    requestAnimationFrame(renderFrame);
+  }
+  requestAnimationFrame(renderFrame);
+
+  function initDockShake(dockEl) {
+    let shakes = 0;
+    let lastDir = 0;
+    let lastX = 0;
+    let timer = null;
+    const deployBtn = dockEl.querySelector('.deploy-node-btn');
+
+    dockEl.addEventListener('mousemove', (e) => {
+      const dx = e.clientX - lastX;
+      if (Math.abs(dx) > 24) {
+        const dir = Math.sign(dx);
+        if (dir !== lastDir) {
+          shakes++;
+          lastDir = dir;
+          clearTimeout(timer);
+          timer = setTimeout(() => { shakes = 0; }, 750);
+
+          if (shakes >= 4) {
+            deployBtn.classList.add('deploy-active');
+            AudioEngine.chirp(1600, 0.08, 'sawtooth');
+            shakes = 0;
+          }
+        }
+      }
+      lastX = e.clientX;
+    });
+  }
+
+  const dockApps = document.getElementById('dockApps');
+  const dockBiz = document.getElementById('dockBiz');
+  initDockShake(dockApps);
+  initDockShake(dockBiz);
+
+  // Custom Node Modal Logic
+  const nodeModal = document.getElementById('nodeModal');
+  const nodeDockSelect = document.getElementById('nodeDockSelect');
+  const nodeNameInput = document.getElementById('nodeName');
+  const nodeUrlInput = document.getElementById('nodeUrl');
+  const nodeIconFileInput = document.getElementById('nodeIconFile');
+
+  document.querySelectorAll('.deploy-node-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const parentDock = e.target.closest('.dock-card').dataset.dock;
+      nodeDockSelect.value = parentDock;
+      nodeModal.style.display = 'flex';
+      nodeNameInput.focus();
+    });
+  });
+
+  const hideNodeModal = () => { nodeModal.style.display = 'none'; };
+  document.getElementById('closeNodeModal').addEventListener('click', hideNodeModal);
+  document.getElementById('cancelNodeBtn').addEventListener('click', hideNodeModal);
+
+  function createMechaAppButton(node) {
+    const a = document.createElement('a');
+    a.className = 'mecha-btn mecha-tooltip';
+    a.href = node.url;
+    a.target = '_blank';
+    a.dataset.tooltip = node.name;
+
+    if (node.icon) {
+      const img = document.createElement('img');
+      img.src = node.icon;
+      img.alt = node.name;
+      a.appendChild(img);
+    } else {
+      const span = document.createElement('span');
+      span.innerText = node.name.substring(0, 3).toUpperCase();
+      a.appendChild(span);
+    }
+    return a;
+  }
+
+  function loadCustomNodes() {
+    try {
+      const nodes = JSON.parse(localStorage.getItem('monolith_robo_nodes') || '[]');
+      nodes.forEach(node => {
+        const wrapper = node.dock === 'biz'
+          ? document.getElementById('dockItemsBiz')
+          : document.getElementById('dockItemsApps');
+        wrapper.appendChild(createMechaAppButton(node));
+      });
+    } catch (e) {}
+  }
+  loadCustomNodes();
+
+  document.getElementById('saveNodeBtn').addEventListener('click', () => {
+    const name = nodeNameInput.value.trim();
+    const url = nodeUrlInput.value.trim();
+    const dock = nodeDockSelect.value;
+    if (!name || !url) return;
+
+    const commitNode = (iconData) => {
+      const nodeObj = { id: Date.now(), name, url, dock, icon: iconData };
+      const current = JSON.parse(localStorage.getItem('monolith_robo_nodes') || '[]');
+      current.push(nodeObj);
+      localStorage.setItem('monolith_robo_nodes', JSON.stringify(current));
+
+      const wrapper = dock === 'biz'
+        ? document.getElementById('dockItemsBiz')
+        : document.getElementById('dockItemsApps');
+      wrapper.appendChild(createMechaAppButton(nodeObj));
+
+      nodeNameInput.value = '';
+      nodeUrlInput.value = '';
+      nodeIconFileInput.value = '';
+      hideNodeModal();
+      AudioEngine.chirp(1200, 0.05, 'sine');
     };
 
-    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    const startTime = performance.now();
+    const file = nodeIconFileInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => commitNode(e.target.result);
+      reader.readAsDataURL(file);
+    } else {
+      commitNode(null);
+    }
+  });
 
-    // -------------------------------------------------------------
-    // LOCAL STORAGE CUSTOM NODES MANAGEMENT
-    // -------------------------------------------------------------
-    function loadSavedApps() {
-      try {
-        const saved = JSON.parse(localStorage.getItem('aethelgard_nodes_v2') || '[]');
-        saved.forEach(app => renderCustomApp(app));
-      } catch(e) {}
+  const novaDrawer = document.getElementById('novaDrawer');
+  const novaTrigger = document.getElementById('novaTrigger');
+  const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+  const chatMsgs = document.getElementById('chatMsgs');
+  const chatInput = document.getElementById('chatInput');
+  const sendChatBtn = document.getElementById('sendChatBtn');
+
+  novaTrigger.addEventListener('click', () => {
+    novaDrawer.classList.toggle('drawer-active');
+    if (novaDrawer.classList.contains('drawer-active')) {
+      chatInput.focus();
+      AudioEngine.chirp(1000, 0.04, 'sine');
+    }
+  });
+  closeDrawerBtn.addEventListener('click', () => novaDrawer.classList.remove('drawer-active'));
+
+  // Settings Modal
+  const settingsModal = document.getElementById('settingsModal');
+  const openSettingsBtn = document.getElementById('openSettingsBtn');
+  const closeSettingsModal = document.getElementById('closeSettingsModal');
+  const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+  const cfgApiKey = document.getElementById('cfgApiKey');
+  const cfgModel = document.getElementById('cfgModel');
+  const cfgPrompt = document.getElementById('cfgPrompt');
+
+  openSettingsBtn.addEventListener('click', () => {
+    cfgApiKey.value = localStorage.getItem('monolith_gemini_key') || '';
+    cfgModel.value = localStorage.getItem('monolith_gemini_model') || 'gemini-3-flash-preview';
+    cfgPrompt.value = localStorage.getItem('monolith_gemini_prompt') || cfgPrompt.defaultValue;
+    settingsModal.style.display = 'flex';
+  });
+
+  const hideSettings = () => { settingsModal.style.display = 'none'; };
+  closeSettingsModal.addEventListener('click', hideSettings);
+  cancelSettingsBtn.addEventListener('click', hideSettings);
+
+  saveSettingsBtn.addEventListener('click', () => {
+    localStorage.setItem('monolith_gemini_key', cfgApiKey.value.trim());
+    localStorage.setItem('monolith_gemini_model', cfgModel.value.trim() || 'gemini-3-flash-preview');
+    localStorage.setItem('monolith_gemini_prompt', cfgPrompt.value.trim());
+    hideSettings();
+    AudioEngine.chirp(1100, 0.04, 'sine');
+  });
+
+  function appendChatBubble(role, text, actionUrl = null) {
+    const bubble = document.createElement('div');
+    bubble.className = `msg-bubble msg-${role}`;
+    bubble.innerText = text;
+
+    if (actionUrl) {
+      const callout = document.createElement('div');
+      callout.className = 'action-callout';
+      callout.innerHTML = `&#9654; EXECUTED: ${actionUrl}`;
+      bubble.appendChild(callout);
     }
 
-    function renderCustomApp(app) {
-      const isBiz = app.dock === 'biz';
-      const targetList = isBiz 
-        ? document.getElementById('listBiz')
-        : document.getElementById('listApps');
-      const addBtn = isBiz ? addAppBtnBiz : addAppBtnApps;
+    chatMsgs.appendChild(bubble);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  }
 
-      const a = document.createElement('a');
-      a.href = app.url;
-      a.className = 'app-btn';
-      a.dataset.tooltip = app.name;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
+  async function handleChatExecution() {
+    const query = chatInput.value.trim();
+    if (!query) return;
+    appendChatBubble('user', query);
+    chatInput.value = '';
 
-      if (app.icon && (app.icon.startsWith('data:image') || app.icon.startsWith('http'))) {
-        const img = document.createElement('img');
-        img.src = app.icon;
-        a.appendChild(img);
-      } else {
-        a.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>`;
-      }
+    const apiKey = localStorage.getItem('monolith_gemini_key');
+    const model = localStorage.getItem('monolith_gemini_model') || 'gemini-3-flash-preview';
+    const systemPrompt = localStorage.getItem('monolith_gemini_prompt') || cfgPrompt.defaultValue;
 
-      targetList.insertBefore(a, addBtn);
+    // Offline heuristic parser when no API key is provided
+    if (!apiKey) {
+      setTimeout(() => {
+        const lower = query.toLowerCase();
+        let targetUrl = null;
+        let response = "[ROBO_DIRECTIVE] Executing command in local mode.";
+
+        if (lower.includes('spotify')) {
+          targetUrl = 'spotify:';
+          response = "Dispatching Spotify desktop protocol...";
+        } else if (lower.includes('youtube')) {
+          targetUrl = 'https://www.youtube.com';
+          response = "Deploying YouTube stream...";
+        } else if (lower.includes('google')) {
+          targetUrl = 'https://www.google.com';
+          response = "Opening Google uplink...";
+        } else {
+          response = "Autonomous mecha copilot operational. Configure your Gemini API key in Settings (gear icon) for unconstrained cognitive operations.";
+        }
+
+        if (targetUrl) {
+          window.open(targetUrl, '_blank');
+          AudioEngine.chirp(1500, 0.06, 'sawtooth');
+        }
+        appendChatBubble('robo', response, targetUrl);
+      }, 250);
+      return;
     }
 
-    function saveCustomApp(app) {
-      try {
-        const saved = JSON.parse(localStorage.getItem('aethelgard_nodes_v2') || '[]');
-        saved.push(app);
-        localStorage.setItem('aethelgard_nodes_v2', JSON.stringify(saved));
-        renderCustomApp(app);
-      } catch(e) {}
-    }
+    // Call Gemini Endpoint
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{ role: "user", parts: [{ text: query }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] }
+      };
 
-    // Modal Interaction
-    triggerFileUpload.addEventListener('click', () => appIconFileInput.click());
-    appIconFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        triggerFileUpload.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          customIconDataUrl = ev.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    function openModalForDock(target) {
-      dockTargetSelect.value = target;
-      modalBackdrop.classList.add('open');
-      appNameInput.focus();
-    }
-
-    addAppBtnApps.addEventListener('click', () => openModalForDock('apps'));
-    addAppBtnBiz.addEventListener('click', () => openModalForDock('biz'));
-
-    btnCancel.addEventListener('click', () => {
-      modalBackdrop.classList.remove('open');
-      customIconDataUrl = '';
-      appNameInput.value = '';
-      appUrlInput.value = '';
-      triggerFileUpload.textContent = 'Select File (SVG/PNG)';
-    });
-
-    btnSave.addEventListener('click', () => {
-      const name = appNameInput.value.trim();
-      const url = appUrlInput.value.trim();
-      if (!name || !url) return;
-
-      saveCustomApp({
-        name,
-        url,
-        icon: customIconDataUrl,
-        dock: dockTargetSelect.value
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
 
-      btnCancel.click();
-    });
+      if (!resp.ok) throw new Error(`HTTP Error ${resp.status}`);
+      const data = await resp.json();
+      const output = data.candidates?.[0]?.content?.parts?.[0]?.text || "[NO RESPONSE RECEIVED]";
 
-    // -------------------------------------------------------------
-    // SHAKE DETECTION FOR BOTH APPS AND BUSINESS DOCKS
-    // -------------------------------------------------------------
-    function setupDockShakeDetection(dockEl, addBtnEl) {
-      let shakeCount = 0;
-      let lastDir = 0;
-      let lastTime = 0;
+      const actionRegex = /\[ACTION:OPEN_URL\|(.*?)\]/;
+      const match = output.match(actionRegex);
+      const cleanText = output.replace(actionRegex, '').trim();
+      let triggeredUrl = null;
 
-      dockEl.addEventListener('mousemove', (e) => {
-        const dx = e.movementX;
-        const now = performance.now();
-
-        if (Math.abs(dx) > 10) {
-          const dir = Math.sign(dx);
-          if (dir !== lastDir && (now - lastTime) < 320) {
-            shakeCount++;
-            if (shakeCount >= 4) {
-              addBtnEl.classList.add('visible');
-            }
-          }
-          lastDir = dir;
-          lastTime = now;
-        }
-      });
-    }
-
-    setupDockShakeDetection(document.getElementById('dockApps'), addAppBtnApps);
-    setupDockShakeDetection(document.getElementById('dockBiz'), addAppBtnBiz);
-
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-
-    function addTrailPoint(x, y) {
-      const o = trailHead * 3;
-      trail[o] = x;
-      trail[o + 1] = y;
-      trail[o + 2] = 1.0;
-      trailHead = (trailHead + 1) % TRAIL_MAX;
-    }
-
-    let rotY = 0;
-    let rotX = 0;
-
-    function render(now) {
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, width, height);
-
-      // System Clocks
-      const d = new Date();
-      const h = String(d.getHours()).padStart(2, '0');
-      const m = String(d.getMinutes()).padStart(2, '0');
-      const s = String(d.getSeconds()).padStart(2, '0');
-      const ms = d.getMilliseconds();
-      
-      timeDigitsMinimal.textContent = `${h}:${m}`;
-      clockDate.textContent = `${days[d.getDay()]} / ${String(d.getDate()).padStart(2, '0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
-
-      const secElapsed = Math.floor((now - startTime) / 1000);
-      const sh = String(Math.floor(secElapsed / 3600)).padStart(2, '0');
-      const sm = String(Math.floor((secElapsed % 3600) / 60)).padStart(2, '0');
-      const ss = String(secElapsed % 60).padStart(2, '0');
-      sessionTimer.textContent = `${sh}:${sm}:${ss}`;
-
-      // 1. Render Background Dust Particles
-      for (let i = 0; i < STAR_COUNT; i++) {
-        const o = i * 4;
-        starBuffer[o + 1] -= starBuffer[o + 2];
-        if (starBuffer[o + 1] < 0) starBuffer[o + 1] = 1;
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${starBuffer[o + 3]})`;
-        ctx.fillRect(starBuffer[o] * width, starBuffer[o + 1] * height, 1.2, 1.2);
+      if (match && match[1]) {
+        triggeredUrl = match[1].trim();
+        window.open(triggeredUrl, '_blank');
+        AudioEngine.chirp(1500, 0.06, 'sawtooth');
       }
 
-      // -------------------------------------------------------------
-      // 3D CHRONO SPHERE GEOMETRIC MATRIX
-      // -------------------------------------------------------------
-      const cx = width / 2;
-      const cy = height / 2;
-      const sphereRadius = Math.min(width, height) * 0.285;
-
-      rotY += 0.0035;
-      rotX += 0.0018;
-
-      const cosY = Math.cos(rotY);
-      const sinY = Math.sin(rotY);
-      const cosX = Math.cos(rotX);
-      const sinX = Math.sin(rotX);
-
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      for (let i = 0; i < SPHERE_COUNT; i++) {
-        const o = i * SPHERE_STRIDE;
-        const x = sphereBuffer[o];
-        const y = sphereBuffer[o + 1];
-        const z = sphereBuffer[o + 2];
-
-        // 3D Rotation Transformations
-        const x1 = x * cosY - z * sinY;
-        const z1 = z * cosY + x * sinY;
-        const y2 = y * cosX - z1 * sinX;
-        const z2 = z1 * cosX + y * sinX;
-
-        // Perspective
-        const fov = 2.4;
-        const scale = fov / (fov + z2);
-        const projX = cx + x1 * sphereRadius * scale;
-        const projY = cy + y2 * sphereRadius * scale;
-
-        const depthAlpha = Math.max((z2 + 1) / 2, 0.06);
-        sphereBuffer[o + 4] += sphereBuffer[o + 5];
-        const twinkle = Math.sin(sphereBuffer[o + 4]) * 0.3 + 0.7;
-        const finalAlpha = depthAlpha * twinkle;
-
-        // Number assignment
-        let displayChar;
-        if (i % 6 === 0) displayChar = s[0];
-        else if (i % 6 === 1) displayChar = s[1];
-        else if (i % 6 === 2) displayChar = m[0];
-        else if (i % 6 === 3) displayChar = m[1];
-        else displayChar = sphereBuffer[o + 3];
-
-        const fontSize = Math.max(Math.floor(13 * scale), 7);
-        ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
-        ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha.toFixed(2)})`;
-        ctx.fillText(displayChar, projX, projY);
-      }
-      ctx.restore();
-
-      // -------------------------------------------------------------
-      // CENTER ATTENTION CORE: SANSKRIT VECTOR + CHRONOMETER
-      // -------------------------------------------------------------
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      // 1. Orbital Chrono Ring (Real Seconds Gauge)
-      const secProgress = (d.getSeconds() + ms / 1000) / 60;
-      ctx.beginPath();
-      ctx.arc(cx, cy, sphereRadius * 0.54, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * secProgress);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-
-      // Outer Ticked Micro Boundary
-      ctx.beginPath();
-      ctx.arc(cx, cy, sphereRadius * 0.58, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // 2. Centerpiece Top: Sanskrit High Consciousness Vector
-      ctx.font = '600 clamp(0.75rem, 1.4vw, 1.05rem) "Cinzel", serif';
-      ctx.fillStyle = 'rgba(229, 192, 123, 0.9)'; // Subtle Champagne Gold
-      ctx.shadowColor = 'rgba(229, 192, 123, 0.5)';
-      ctx.shadowBlur = 14;
-      ctx.fillText('सर्वं सम्भाव्यते त्वयि', cx, cy - 42);
-
-      // 3. Centerpiece Core: High Density Digits
-      ctx.font = '800 clamp(2.6rem, 5.8vw, 4.4rem) "JetBrains Mono", monospace';
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
-      ctx.shadowBlur = 22;
-      ctx.fillText(`${h}:${m}:${s}`, cx, cy + 2);
-
-      // 4. Centerpiece Bottom: Precision Chrono Sub-telemetry
-      ctx.font = '500 0.68rem "JetBrains Mono", monospace';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
-      ctx.shadowBlur = 0;
-      ctx.letterSpacing = "4px";
-      ctx.fillText(`UTC+05:30 • SEC ${(ms).toString().padStart(3, '0')}`, cx, cy + 44);
-      ctx.restore();
-
-      // -------------------------------------------------------------
-      // MAGICAL SHRINKING LINE RIBBON TRAIL
-      // -------------------------------------------------------------
-      if (mouse.hasMoved) {
-        ctx.save();
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        for (let i = 0; i < TRAIL_MAX - 1; i++) {
-          const idxA = ((trailHead - i - 1 + TRAIL_MAX) % TRAIL_MAX) * 3;
-          const idxB = ((trailHead - i - 2 + TRAIL_MAX) % TRAIL_MAX) * 3;
-
-          const lifeA = trail[idxA + 2];
-          const lifeB = trail[idxB + 2];
-
-          if (lifeA > 0.05 && lifeB > 0.05) {
-            const progress = 1 - (i / TRAIL_MAX);
-            const lineWidth = Math.max(progress * 3.4, 0.4);
-            const alpha = Math.min(lifeA * progress * 0.85, 0.9);
-
-            ctx.beginPath();
-            ctx.moveTo(trail[idxA], trail[idxA + 1]);
-            ctx.lineTo(trail[idxB], trail[idxB + 1]);
-
-            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
-            ctx.lineWidth = lineWidth;
-            ctx.stroke();
-          }
-          trail[idxA + 2] *= 0.88;
-        }
-        ctx.restore();
-      }
-
-      requestAnimationFrame(render);
+      appendChatBubble('robo', cleanText, triggeredUrl);
+    } catch (err) {
+      appendChatBubble('robo', `[TELEMETRY FAULT] Communication breakdown: ${err.message}`);
     }
+  }
 
-    // Hardware Event Handlers
-    window.addEventListener('resize', resize, { passive: true });
+  sendChatBtn.addEventListener('click', handleChatExecution);
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleChatExecution();
+  });
 
-    window.addEventListener('mousemove', (e) => {
-      mouse.hasMoved = true;
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-
-      ambientGlow.style.setProperty('--mx', `${e.clientX}px`);
-      ambientGlow.style.setProperty('--my', `${e.clientY}px`);
-
-      // Gentle interactive 3D rotation bias
-      rotY += (e.clientX - mouse.prevX) * 0.00045;
-      rotX += (e.clientY - mouse.prevY) * 0.00045;
-
-      mouse.prevX = e.clientX;
-      mouse.prevY = e.clientY;
-
-      addTrailPoint(e.clientX, e.clientY);
-    }, { passive: true });
-
-    window.addEventListener('mouseleave', () => {
-      mouse.hasMoved = false;
-      ambientGlow.style.setProperty('--mx', `-500px`);
-      ambientGlow.style.setProperty('--my', `-500px`);
-    });
-
-    resize();
-    loadSavedApps();
-    requestAnimationFrame(render);
-  </script>
+})();
+</script>
 </body>
 </html>
