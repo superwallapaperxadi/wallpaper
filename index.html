@@ -1,1503 +1,1645 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aethelgard Mecha-Core // Autonomous Robotic Chrono-Matrix</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=JetBrains+Mono:wght@200;400;600;800&family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg-void: #000000;
-    --cyan-core: #62b6ff;
-    --cyan-glow: rgba(98, 182, 255, 0.45);
-    --gold-core: #e5c07b;
-    --gold-glow: rgba(229, 192, 123, 0.38);
-    --robo-green: #39ff14;
-    --robo-amber: #ffaa00;
-    --glass-hull: rgba(10, 14, 20, 0.78);
-    --glass-border: rgba(98, 182, 255, 0.16);
-    --glass-blur: blur(20px);
-    --btn-metal: #e8e8e8;
-    --font-mono: 'JetBrains Mono', monospace;
-    --font-serif: 'Cinzel', serif;
-    --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    --mx: 50vw;
-    --my: 50vh;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aethelgard Monolith Core — Precision Chrono Matrix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.2);
+      --glass-surface: rgba(10, 10, 14, 0.76);
+      --glass-surface-dense: rgba(12, 12, 16, 0.96);
+      --accent-blue: #38bdf8;
+    }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-    -webkit-user-select: none;
-  }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
-  body, html {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background: var(--bg-void);
-    font-family: var(--font-sans);
-    color: #ffffff;
-    cursor: crosshair;
-  }
+    body {
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: var(--font-main);
+      color: #ffffff;
+      position: relative;
+    }
 
-  #spotlight {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background: radial-gradient(circle 650px at var(--mx) var(--my), rgba(98, 182, 255, 0.08), transparent 82%);
-  }
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(circle 650px at var(--mx, -500px) var(--my, -500px), rgba(255, 255, 255, 0.04), transparent 75%);
+    }
 
-  /* Architectural Hairline Mecha Frame */
-  .viewport-frame {
-    position: fixed;
-    inset: 22px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    pointer-events: none;
-    z-index: 10;
-  }
+    canvas#stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
 
-  .corner-tick {
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-color: var(--cyan-core);
-    border-style: solid;
-    opacity: 0.85;
-  }
-  .tick-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-  .tick-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
-  .tick-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
-  .tick-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+    .view-frame {
+      position: fixed;
+      inset: 20px;
+      border: 1px solid var(--border-subtle);
+      pointer-events: none;
+      z-index: 5;
+    }
 
-  /* Architectural Telemetry Badges */
-  .hud-badge {
-    position: absolute;
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.45);
-    text-transform: uppercase;
-  }
-  .badge-top-left { top: -10px; left: 28px; background: #000; padding: 0 6px; }
-  .badge-bottom-right { bottom: -10px; right: 28px; background: #000; padding: 0 6px; }
+    .corner {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    .c-tl { top: -1px; left: -1px; border-top: 1.5px solid; border-left: 1.5px solid; }
+    .c-tr { top: -1px; right: -1px; border-top: 1.5px solid; border-right: 1.5px solid; }
+    .c-bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+    .c-br { bottom: -1px; right: -1px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
 
-  /* Main High-Performance Canvas */
-  #stage {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    display: block;
-  }
+    .hud {
+      position: absolute;
+      inset: 0;
+      padding: 38px 46px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 10;
+    }
 
-  .telemetry-core {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 4;
-    text-align: center;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      position: relative;
+    }
 
-  .sanskrit-vector {
-    font-family: var(--font-serif);
-    font-size: clamp(0.9rem, 1.8vw, 1.25rem);
-    font-weight: 700;
-    letter-spacing: 0.35em;
-    color: var(--gold-core);
-    text-shadow: 0 0 16px var(--gold-glow), 0 0 35px rgba(229, 192, 123, 0.2);
-    margin-bottom: 6px;
-    opacity: 0.95;
-  }
+    .left-cluster {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+      max-width: calc(100vw - 320px);
+      z-index: 20;
+    }
 
-  .main-chronometer {
-    font-family: var(--font-mono);
-    font-size: clamp(3rem, 6.8vw, 5.2rem);
-    font-weight: 800;
-    letter-spacing: 0.07em;
-    color: #ffffff;
-    text-shadow: 0 0 28px rgba(255, 255, 255, 0.85), 0 0 60px var(--cyan-glow);
-    line-height: 1;
-  }
+    .docks-cluster {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-  .robo-status-row {
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--cyan-core);
-    text-shadow: 0 0 10px var(--cyan-glow);
-  }
+    .apps-dock {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px 4px 6px;
+      background: var(--glass-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 40px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+      width: fit-content;
+      max-width: 100%;
+    }
 
-  .robo-pip {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--robo-green);
-    box-shadow: 0 0 8px var(--robo-green);
-    animation: blip 1.4s ease-in-out infinite alternate;
-  }
-  @keyframes blip {
-    0% { opacity: 0.3; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1.25); }
-  }
+    .apps-dock:hover {
+      background: rgba(18, 18, 22, 0.94);
+      border-color: var(--border-light);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
 
-  .celestial-module {
-    position: fixed;
-    top: 42px;
-    right: 42px;
-    z-index: 12;
-    background: var(--glass-hull);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    padding: 10px 18px 10px 12px;
-    border-radius: 48px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75);
-    border-left: 2px solid var(--cyan-core);
-  }
+    .apps-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
-  #celestialCanvas {
-    width: 80px;
-    height: 80px;
-    display: block;
-  }
+    .apps-trigger svg {
+      width: 13px;
+      height: 13px;
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.65);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s ease;
+    }
 
-  .celestial-meta {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+    .apps-dock:hover .apps-trigger svg {
+      transform: rotate(90deg);
+      stroke: #ffffff;
+    }
 
-  .celestial-digital {
-    font-family: var(--font-mono);
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px var(--cyan-glow);
-  }
+    .apps-label {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      transition: color 0.2s ease;
+    }
 
-  .celestial-date {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    letter-spacing: 3px;
-    color: var(--gold-core);
-    text-transform: uppercase;
-    margin-top: 3px;
-  }
+    .apps-dock:hover .apps-label {
+      color: #ffffff;
+    }
 
-  .docks-zone {
-    position: fixed;
-    top: 42px;
-    left: 42px;
-    z-index: 12;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+    .apps-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 0;
+      opacity: 0;
+      pointer-events: none;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-right: 4px;
+      transition: max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.28s ease,
+                  margin-left 0.3s ease;
+    }
 
-  .dock-card {
-    background: var(--glass-hull);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    padding: 6px 12px 6px 10px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-    transition: border-color 0.25s, box-shadow 0.25s;
-    border-left: 2px solid var(--gold-core);
-  }
+    .apps-list::-webkit-scrollbar {
+      display: none;
+    }
 
-  .dock-card:hover {
-    border-color: rgba(98, 182, 255, 0.45);
-    box-shadow: 0 12px 38px rgba(98, 182, 255, 0.15);
-  }
+    .apps-dock:hover .apps-list {
+      max-width: min(680px, calc(100vw - 420px));
+      opacity: 1;
+      pointer-events: auto;
+      margin-left: 6px;
+    }
 
-  .dock-tag {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.5);
-    padding-right: 6px;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-  }
+    .app-btn {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
 
-  .dock-items-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+    .app-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      transition: transform 0.25s ease;
+    }
 
-  /* Mecha Bevel Button styling */
-  button.mecha-btn, a.mecha-btn {
-    position: relative;
-    height: 38px;
-    padding: 0 14px;
-    border: 2px solid #000000;
-    background: var(--btn-metal);
-    user-select: none;
-    white-space: nowrap;
-    transition: all 0.06s linear;
-    font-family: var(--font-mono);
-    color: #000000;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    cursor: crosshair;
-    outline: none;
-  }
+    .app-btn svg {
+      width: 15px;
+      height: 15px;
+      object-fit: contain;
+    }
 
-  button.mecha-btn:before, button.mecha-btn:after,
-  a.mecha-btn:before, a.mecha-btn:after {
-    content: "";
-    position: absolute;
-    background: var(--btn-metal);
-    transition: all 0.2s linear;
-    pointer-events: none;
-  }
+    .app-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px) scale(1.1);
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+    }
 
-  button.mecha-btn:before, a.mecha-btn:before {
-    width: calc(100% + 6px);
-    height: calc(100% - 14px);
-    top: 7px;
-    left: -3px;
-  }
+    .app-btn:hover img {
+      transform: scale(1.12);
+    }
 
-  button.mecha-btn:after, a.mecha-btn:after {
-    width: calc(100% - 14px);
-    height: calc(100% + 6px);
-    top: -3px;
-    left: 7px;
-  }
+    .app-btn:active {
+      transform: scale(0.92);
+    }
 
-  button.mecha-btn:hover, a.mecha-btn:hover {
-    cursor: crosshair;
-    background: #ffffff;
-    box-shadow: 0 0 16px var(--cyan-glow);
-  }
+    .app-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #ffffff;
+      background: rgba(10, 10, 14, 0.96);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 400;
+    }
 
-  button.mecha-btn:active, a.mecha-btn:active {
-    transform: scale(0.95);
-  }
+    .app-btn:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
-  button.mecha-btn:hover:before, a.mecha-btn:hover:before {
-    height: calc(100% - 24px);
-    top: 12px;
-  }
+    .add-app-btn {
+      width: 32px;
+      height: 32px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px dashed rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
-  button.mecha-btn:hover:after, a.mecha-btn:hover:after {
-    width: calc(100% - 24px);
-    left: 12px;
-  }
+    .add-app-btn.visible {
+      display: flex;
+    }
 
-  .mecha-btn span, .mecha-btn svg, .mecha-btn img {
-    font-size: 0.72rem;
-    z-index: 3;
-    position: relative;
-    font-weight: 700;
-    display: block;
-  }
+    .add-app-btn:hover {
+      background: #ffffff;
+      border-color: #ffffff;
+      transform: scale(1.08);
+    }
 
-  .mecha-btn svg, .mecha-btn img {
-    width: 16px;
-    height: 16px;
-    object-fit: contain;
-  }
+    .add-app-btn:hover svg {
+      stroke: #000000;
+    }
 
-  .mecha-btn::after {
-    z-index: 1;
-  }
+    .add-app-btn svg {
+      width: 13px;
+      height: 13px;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+    }
 
-  /* Cyber Tooltip */
-  .mecha-tooltip {
-    position: relative;
-  }
-  .mecha-tooltip::before {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: -32px;
-    left: 50%;
-    transform: translateX(-50%) scale(0.85);
-    background: #090c12;
-    border: 1px solid var(--cyan-core);
-    color: #ffffff;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    padding: 3px 8px;
-    border-radius: 2px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 40;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.8);
-  }
-  .mecha-tooltip:hover::before {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-  }
+    .search-cluster {
+      display: flex;
+      align-items: center;
+      position: relative;
+      width: 360px;
+      max-width: 100%;
+      margin-top: 4px;
+    }
 
-  .deploy-node-btn {
-    display: none;
-    height: 38px;
-    padding: 0 12px;
-    border: 2px dashed var(--gold-core);
-    background: rgba(229, 192, 123, 0.1);
-    color: var(--gold-core);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    align-items: center;
-    justify-content: center;
-    cursor: crosshair;
-    transition: all 0.2s ease;
-  }
-  .deploy-node-btn:hover {
-    background: var(--gold-core);
-    color: #000000;
-    box-shadow: 0 0 16px var(--gold-glow);
-  }
-  .deploy-active {
-    display: inline-flex !important;
-    animation: popDeploy 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  @keyframes popDeploy {
-    from { opacity: 0; transform: scale(0.7); }
-    to { opacity: 1; transform: scale(1); }
-  }
+    .search-capsule {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      background: var(--glass-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 28px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    }
 
-  .copilot-zone {
-    position: fixed;
-    bottom: 42px;
-    right: 42px;
-    z-index: 30;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-  }
+    .search-capsule:focus-within {
+      background: rgba(18, 18, 24, 0.96);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
 
-  .nova-trigger-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 42px;
-    padding: 0 20px;
-    background: var(--glass-hull);
-    border: 2px solid #000000;
-    border-radius: 4px;
-    color: #ffffff;
-    cursor: crosshair;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    box-shadow: 0 0 20px var(--cyan-glow);
-    transition: all 0.2s ease;
-  }
-  .nova-trigger-btn:hover {
-    background: rgba(98, 182, 255, 0.15);
-    border-color: var(--cyan-core);
-    transform: translateY(-2px);
-  }
+    .bing-brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.6rem;
+      font-family: var(--font-mono);
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.55);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
 
-  .pulse-core {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--cyan-core);
-    box-shadow: 0 0 10px var(--cyan-core);
-    animation: pulseCore 1.6s infinite ease-in-out;
-  }
-  @keyframes pulseCore {
-    0%, 100% { transform: scale(0.8); opacity: 0.6; }
-    50% { transform: scale(1.3); opacity: 1; }
-  }
+    .bing-brand-badge svg {
+      width: 14px;
+      height: 14px;
+    }
 
-  /* Nova Chat Terminal */
-  .nova-drawer {
-    display: none;
-    flex-direction: column;
-    width: 380px;
-    height: 500px;
-    margin-bottom: 14px;
-    background: rgba(8, 11, 16, 0.94);
-    border: 1px solid var(--cyan-core);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: 8px;
-    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(98, 182, 255, 0.18);
-    overflow: hidden;
-  }
-  .drawer-active {
-    display: flex;
-    animation: drawerOpen 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  @keyframes drawerOpen {
-    from { opacity: 0; transform: translateY(20px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.8px;
+      color: #ffffff;
+    }
 
-  .drawer-header {
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
 
-  .drawer-title {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--cyan-core);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+    .search-hint {
+      font-family: var(--font-mono);
+      font-size: 0.54rem;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.3);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 5px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
 
-  .icon-btn {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: crosshair;
-    font-size: 1rem;
-    padding: 4px 6px;
-    transition: color 0.2s;
-  }
-  .icon-btn:hover {
-    color: var(--cyan-core);
-  }
+    .top-right-gauge {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      pointer-events: auto;
+      z-index: 20;
+    }
 
-  .drawer-messages {
-    flex: 1;
-    padding: 14px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.45;
-  }
+    .dial-clock-card {
+      position: relative;
+      width: 112px;
+      height: 112px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(20, 20, 26, 0.85) 0%, rgba(8, 8, 11, 0.95) 75%);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.02);
+    }
 
-  .msg-bubble {
-    max-width: 86%;
-    padding: 8px 12px;
-    border-radius: 4px;
-    word-break: break-word;
-  }
-  .msg-user {
-    align-self: flex-end;
-    background: rgba(98, 182, 255, 0.15);
-    border: 1px solid rgba(98, 182, 255, 0.35);
-    color: #ffffff;
-  }
-  .msg-robo {
-    align-self: flex-start;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
-  }
+    .dial-svg-ring {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
 
-  .action-callout {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(229, 192, 123, 0.14);
-    border: 1px solid var(--gold-core);
-    color: var(--gold-core);
-    padding: 4px 8px;
-    border-radius: 2px;
-    margin-top: 6px;
-    font-size: 0.68rem;
-  }
+    .dial-track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 2.2;
+    }
 
-  .drawer-input-row {
-    padding: 10px 14px;
-    background: rgba(0, 0, 0, 0.4);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    gap: 8px;
-  }
+    .dial-sec-progress {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.7);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-dasharray: 326.7;
+      stroke-dashoffset: 326.7;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+      transition: stroke-dashoffset 0.05s linear;
+    }
 
-  .drawer-input-row input {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 3px;
-    color: #ffffff;
-    padding: 8px 12px;
-    font-family: var(--font-mono);
-    font-size: 0.76rem;
-    outline: none;
-  }
-  .drawer-input-row input:focus {
-    border-color: var(--cyan-core);
-  }
+    .dial-needle-wrap {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      transform-origin: center;
+    }
 
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(12px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-box {
-    width: 420px;
-    background: #090c12;
-    border: 1px solid var(--cyan-core);
-    border-radius: 4px;
-    padding: 24px;
-    box-shadow: 0 0 40px rgba(98, 182, 255, 0.25);
-    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  @keyframes modalPop {
-    from { opacity: 0; transform: scale(0.92); }
-    to { opacity: 1; transform: scale(1); }
-  }
+    .dial-needle {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 1.5px;
+      height: 46px;
+      background: linear-gradient(to bottom, #ffffff 0%, rgba(255, 255, 255, 0.1) 80%, transparent 100%);
+      transform: translateX(-50%);
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    }
 
-  .modal-title {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    font-weight: 800;
-    letter-spacing: 3px;
-    color: var(--cyan-core);
-    margin-bottom: 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+    .dial-needle-dot {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #ffffff;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px #ffffff;
+    }
 
-  .modal-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-  .modal-field label {
-    font-family: var(--font-mono);
-    font-size: 0.64rem;
-    letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.45);
-    text-transform: uppercase;
-  }
-  .modal-field input, .modal-field select, .modal-field textarea {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 3px;
-    color: #ffffff;
-    padding: 8px 10px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    outline: none;
-  }
-  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
-    border-color: var(--cyan-core);
-  }
+    .dial-inner-content {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+    }
 
-  .modal-btn-row {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-  }
-</style>
+    .dial-time-main {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .dial-sec-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .dial-calendar-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .dial-cal-day {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .dial-cal-date {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+    }
+
+    /* CENTER FOCUS VECTOR: Interactive Kinetic Core */
+    .center-focus-bay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: auto;
+      z-index: 8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: crosshair;
+    }
+
+    .focus-text-primary {
+      font-family: var(--font-main);
+      font-size: clamp(2.8rem, 6.6vw, 5.8rem);
+      font-weight: 900;
+      letter-spacing: clamp(6px, 1.6vw, 16px);
+      text-transform: uppercase;
+      line-height: 1;
+      text-indent: clamp(6px, 1.6vw, 16px);
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 32%, #64748b 50%, #ffffff 68%, #94a3b8 100%);
+      background-size: 240% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 35px rgba(255, 255, 255, 0.25));
+      transition: filter 0.25s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .center-focus-bay:hover .focus-text-primary {
+      filter: drop-shadow(0 0 55px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 20px rgba(56, 189, 248, 0.35));
+      transform: scale(1.025);
+      animation: metallicShimmer 2.2s linear infinite;
+    }
+
+    @keyframes metallicShimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 240% center; }
+    }
+
+    .focus-sub-text {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.35);
+      text-indent: 6px;
+      transition: color 0.3s ease;
+    }
+
+    .center-focus-bay:hover .focus-sub-text {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .row-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
+    }
+
+    .telemetry {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pip {
+      width: 5px;
+      height: 5px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ffffff;
+    }
+
+    .telemetry-val {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .axiom {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .minimized-dock-trigger {
+      position: fixed;
+      right: 28px;
+      bottom: 28px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(14, 14, 18, 0.92);
+      border: 1px solid var(--border-subtle);
+      border-radius: 30px;
+      padding: 7px 15px 7px 11px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(18px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .minimized-dock-trigger.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .minimized-dock-trigger:hover {
+      background: #ffffff;
+      border-color: #ffffff;
+      box-shadow: 0 12px 30px rgba(255, 255, 255, 0.3);
+    }
+
+    .minimized-dock-trigger:hover .arrow-circle {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .minimized-dock-trigger:hover .minimized-text,
+    .minimized-dock-trigger:hover .minimized-badge {
+      color: #000000;
+    }
+
+    .arrow-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .arrow-circle svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .minimized-text {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ffffff;
+      transition: color 0.2s ease;
+    }
+
+    .minimized-badge {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 800;
+      color: var(--accent-blue);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .hud-browser-window {
+      position: fixed;
+      inset: 48px;
+      background: var(--glass-surface-dense);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(36px);
+      -webkit-backdrop-filter: blur(36px);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96) translateY(24px);
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hud-browser-window.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
+    .hud-browser-window.minimized {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.7) translateY(120px);
+    }
+
+    .browser-header {
+      height: 48px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(255, 255, 255, 0.02);
+      flex-shrink: 0;
+    }
+
+    .window-controls-traffic {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .traffic-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-close { background: #ff5f56; }
+    .btn-minimize { background: #ffbd2e; }
+    .btn-expand { background: #27c93f; }
+
+    .traffic-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .browser-omnibar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 520px;
+      max-width: 50%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 5px 12px;
+    }
+
+    .browser-omnibar svg {
+      width: 13px;
+      height: 13px;
+      stroke: rgba(255, 255, 255, 0.4);
+    }
+
+    .browser-omnibar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+    }
+
+    .window-external-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-external-popout {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-external-popout:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-external-popout svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .browser-body {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 48px);
+      position: relative;
+      background: #000000;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      overflow: hidden;
+    }
+
+    .browser-body iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #ffffff;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.86);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .custom-modal {
+      width: 440px;
+      background: rgba(14, 14, 18, 0.96);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes modalSlide {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+    }
+
+    .input-group input, .input-group select {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .input-group input:focus, .input-group select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-action {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-save {
+      background: #ffffff;
+      border: 1px solid #ffffff;
+      color: #000000;
+    }
+
+    @media (max-width: 900px) {
+      .hud { padding: 24px; }
+      .view-frame { inset: 10px; }
+      .search-cluster { width: 100%; }
+      .dial-clock-card { width: 92px; height: 92px; }
+      .hud-browser-window { inset: 18px; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- Ambient Dynamic Spotlight Layer -->
-<div id="spotlight"></div>
+  <div class="ambient-glow" id="ambientGlow"></div>
 
-<!-- Viewport Hairline Frame & Architectural Corner Ticks -->
-<div class="viewport-frame">
-  <div class="corner-tick tick-tl"></div>
-  <div class="corner-tick tick-tr"></div>
-  <div class="corner-tick tick-bl"></div>
-  <div class="corner-tick tick-br"></div>
-  <div class="hud-badge badge-top-left">SYS_CORE // VER 3.8.0-RC</div>
-  <div class="hud-badge badge-bottom-right">GIMBAL MATRIX // ACTIVE</div>
-</div>
-
-<!-- Main High-Density Canvas (Robotic Matrix, 3D Lattice, Reticles) -->
-<canvas id="stage"></canvas>
-
-<div class="telemetry-core">
-  <div class="sanskrit-vector">सर्वं सम्भाव्यते त्वयि</div>
-  <div class="main-chronometer" id="mainClock">00:00:00</div>
-  <div class="robo-status-row">
-    <span class="robo-pip"></span>
-    <span id="subStatus">SERVO LOCKED • UTC+05:30 • SEC 00.000</span>
-  </div>
-</div>
-
-<!-- Top-Right: Astronomical Celestial Roman Dial -->
-<div class="celestial-module">
-  <canvas id="celestialCanvas" width="160" height="160"></canvas>
-  <div class="celestial-meta">
-    <div class="celestial-digital" id="celestialClock">00:00:00</div>
-    <div class="celestial-date" id="celestialDate">MON • 01 JAN</div>
-  </div>
-</div>
-
-<div class="docks-zone">
-  <!-- Dock 1: Personal Tactical Apps -->
-  <div class="dock-card" id="dockApps" data-dock="apps">
-    <div class="dock-tag">APPS</div>
-    <div class="dock-items-wrapper" id="dockItemsApps">
-      <a href="https://www.google.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Google">
-        <svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.2s.7 5.5 1.9 7.9l3.7-2.9z"/><path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"/></svg>
-      </a>
-      <a href="https://www.youtube.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="YouTube">
-        <svg viewBox="0 0 24 24"><path fill="#FF0000" d="M23.5 6.2c-.3-1-.9-1.8-1.9-2.1C19.9 3.5 12 3.5 12 3.5s-7.9 0-9.6.6c-1 .3-1.6 1.1-1.9 2.1C0 7.9 0 12 0 12s0 4.1.5 5.8c.3 1 .9 1.8 1.9 2.1 1.7.6 9.6.6 9.6.6s7.9 0 9.6-.6c1-.3 1.6-1.1 1.9-2.1.5-1.7.5-5.8.5-5.8s0-4.1-.5-5.8z"/><polygon fill="#FFFFFF" points="9.6,15.6 15.8,12 9.6,8.4"/></svg>
-      </a>
-      <a href="https://www.instagram.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Instagram">
-        <svg viewBox="0 0 24 24"><path fill="#E1306C" d="M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4 1 .5.5.7.8 1 1.4.2.4.3 1.1.4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-1 1.4-.5.5-.8.7-1.4 1-.4.2-1.1.3-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-1-.5-.5-.7-.8-1-1.4-.2-.4-.3-1.1-.4-2.2-.1-1.3-.1-1.6-.1-4.8s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 1-1.4.5-.5.8-.7 1.4-1 .4-.2 1.1-.3 2.2-.4 1.2-.1 1.6-.1 4.8-.1M12 0C8.7 0 8.3 0 7.1.1 5.8.1 4.9.3 4.2.6c-.8.3-1.5.7-2.1 1.4C1.4 2.6 1 3.3.7 4.1c-.3.8-.5 1.7-.5 2.9C0 8.3 0 8.7 0 12s0 3.7.1 4.9c.1 1.3.3 2.1.6 2.9.3.8.7 1.5 1.4 2.1.7.7 1.4 1.1 2.1 1.4.8.3 1.7.5 2.9.5 1.3.1 1.7.1 4.9.1s3.7 0 4.9-.1c1.3-.1 2.1-.3 2.9-.6.8-.3 1.5-.7 2.1-1.4.7-.7 1.1-1.4 1.4-2.1.3-.8.5-1.7.5-2.9.1-1.3.1-1.7.1-4.9s0-3.7-.1-4.9c-.1-1.3-.3-2.1-.6-2.9-.3-.8-.7-1.5-1.4-2.1-.7-.7-1.4-1.1-2.1-1.4-.8-.3-1.7-.5-2.9-.5C15.7 0 15.3 0 12 0zm0 5.8c-3.4 0-6.2 2.8-6.2 6.2s2.8 6.2 6.2 6.2 6.2-2.8 6.2-6.2S15.4 5.8 12 5.8zm0 10.2c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm6.4-10.8c-.8 0-1.4.6-1.4 1.4s.6 1.4 1.4 1.4 1.4-.6 1.4-1.4-.6-1.4-1.4-1.4z"/></svg>
-      </a>
-      <a href="https://www.pinterest.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Pinterest">
-        <svg viewBox="0 0 24 24"><path fill="#BD081C" d="M12 0C5.4 0 0 5.4 0 12c0 5.1 3.2 9.4 7.6 11.1-.1-1-.2-2.4 0-3.5.2-1 1.5-6.3 1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.1 2.3-3.1 1.1 0 1.6.8 1.6 1.8 0 1.1-.7 2.7-1.1 4.3-.3 1.3.6 2.3 1.9 2.3 2.3 0 4.1-2.4 4.1-6 0-3.1-2.2-5.3-5.5-5.3-3.8 0-6 2.8-6 5.8 0 1.1.4 2.4 1 3.1.1.1.1.3.1.4-.1.4-.3 1.3-.4 1.5-.1.3-.2.4-.5.2-2-.9-3.2-3.8-3.2-6.1 0-5 3.6-9.6 10.5-9.6 5.6 0 9.9 4 9.9 9.3 0 5.5-3.5 10-8.3 10-1.6 0-3.2-.8-3.7-1.8l-1 3.9c-.4 1.4-1.4 3.1-2.1 4.2 1.4.4 2.8.6 4.3.6 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
-      </a>
-      <a href="https://web.snapchat.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Snapchat">
-        <svg viewBox="0 0 24 24"><path fill="#FFFC00" d="M12 0C5.4 0 2.2 4.4 2.2 7.7c0 2 .9 3.5 1.5 4.5.2.3.3.6.1.9-.3.6-1 1.8-1.5 2-.4.1-.7.2-1 .3-.3.1-.6.3-.6.6 0 .5.6.8 1.3.9 1.1.2 2.2-.2 2.9-.6.4-.2.8-.2 1.1.1.9.9 2.6 2.3 6 2.3s5.1-1.4 6-2.3c.3-.3.7-.3 1.1-.1.7.4 1.8.8 2.9.6.7-.1 1.3-.4 1.3-.9 0-.3-.3-.5-.6-.6-.3-.1-.6-.2-1-.3-.5-.2-1.2-1.4-1.5-2-.2-.3-.1-.6.1-.9.6-1 1.5-2.5 1.5-4.5C21.8 4.4 18.6 0 12 0z"/></svg>
-      </a>
-    </div>
-    <button class="deploy-node-btn" title="Deploy Custom Robotic Protocol">+ DEPLOY</button>
+  <div class="view-frame">
+    <div class="corner c-tl"></div>
+    <div class="corner c-tr"></div>
+    <div class="corner c-bl"></div>
+    <div class="corner c-br"></div>
   </div>
 
-  <!-- Dock 2: Business Core Ops -->
-  <div class="dock-card" id="dockBiz" data-dock="biz">
-    <div class="dock-tag">BIZ_OPS</div>
-    <div class="dock-items-wrapper" id="dockItemsBiz">
-      <a href="https://adsmanager.facebook.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Meta Ads">
-        <svg viewBox="0 0 24 24"><path fill="#0081FB" d="M24 12c0-6.6-5.4-12-12-12S0 5.4 0 12c0 6 4.4 11 10.1 11.9V15.5H7.3V12h2.8V9.3c0-2.8 1.7-4.3 4.2-4.3 1.2 0 2.5.2 2.5.2v2.7h-1.4c-1.4 0-1.8.9-1.8 1.8V12h3.1l-.5 3.5h-2.6v8.4C19.6 23 24 18 24 12z"/></svg>
-      </a>
-      <a href="https://ads.google.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Google Ads">
-        <svg viewBox="0 0 24 24"><path fill="#FBBC04" d="M3.7 13.9L8.6 5.4c1.1-1.9 3.6-2.6 5.5-1.5l4.9 2.8-9.8 17c-1.9 1.1-4.4.4-5.5-1.5L.4 16.8c-.8-1.5-.5-3.3.7-4.4l2.6 1.5z"/><path fill="#4285F4" d="M22.8 16.9l-4.9-2.8 4.9-8.5c1.1-1.9.4-4.4-1.5-5.5-1.9-1.1-4.4-.4-5.5 1.5l-4.9 8.5 4.9 2.8 6.5-11.3 1.5.9c1.9 1.1 2.6 3.6 1.5 5.5l-2.5 4.4z"/><circle fill="#34A853" cx="7.7" cy="18.9" r="3.8"/></svg>
-      </a>
-      <a href="https://analytics.google.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Analytics">
-        <svg viewBox="0 0 24 24"><path fill="#F9AB00" d="M21.5 19.5h-19c-.8 0-1.5-.7-1.5-1.5V6c0-.8.7-1.5 1.5-1.5h19c.8 0 1.5.7 1.5 1.5v12c0 .8-.7 1.5-1.5 1.5z"/><path fill="#E37400" d="M6 16.5H4v-5h2v5zm5 0H9v-9h2v9zm5 0h-2v-13h2v13zm5 0h-2v-7h2v7z"/></svg>
-      </a>
-      <a href="https://dashboard.stripe.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Stripe">
-        <svg viewBox="0 0 24 24"><path fill="#635BFF" d="M13.9 8.7c0-.7.6-1.1 1.6-1.1 1.4 0 3.2.5 4.6 1.2V4.4C18.5 3.8 16.8 3.5 15 3.5c-4.4 0-7.3 2.3-7.3 6.1 0 5.9 8.2 5 8.2 7.5 0 .8-.7 1.2-1.8 1.2-1.6 0-3.7-.7-5.3-1.6v4.5c1.8.8 3.7 1.1 5.5 1.1 4.5 0 7.7-2.2 7.7-6.2-.1-6.3-8.1-5.3-8.1-7.4z"/></svg>
-      </a>
-      <a href="https://admin.shopify.com" target="_blank" class="mecha-btn mecha-tooltip" data-tooltip="Shopify">
-        <svg viewBox="0 0 24 24"><path fill="#96BF48" d="M19.3 5.4l-2.2-.6c-.1 0-.1 0-.2.1L15.6 9c-.1.2-.3.2-.4.1-.1 0-.1-.1-.1-.2L13.8 3.7c0-.1-.1-.2-.2-.2h-1.3c-.7 0-1.4.3-1.9.8-.5.5-.8 1.2-.8 1.9 0 .4.1.8.2 1.1l-3 1c-.3.1-.4.4-.3.7l3.6 13.7c.1.3.4.5.7.5h8.9c.3 0 .6-.2.7-.5l3.2-16.1c0-.2-.1-.5-.3-.6z"/></svg>
-      </a>
-    </div>
-    <button class="deploy-node-btn" title="Deploy Custom Robotic Protocol">+ DEPLOY</button>
-  </div>
-</div>
+  <canvas id="stage"></canvas>
 
-<div class="copilot-zone">
-  <div class="nova-drawer" id="novaDrawer">
-    <div class="drawer-header">
-      <div class="drawer-title">
-        <span class="pulse-core"></span>
-        NOVA AI // SYNTHETIC PILOT
+  <div class="hud">
+    <div class="row-top">
+      <div class="left-cluster">
+        
+        <div class="docks-cluster">
+          <div class="apps-dock" id="dockApps">
+            <div class="apps-trigger">
+              <svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
+              <span class="apps-label">Apps</span>
+            </div>
+            <div class="apps-list" id="listApps">
+              <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google">
+                <svg viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+              </a>
+              <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="YouTube">
+                <svg viewBox="0 0 24 24">
+                  <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                  <path fill="#FFFFFF" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Instagram">
+                <svg viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#FFDC80"/>
+                      <stop offset="25%" stop-color="#FCAF45"/>
+                      <stop offset="50%" stop-color="#F56040"/>
+                      <stop offset="75%" stop-color="#E1306C"/>
+                      <stop offset="100%" stop-color="#C13584"/>
+                    </linearGradient>
+                  </defs>
+                  <path fill="url(#ig-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+              <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Pinterest">
+                <svg viewBox="0 0 24 24">
+                  <path fill="#E60023" d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.332 1.357-.053.211-.174.256-.402.154-1.498-.697-2.435-2.887-2.435-4.647 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
+                </svg>
+              </a>
+
+              <div class="add-app-btn" id="addAppBtn-apps" data-target="apps" title="Register Custom App">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="apps-dock" id="dockBiz">
+            <div class="apps-trigger">
+              <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zm-11 0h7v7H3z"/></svg>
+              <span class="apps-label">Business</span>
+            </div>
+            <div class="apps-list" id="listBiz">
+              <a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Meta Ads">
+                <img src="https://i.pinimg.com/1200x/e0/6c/06/e06c061bc3c7558aefe2fbe49e2ca4c3.jpg" alt="Meta Ads" />
+              </a>
+              <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="ChatGPT">
+                <img src="https://i.pinimg.com/736x/71/61/83/7161838ef35472566c5008d97e219eba.jpg" alt="ChatGPT" />
+              </a>
+              <a href="https://ads.google.com?subid=xs-ip-gemini-adlc" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google Ads">
+                <img src="https://i.pinimg.com/1200x/06/20/c0/0620c0516092dbd4d617ddb2cff22c50.jpg" alt="Google Ads" />
+              </a>
+              <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google Analytics">
+                <img src="https://i.pinimg.com/736x/1d/6f/42/1d6f4262bc9761b975b467818752f3e3.jpg" alt="Google Analytics" />
+              </a>
+
+              <div class="add-app-btn" id="addAppBtn-biz" data-target="biz" title="Register Custom Business App">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-cluster">
+          <form id="bingSearchForm" class="search-capsule">
+            <div class="bing-brand-badge">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path fill="#0083D6" d="M4 3l4.5 1.6v11.7l6.7 3.9 4.8-2.8V9.8l-4.8-1.9-6.7 3.9V3H4z"/>
+              </svg>
+              <span>Bing</span>
+            </div>
+            <input type="text" id="bingQuery" class="search-input" placeholder="Search web..." autocomplete="off" spellcheck="false" />
+            <span class="search-hint">↵ Enter</span>
+          </form>
+        </div>
+
       </div>
-      <div>
-        <button class="icon-btn" id="openSettingsBtn" title="Cognitive Parameters">&#9881;</button>
-        <button class="icon-btn" id="closeDrawerBtn" title="Dismiss">&times;</button>
+
+      <div class="top-right-gauge">
+        <div class="dial-calendar-info">
+          <span class="dial-cal-day" id="dialDay">TUE</span>
+          <span class="dial-cal-date" id="dialDate">08 SEP 2026</span>
+        </div>
+
+        <div class="dial-clock-card">
+          <svg class="dial-svg-ring" viewBox="0 0 112 112">
+            <circle class="dial-track" cx="56" cy="56" r="52"></circle>
+            <circle class="dial-sec-progress" id="dialSecArc" cx="56" cy="56" r="52"></circle>
+          </svg>
+          
+          <div class="dial-needle-wrap" id="dialNeedleWrap">
+            <div class="dial-needle-dot"></div>
+            <div class="dial-needle"></div>
+          </div>
+
+          <div class="dial-inner-content">
+            <div class="dial-time-main" id="dialTimeDigits">00:00</div>
+            <div class="dial-sec-badge" id="dialSecBadge">00s</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="drawer-messages" id="chatMsgs">
-      <div class="msg-bubble msg-robo">
-        [INIT_OK] Mecha telemetry online. Gimbals aligned. Say "Open YouTube", "Launch Spotify", or query mecha protocols.
+
+    <!-- CENTER FOCUS CORE -->
+    <div class="center-focus-bay" id="focusCenterBay">
+      <div class="focus-text-primary" id="focusText">DO MORE FOCUS</div>
+      <div class="focus-sub-text">संस्कृत मंत्र</div>
+    </div>
+
+    <div class="row-bottom">
+      <div class="telemetry">
+        <span class="pip"></span>
+        <span>PRECISION MATRIX</span>
+        <span id="sessionTimer" class="telemetry-val">00:00:00</span>
+        <span style="opacity: 0.4;">|</span>
+        <span>SYSTEM UPTIME</span>
+        <span id="actualUptime" class="telemetry-val">00:00:00</span>
+      </div>
+      <div class="axiom">FOCUS IS A VECTOR</div>
+    </div>
+  </div>
+
+  <div class="minimized-dock-trigger" id="minimizedRestoreBtn" title="Restore Minimized Browser">
+    <div class="arrow-circle">
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+    <span class="minimized-text">Active Session</span>
+    <span class="minimized-badge" id="minimizedQueryTag">Bing</span>
+  </div>
+
+  <div class="hud-browser-window" id="hudBrowser">
+    <div class="browser-header">
+      <div class="window-controls-traffic">
+        <button class="traffic-btn btn-close" id="btnWinClose" title="Close Window"></button>
+        <button class="traffic-btn btn-minimize" id="btnWinMinimize" title="Minimize to Right Drawer"></button>
+        <button class="traffic-btn btn-expand" id="btnWinExpand" title="Expand Fullscreen"></button>
+      </div>
+
+      <div class="browser-omnibar">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2"/></svg>
+        <input type="text" id="hudOmniUrl" readonly value="https://www.bing.com" />
+      </div>
+
+      <div class="window-external-actions">
+        <a id="btnWinExternalPopout" href="https://www.bing.com" target="_blank" rel="noopener noreferrer" class="btn-external-popout">
+          <span>Launch External</span>
+          <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </a>
       </div>
     </div>
-    <div class="drawer-input-row">
-      <input type="text" id="chatInput" placeholder="Command mecha core..." autocomplete="off">
-      <button class="mecha-btn" id="sendChatBtn"><span>EXEC</span></button>
+
+    <div class="browser-body">
+      <iframe id="browserFrame" src="about:blank" allow="fullscreen; encrypted-media"></iframe>
     </div>
   </div>
-  <button class="nova-trigger-btn" id="novaTrigger">
-    <span class="pulse-core"></span>
-    NOVA ROBO-PILOT
-  </button>
-</div>
 
-<!-- Custom Node Deployment Modal -->
-<div class="modal-overlay" id="nodeModal">
-  <div class="modal-box">
-    <div class="modal-title">
-      <span>DEPLOY CUSTOM NODE</span>
-      <button class="icon-btn" id="closeNodeModal">&times;</button>
-    </div>
-    <div class="modal-field">
-      <label>DESTINATION DOCK</label>
-      <select id="nodeDockSelect">
-        <option value="apps">Apps Shelf</option>
-        <option value="biz">Business Shelf</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <label>NODE DESIGNATION</label>
-      <input type="text" id="nodeName" placeholder="Spotify / Terminal / Discord">
-    </div>
-    <div class="modal-field">
-      <label>TARGET URL OR APP PROTOCOL</label>
-      <input type="text" id="nodeUrl" placeholder="https://... or spotify:">
-    </div>
-    <div class="modal-field">
-      <label>CUSTOM ICON (SVG / PNG)</label>
-      <input type="file" id="nodeIconFile" accept="image/*,.svg">
-    </div>
-    <div class="modal-btn-row">
-      <button class="mecha-btn" id="cancelNodeBtn"><span>ABORT</span></button>
-      <button class="mecha-btn" id="saveNodeBtn"><span>COMMIT</span></button>
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="custom-modal">
+      <div class="modal-title">Deploy Custom Node</div>
+      
+      <div class="input-group">
+        <label>App Name / Tooltip</label>
+        <input type="text" id="appName" placeholder="e.g., Notion, Figma" />
+      </div>
+
+      <div class="input-group">
+        <label>Target URL or Protocol</label>
+        <input type="text" id="appUrl" placeholder="e.g., https://notion.so" />
+      </div>
+
+      <div class="input-group">
+        <label>Icon Image URL</label>
+        <input type="text" id="appIconUrl" placeholder="Direct image link" />
+      </div>
+
+      <div class="input-group">
+        <label>Shelf Placement</label>
+        <select id="dockTarget">
+          <option value="biz">Business Shelf</option>
+          <option value="apps">Apps Shelf</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-action btn-cancel" id="btnCancel">Cancel</button>
+        <button class="btn-action btn-save" id="btnSave">Deploy Node</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Copilot Settings Modal -->
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal-box">
-    <div class="modal-title">
-      <span>COGNITIVE PARAMETERS</span>
-      <button class="icon-btn" id="closeSettingsModal">&times;</button>
-    </div>
-    <div class="modal-field">
-      <label>GEMINI API KEY</label>
-      <input type="password" id="cfgApiKey" placeholder="AIzaSy...">
-    </div>
-    <div class="modal-field">
-      <label>NEURAL RUNTIME MODEL</label>
-      <input type="text" id="cfgModel" value="gemini-3-flash-preview">
-    </div>
-    <div class="modal-field">
-      <label>DIRECTIVE INSTRUCTION</label>
-      <textarea id="cfgPrompt" rows="3">You are Nova, an ultra-advanced robotic autonomous copilot embedded inside the Aethelgard Mecha-Core live wallpaper. Speak like a concise, hyper-competent synthetic intelligence. If instructed to open an application or site, reply briefly and append the command tag: [ACTION:OPEN_URL|https://full-url-here] or [ACTION:OPEN_URL|protocol:].</textarea>
-    </div>
-    <div class="modal-btn-row">
-      <button class="mecha-btn" id="cancelSettingsBtn"><span>CANCEL</span></button>
-      <button class="mecha-btn" id="saveSettingsBtn"><span>STORE</span></button>
-    </div>
-  </div>
-</div>
-
-<script>
-(() => {
-  'use strict';
-
-  const AudioEngine = (() => {
-    let audioCtx = null;
-    function getContext() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      return audioCtx;
-    }
-
-    function chirp(freq = 880, dur = 0.04, type = 'sine') {
-      try {
-        const ctx = getContext();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * 1.8, ctx.currentTime + dur);
-        gain.gain.setValueAtTime(0.04, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + dur);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + dur);
-      } catch (e) {}
-    }
-
-    function mechanicalClick() {
-      chirp(1400, 0.02, 'triangle');
-    }
-
-    return { chirp, mechanicalClick };
-  })();
-
-  // Attach robotic sound to interactive elements
-  document.querySelectorAll('button, a, input').forEach(el => {
-    el.addEventListener('mouseenter', () => AudioEngine.mechanicalClick());
-  });
-
-  const canvas = document.getElementById('stage');
-  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-  let width = 0, height = 0;
-
-  function handleResize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', handleResize, { passive: true });
-  handleResize();
-
-  // Pointer lerping and kinematics
-  let mouseX = width / 2, mouseY = height / 2;
-  let targetMouseX = mouseX, targetMouseY = mouseY;
-  let hasPointerMoved = false;
-
-  window.addEventListener('pointermove', (e) => {
-    hasPointerMoved = true;
-    targetMouseX = e.clientX;
-    targetMouseY = e.clientY;
-  }, { passive: true });
-
-  // Fixed Float32Array Ring Buffer for Mouse Laser Trail (Zero-Garbage Collection)
-  const TRAIL_MAX = 36;
-  const trailBuffer = new Float32Array(TRAIL_MAX * 2);
-  let trailHead = 0;
-  for (let i = 0; i < TRAIL_MAX; i++) {
-    trailBuffer[i * 2] = mouseX;
-    trailBuffer[i * 2 + 1] = mouseY;
-  }
-
-  // 3D Fibonacci Quantum Chrono-Sphere Matrix
-  // [x, y, z, baseAngle, pitch, noiseDigit, flickerPhase]
-  const NODE_COUNT = 380;
-  const NODE_STRIDE = 7;
-  const nodeBuffer = new Float32Array(NODE_COUNT * NODE_STRIDE);
-  const SPHERE_RADIUS = 285;
-  const goldenRatio = (1 + Math.sqrt(5)) / 2;
-
-  for (let i = 0; i < NODE_COUNT; i++) {
-    const offset = i * NODE_STRIDE;
-    const theta = 2 * Math.PI * i / goldenRatio;
-    const phi = Math.acos(1 - 2 * (i + 0.5) / NODE_COUNT);
-
-    nodeBuffer[offset] = SPHERE_RADIUS * Math.sin(phi) * Math.cos(theta);     // X
-    nodeBuffer[offset + 1] = SPHERE_RADIUS * Math.sin(phi) * Math.sin(theta); // Y
-    nodeBuffer[offset + 2] = SPHERE_RADIUS * Math.cos(phi);                  // Z
-    nodeBuffer[offset + 3] = theta;
-    nodeBuffer[offset + 4] = phi;
-    nodeBuffer[offset + 5] = Math.floor(Math.random() * 9);                  // Digit
-    nodeBuffer[offset + 6] = Math.random() * Math.PI * 2;                    // Phase
-  }
-
-  // Floating Cybernetic Dust / Energy Grid
-  const DUST_COUNT = 64;
-  const dustBuffer = new Float32Array(DUST_COUNT * 4); // [x, y, speed, alpha]
-  for (let i = 0; i < DUST_COUNT; i++) {
-    dustBuffer[i * 4] = Math.random();
-    dustBuffer[i * 4 + 1] = Math.random();
-    dustBuffer[i * 4 + 2] = Math.random() * 0.0003 + 0.0001;
-    dustBuffer[i * 4 + 3] = Math.random() * 0.4 + 0.1;
-  }
-
-  const celCanvas = document.getElementById('celestialCanvas');
-  const celCtx = celCanvas.getContext('2d');
-  const ROMAN_NUMERALS = ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
-
-  function renderCelestialClock(date, ms) {
-    const w = 160, h = 160;
-    celCtx.clearRect(0, 0, w, h);
-    const cx = w / 2, cy = h / 2;
-    const r = 68;
-
-    // Bezel track
-    celCtx.beginPath();
-    celCtx.arc(cx, cy, r, 0, Math.PI * 2);
-    celCtx.strokeStyle = 'rgba(98, 182, 255, 0.22)';
-    celCtx.lineWidth = 1.5;
-    celCtx.stroke();
-
-    // Secondary dashed telemetry ring
-    celCtx.beginPath();
-    celCtx.setLineDash([2, 4]);
-    celCtx.arc(cx, cy, r - 6, 0, Math.PI * 2);
-    celCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    celCtx.stroke();
-    celCtx.setLineDash([]);
-
-    // 12 Quantum Chevrons + Roman Numerals
-    for (let i = 0; i < 12; i++) {
-      const angle = (i * 30) * Math.PI / 180;
-      const x1 = cx + Math.cos(angle) * (r - 1);
-      const y1 = cy + Math.sin(angle) * (r - 1);
-      const x2 = cx + Math.cos(angle) * (r - 7);
-      const y2 = cy + Math.sin(angle) * (r - 7);
-
-      celCtx.beginPath();
-      celCtx.moveTo(x1, y1);
-      celCtx.lineTo(x2, y2);
-      celCtx.strokeStyle = (i % 3 === 0) ? '#62b6ff' : 'rgba(98, 182, 255, 0.4)';
-      celCtx.lineWidth = (i % 3 === 0) ? 2 : 1;
-      celCtx.stroke();
-
-      const textR = r - 18;
-      const tx = cx + Math.sin(angle) * textR;
-      const ty = cy - Math.cos(angle) * textR;
-      celCtx.font = "700 8px 'Cinzel', serif";
-      celCtx.fillStyle = (i % 3 === 0) ? '#e5c07b' : 'rgba(255, 255, 255, 0.55)';
-      celCtx.textAlign = 'center';
-      celCtx.textBaseline = 'middle';
-      celCtx.fillText(ROMAN_NUMERALS[i], tx, ty);
-    }
-
-    const sec = date.getSeconds() + ms / 1000;
-    const min = date.getMinutes() + sec / 60;
-    const hr = (date.getHours() % 12) + min / 60;
-
-    // Hour Vector (Champagne Gold)
-    const hrAngle = (hr * 30 - 90) * Math.PI / 180;
-    celCtx.beginPath();
-    celCtx.moveTo(cx, cy);
-    celCtx.lineTo(cx + Math.cos(hrAngle) * 30, cy + Math.sin(hrAngle) * 30);
-    celCtx.strokeStyle = '#e5c07b';
-    celCtx.lineWidth = 2.4;
-    celCtx.shadowColor = '#e5c07b';
-    celCtx.shadowBlur = 8;
-    celCtx.stroke();
-    celCtx.shadowBlur = 0;
-
-    // Minute Jagged Hand (Quantum Cyan)
-    const minAngle = (min * 6 - 90) * Math.PI / 180;
-    const mLen = 46;
-    celCtx.beginPath();
-    celCtx.moveTo(cx, cy);
-    celCtx.lineTo(cx + Math.cos(minAngle) * (mLen * 0.45) + Math.sin(minAngle) * 3, cy + Math.sin(minAngle) * (mLen * 0.45) - Math.cos(minAngle) * 3);
-    celCtx.lineTo(cx + Math.cos(minAngle) * (mLen * 0.72) - Math.sin(minAngle) * 3, cy + Math.sin(minAngle) * (mLen * 0.72) + Math.cos(minAngle) * 3);
-    celCtx.lineTo(cx + Math.cos(minAngle) * mLen, cy + Math.sin(minAngle) * mLen);
-    celCtx.strokeStyle = '#62b6ff';
-    celCtx.lineWidth = 1.8;
-    celCtx.shadowColor = '#62b6ff';
-    celCtx.shadowBlur = 10;
-    celCtx.stroke();
-    celCtx.shadowBlur = 0;
-
-    // Sub-Second Sweep Arrow
-    const secAngle = (sec * 6 - 90) * Math.PI / 180;
-    celCtx.beginPath();
-    celCtx.moveTo(cx - Math.cos(secAngle) * 9, cy - Math.sin(secAngle) * 9);
-    celCtx.lineTo(cx + Math.cos(secAngle) * 52, cy + Math.sin(secAngle) * 52);
-    celCtx.strokeStyle = '#ffffff';
-    celCtx.lineWidth = 1;
-    celCtx.stroke();
-
-    // Center Pivot Mecha Bolt
-    celCtx.beginPath();
-    celCtx.arc(cx, cy, 3.5, 0, Math.PI * 2);
-    celCtx.fillStyle = '#62b6ff';
-    celCtx.fill();
-  }
-
-  const mainClock = document.getElementById('mainClock');
-  const subStatus = document.getElementById('subStatus');
-  const celestialClock = document.getElementById('celestialClock');
-  const celestialDate = document.getElementById('celestialDate');
-
-  const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-  const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-
-  let rotX = 0;
-  let rotY = 0;
-  let lastTime = performance.now();
-
-  function renderFrame(now) {
-    const dt = Math.min((now - lastTime) / 1000, 0.1);
-    lastTime = now;
-
-    // Pointer Smooth Lerp
-    mouseX += (targetMouseX - mouseX) * 0.12;
-    mouseY += (targetMouseY - mouseY) * 0.12;
-    document.documentElement.style.setProperty('--mx', `${mouseX}px`);
-    document.documentElement.style.setProperty('--my', `${mouseY}px`);
-
-    // Ring-buffer mouse laser trail
-    trailBuffer[trailHead * 2] = mouseX;
-    trailBuffer[trailHead * 2 + 1] = mouseY;
-    trailHead = (trailHead + 1) % TRAIL_MAX;
-
-    // Clear Screen
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, width, height);
-
-    // 1. Render Mecha Background Dust / Energy Motifs
-    for (let i = 0; i < DUST_COUNT; i++) {
-      const o = i * 4;
-      dustBuffer[o + 1] -= dustBuffer[o + 2];
-      if (dustBuffer[o + 1] < 0) dustBuffer[o + 1] = 1;
-      ctx.fillStyle = `rgba(98, 182, 255, ${dustBuffer[o + 3]})`;
-      ctx.fillRect(dustBuffer[o] * width, dustBuffer[o + 1] * height, 1.4, 1.4);
-    }
-
-    // 2. Render Shrinking Mecha Laser Trail
-    if (hasPointerMoved) {
-      ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      for (let i = 0; i < TRAIL_MAX - 1; i++) {
-        const curr = ((trailHead - i - 1 + TRAIL_MAX) % TRAIL_MAX) * 2;
-        const prev = ((trailHead - i - 2 + TRAIL_MAX) % TRAIL_MAX) * 2;
-        const progress = 1 - (i / TRAIL_MAX);
-        const alpha = Math.max(0, progress * 0.8);
-
-        ctx.beginPath();
-        ctx.moveTo(trailBuffer[curr], trailBuffer[curr + 1]);
-        ctx.lineTo(trailBuffer[prev], trailBuffer[prev + 1]);
-        ctx.strokeStyle = `rgba(98, 182, 255, ${alpha.toFixed(2)})`;
-        ctx.lineWidth = Math.max(0.4, progress * 2.8);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    const cx = width / 2;
-    const cy = height / 2;
-    const date = new Date();
-    const ms = date.getMilliseconds();
-    const sec = date.getSeconds();
-    const min = date.getMinutes();
-    const hr = date.getHours();
-
-    // 3. Robotic Kinetic Gimbal Rings (Direct in Canvas)
-    rotY += dt * 0.35 + ((mouseX / width) - 0.5) * 0.02;
-    rotX += dt * 0.18 + ((mouseY / height) - 0.5) * 0.02;
-
-    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-    const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
-
-    // Concentric Servo Reticle Rings
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 218, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Outer counter-rotating robotic degree ticks
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(-rotY * 0.5);
-    ctx.strokeStyle = 'rgba(98, 182, 255, 0.25)';
-    ctx.lineWidth = 1.2;
-    for (let deg = 0; deg < 360; deg += 15) {
-      const rad = deg * Math.PI / 180;
-      const len = deg % 45 === 0 ? 9 : 4;
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(rad) * 224, Math.sin(rad) * 224);
-      ctx.lineTo(Math.cos(rad) * (224 + len), Math.sin(rad) * (224 + len));
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // Dynamic Sub-second Progress Orbital Arc
-    const secRatio = (sec + ms / 1000) / 60;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 218, -Math.PI / 2, -Math.PI / 2 + secRatio * Math.PI * 2);
-    ctx.strokeStyle = 'rgba(98, 182, 255, 0.7)';
-    ctx.lineWidth = 2.4;
-    ctx.shadowColor = 'rgba(98, 182, 255, 0.6)';
-    ctx.shadowBlur = 10;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.restore();
-
-    const fov = 420;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    for (let i = 0; i < NODE_COUNT; i++) {
-      const o = i * NODE_STRIDE;
-      const x = nodeBuffer[o];
-      const y = nodeBuffer[o + 1];
-      const z = nodeBuffer[o + 2];
-
-      // Y-axis rotation
-      const x1 = x * cosY + z * sinY;
-      const z1 = -x * sinY + z * cosY;
-
-      // X-axis rotation
-      const y2 = y * cosX - z1 * sinX;
-      const z2 = y * sinX + z1 * cosX;
-
-      // Perspective projection
-      const scale = fov / (fov + z2 + 360);
-      if (scale <= 0) continue;
-
-      const px = cx + x1 * scale;
-      const py = cy + y2 * scale;
-
-      // Depth alpha
-      const depthAlpha = Math.max(0.06, Math.min(0.95, (z2 + SPHERE_RADIUS) / (SPHERE_RADIUS * 2)));
-
-      // Dynamic Node Output: Real digits vs Ambient binary/noise
-      let charVal;
-      let fillCol;
-
-      if (i % 8 === 0) {
-        charVal = String(sec).padStart(2, '0');
-        fillCol = `rgba(98, 182, 255, ${depthAlpha})`;
-        ctx.font = `700 ${Math.max(8, 13 * scale)}px 'JetBrains Mono', monospace`;
-      } else if (i % 12 === 0) {
-        charVal = String(min).padStart(2, '0');
-        fillCol = `rgba(229, 192, 123, ${depthAlpha})`;
-        ctx.font = `700 ${Math.max(8, 12 * scale)}px 'JetBrains Mono', monospace`;
-      } else {
-        charVal = nodeBuffer[o + 5];
-        fillCol = `rgba(255, 255, 255, ${(depthAlpha * 0.45).toFixed(2)})`;
-        ctx.font = `400 ${Math.max(6, 10 * scale)}px 'JetBrains Mono', monospace`;
-      }
-
-      ctx.fillStyle = fillCol;
-      ctx.fillText(charVal, px, py);
-
-      // Micro node anchor tick
-      ctx.beginPath();
-      ctx.arc(px, py + 7 * scale, 0.8 * scale, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(98, 182, 255, ${depthAlpha * 0.6})`;
-      ctx.fill();
-    }
-
-    // 4. Cursor Robotic Target Brackets (Drawn directly in Canvas)
-    if (hasPointerMoved) {
-      ctx.save();
-      const bSize = 14;
-      ctx.strokeStyle = 'rgba(98, 182, 255, 0.4)';
-      ctx.lineWidth = 1.2;
-
-      // Top-left
-      ctx.beginPath();
-      ctx.moveTo(mouseX - bSize, mouseY - bSize / 2);
-      ctx.lineTo(mouseX - bSize, mouseY - bSize);
-      ctx.lineTo(mouseX - bSize / 2, mouseY - bSize);
-      ctx.stroke();
-
-      // Top-right
-      ctx.beginPath();
-      ctx.moveTo(mouseX + bSize / 2, mouseY - bSize);
-      ctx.lineTo(mouseX + bSize, mouseY - bSize);
-      ctx.lineTo(mouseX + bSize, mouseY - bSize / 2);
-      ctx.stroke();
-
-      // Bottom-left
-      ctx.beginPath();
-      ctx.moveTo(mouseX - bSize, mouseY + bSize / 2);
-      ctx.lineTo(mouseX - bSize, mouseY + bSize);
-      ctx.lineTo(mouseX - bSize / 2, mouseY + bSize);
-      ctx.stroke();
-
-      // Bottom-right
-      ctx.beginPath();
-      ctx.moveTo(mouseX + bSize / 2, mouseY + bSize);
-      ctx.lineTo(mouseX + bSize, mouseY + bSize);
-      ctx.lineTo(mouseX + bSize, mouseY + bSize / 2);
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    // Telemetry Sync
-    const timeStr = date.toTimeString().split(' ')[0];
-    mainClock.innerText = timeStr;
-    celestialClock.innerText = timeStr;
-
-    const msPad = String(ms).padStart(3, '0');
-    subStatus.innerText = `SERVO LOCKED • UTC+05:30 • SEC ${String(sec).padStart(2, '0')}.${msPad}`;
-
-    const dName = DAYS[date.getDay()];
-    const mName = MONTHS[date.getMonth()];
-    const dNum = String(date.getDate()).padStart(2, '0');
-    celestialDate.innerText = `${dName} • ${dNum} ${mName}`;
-
-    // Render Celestial Clock
-    renderCelestialClock(date, ms);
-
-    requestAnimationFrame(renderFrame);
-  }
-  requestAnimationFrame(renderFrame);
-
-  function initDockShake(dockEl) {
-    let shakes = 0;
-    let lastDir = 0;
-    let lastX = 0;
-    let timer = null;
-    const deployBtn = dockEl.querySelector('.deploy-node-btn');
-
-    dockEl.addEventListener('mousemove', (e) => {
-      const dx = e.clientX - lastX;
-      if (Math.abs(dx) > 24) {
-        const dir = Math.sign(dx);
-        if (dir !== lastDir) {
-          shakes++;
-          lastDir = dir;
-          clearTimeout(timer);
-          timer = setTimeout(() => { shakes = 0; }, 750);
-
-          if (shakes >= 4) {
-            deployBtn.classList.add('deploy-active');
-            AudioEngine.chirp(1600, 0.08, 'sawtooth');
-            shakes = 0;
-          }
-        }
-      }
-      lastX = e.clientX;
-    });
-  }
-
-  const dockApps = document.getElementById('dockApps');
-  const dockBiz = document.getElementById('dockBiz');
-  initDockShake(dockApps);
-  initDockShake(dockBiz);
-
-  // Custom Node Modal Logic
-  const nodeModal = document.getElementById('nodeModal');
-  const nodeDockSelect = document.getElementById('nodeDockSelect');
-  const nodeNameInput = document.getElementById('nodeName');
-  const nodeUrlInput = document.getElementById('nodeUrl');
-  const nodeIconFileInput = document.getElementById('nodeIconFile');
-
-  document.querySelectorAll('.deploy-node-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const parentDock = e.target.closest('.dock-card').dataset.dock;
-      nodeDockSelect.value = parentDock;
-      nodeModal.style.display = 'flex';
-      nodeNameInput.focus();
-    });
-  });
-
-  const hideNodeModal = () => { nodeModal.style.display = 'none'; };
-  document.getElementById('closeNodeModal').addEventListener('click', hideNodeModal);
-  document.getElementById('cancelNodeBtn').addEventListener('click', hideNodeModal);
-
-  function createMechaAppButton(node) {
-    const a = document.createElement('a');
-    a.className = 'mecha-btn mecha-tooltip';
-    a.href = node.url;
-    a.target = '_blank';
-    a.dataset.tooltip = node.name;
-
-    if (node.icon) {
-      const img = document.createElement('img');
-      img.src = node.icon;
-      img.alt = node.name;
-      a.appendChild(img);
-    } else {
-      const span = document.createElement('span');
-      span.innerText = node.name.substring(0, 3).toUpperCase();
-      a.appendChild(span);
-    }
-    return a;
-  }
-
-  function loadCustomNodes() {
-    try {
-      const nodes = JSON.parse(localStorage.getItem('monolith_robo_nodes') || '[]');
-      nodes.forEach(node => {
-        const wrapper = node.dock === 'biz'
-          ? document.getElementById('dockItemsBiz')
-          : document.getElementById('dockItemsApps');
-        wrapper.appendChild(createMechaAppButton(node));
-      });
-    } catch (e) {}
-  }
-  loadCustomNodes();
-
-  document.getElementById('saveNodeBtn').addEventListener('click', () => {
-    const name = nodeNameInput.value.trim();
-    const url = nodeUrlInput.value.trim();
-    const dock = nodeDockSelect.value;
-    if (!name || !url) return;
-
-    const commitNode = (iconData) => {
-      const nodeObj = { id: Date.now(), name, url, dock, icon: iconData };
-      const current = JSON.parse(localStorage.getItem('monolith_robo_nodes') || '[]');
-      current.push(nodeObj);
-      localStorage.setItem('monolith_robo_nodes', JSON.stringify(current));
-
-      const wrapper = dock === 'biz'
-        ? document.getElementById('dockItemsBiz')
-        : document.getElementById('dockItemsApps');
-      wrapper.appendChild(createMechaAppButton(nodeObj));
-
-      nodeNameInput.value = '';
-      nodeUrlInput.value = '';
-      nodeIconFileInput.value = '';
-      hideNodeModal();
-      AudioEngine.chirp(1200, 0.05, 'sine');
+  <script>
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const ambientGlow = document.getElementById('ambientGlow');
+    const sessionTimer = document.getElementById('sessionTimer');
+    const actualUptime = document.getElementById('actualUptime');
+
+    const dialTimeDigits = document.getElementById('dialTimeDigits');
+    const dialSecBadge = document.getElementById('dialSecBadge');
+    const dialDay = document.getElementById('dialDay');
+    const dialDate = document.getElementById('dialDate');
+    const dialSecArc = document.getElementById('dialSecArc');
+    const dialNeedleWrap = document.getElementById('dialNeedleWrap');
+
+    const bingSearchForm = document.getElementById('bingSearchForm');
+    const bingQuery = document.getElementById('bingQuery');
+    const hudBrowser = document.getElementById('hudBrowser');
+    const browserFrame = document.getElementById('browserFrame');
+    const hudOmniUrl = document.getElementById('hudOmniUrl');
+    const btnWinClose = document.getElementById('btnWinClose');
+    const btnWinMinimize = document.getElementById('btnWinMinimize');
+    const btnWinExpand = document.getElementById('btnWinExpand');
+    const btnWinExternalPopout = document.getElementById('btnWinExternalPopout');
+    const minimizedRestoreBtn = document.getElementById('minimizedRestoreBtn');
+    const minimizedQueryTag = document.getElementById('minimizedQueryTag');
+    const focusCenterBay = document.getElementById('focusCenterBay');
+    const focusText = document.getElementById('focusText');
+
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const addAppBtnApps = document.getElementById('addAppBtn-apps');
+    const addAppBtnBiz = document.getElementById('addAppBtn-biz');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnSave = document.getElementById('btnSave');
+    const appNameInput = document.getElementById('appName');
+    const appUrlInput = document.getElementById('appUrl');
+    const appIconUrlInput = document.getElementById('appIconUrl');
+    const dockTargetSelect = document.getElementById('dockTarget');
+
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    const sessionStart = performance.now();
+    const systemEpochTime = Date.now() - performance.now();
+    let lastTime = performance.now();
+
+    // -------------------------------------------------------------
+    // SHAKE DETECTION & HIGH-VOLTAGE TESLA ARCS
+    // -------------------------------------------------------------
+    const mouse = {
+      x: -1000,
+      y: -1000,
+      prevX: -1000,
+      prevY: -1000,
+      shakeHist: [],
+      shakeIntensity: 0
     };
 
-    const file = nodeIconFileInput.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => commitNode(e.target.result);
-      reader.readAsDataURL(file);
-    } else {
-      commitNode(null);
-    }
-  });
+    let lightningActive = false;
+    let lightningEnergy = 0;
+    let lightningChains = [];
 
-  const novaDrawer = document.getElementById('novaDrawer');
-  const novaTrigger = document.getElementById('novaTrigger');
-  const closeDrawerBtn = document.getElementById('closeDrawerBtn');
-  const chatMsgs = document.getElementById('chatMsgs');
-  const chatInput = document.getElementById('chatInput');
-  const sendChatBtn = document.getElementById('sendChatBtn');
+    function triggerTeslaNetwork(cx, cy, intensity) {
+      lightningChains = [];
+      const branches = Math.min(Math.floor(intensity * 4) + 2, 7);
+      
+      for (let b = 0; b < branches; b++) {
+        const segs = Math.floor(Math.random() * 8) + 8;
+        const pts = [{ x: cx, y: cy }];
+        let curX = cx;
+        let curY = cy;
+        const angle = (Math.PI * 2 * b) / branches + (Math.random() - 0.5) * 0.8;
+        const length = (Math.random() * 16 + 18) * (0.8 + intensity * 0.4);
 
-  novaTrigger.addEventListener('click', () => {
-    novaDrawer.classList.toggle('drawer-active');
-    if (novaDrawer.classList.contains('drawer-active')) {
-      chatInput.focus();
-      AudioEngine.chirp(1000, 0.04, 'sine');
-    }
-  });
-  closeDrawerBtn.addEventListener('click', () => novaDrawer.classList.remove('drawer-active'));
-
-  // Settings Modal
-  const settingsModal = document.getElementById('settingsModal');
-  const openSettingsBtn = document.getElementById('openSettingsBtn');
-  const closeSettingsModal = document.getElementById('closeSettingsModal');
-  const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
-  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-  const cfgApiKey = document.getElementById('cfgApiKey');
-  const cfgModel = document.getElementById('cfgModel');
-  const cfgPrompt = document.getElementById('cfgPrompt');
-
-  openSettingsBtn.addEventListener('click', () => {
-    cfgApiKey.value = localStorage.getItem('monolith_gemini_key') || '';
-    cfgModel.value = localStorage.getItem('monolith_gemini_model') || 'gemini-3-flash-preview';
-    cfgPrompt.value = localStorage.getItem('monolith_gemini_prompt') || cfgPrompt.defaultValue;
-    settingsModal.style.display = 'flex';
-  });
-
-  const hideSettings = () => { settingsModal.style.display = 'none'; };
-  closeSettingsModal.addEventListener('click', hideSettings);
-  cancelSettingsBtn.addEventListener('click', hideSettings);
-
-  saveSettingsBtn.addEventListener('click', () => {
-    localStorage.setItem('monolith_gemini_key', cfgApiKey.value.trim());
-    localStorage.setItem('monolith_gemini_model', cfgModel.value.trim() || 'gemini-3-flash-preview');
-    localStorage.setItem('monolith_gemini_prompt', cfgPrompt.value.trim());
-    hideSettings();
-    AudioEngine.chirp(1100, 0.04, 'sine');
-  });
-
-  function appendChatBubble(role, text, actionUrl = null) {
-    const bubble = document.createElement('div');
-    bubble.className = `msg-bubble msg-${role}`;
-    bubble.innerText = text;
-
-    if (actionUrl) {
-      const callout = document.createElement('div');
-      callout.className = 'action-callout';
-      callout.innerHTML = `&#9654; EXECUTED: ${actionUrl}`;
-      bubble.appendChild(callout);
-    }
-
-    chatMsgs.appendChild(bubble);
-    chatMsgs.scrollTop = chatMsgs.scrollHeight;
-  }
-
-  async function handleChatExecution() {
-    const query = chatInput.value.trim();
-    if (!query) return;
-    appendChatBubble('user', query);
-    chatInput.value = '';
-
-    const apiKey = localStorage.getItem('monolith_gemini_key');
-    const model = localStorage.getItem('monolith_gemini_model') || 'gemini-3-flash-preview';
-    const systemPrompt = localStorage.getItem('monolith_gemini_prompt') || cfgPrompt.defaultValue;
-
-    // Offline heuristic parser when no API key is provided
-    if (!apiKey) {
-      setTimeout(() => {
-        const lower = query.toLowerCase();
-        let targetUrl = null;
-        let response = "[ROBO_DIRECTIVE] Executing command in local mode.";
-
-        if (lower.includes('spotify')) {
-          targetUrl = 'spotify:';
-          response = "Dispatching Spotify desktop protocol...";
-        } else if (lower.includes('youtube')) {
-          targetUrl = 'https://www.youtube.com';
-          response = "Deploying YouTube stream...";
-        } else if (lower.includes('google')) {
-          targetUrl = 'https://www.google.com';
-          response = "Opening Google uplink...";
-        } else {
-          response = "Autonomous mecha copilot operational. Configure your Gemini API key in Settings (gear icon) for unconstrained cognitive operations.";
+        for (let s = 0; s < segs; s++) {
+          const segAngle = angle + (Math.random() - 0.5) * 1.5;
+          curX += Math.cos(segAngle) * length;
+          curY += Math.sin(segAngle) * length;
+          pts.push({ x: curX, y: curY });
         }
-
-        if (targetUrl) {
-          window.open(targetUrl, '_blank');
-          AudioEngine.chirp(1500, 0.06, 'sawtooth');
-        }
-        appendChatBubble('robo', response, targetUrl);
-      }, 250);
-      return;
+        lightningChains.push(pts);
+      }
     }
 
-    // Call Gemini Endpoint
-    try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const payload = {
-        contents: [{ role: "user", parts: [{ text: query }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] }
-      };
+    window.addEventListener('mousemove', (e) => {
+      const now = performance.now();
+      const dx = e.clientX - mouse.prevX;
+      const dy = e.clientY - mouse.prevY;
+      const dist = Math.hypot(dx, dy);
 
-      const resp = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
 
-      if (!resp.ok) throw new Error(`HTTP Error ${resp.status}`);
-      const data = await resp.json();
-      const output = data.candidates?.[0]?.content?.parts?.[0]?.text || "[NO RESPONSE RECEIVED]";
+      ambientGlow.style.setProperty('--mx', `${e.clientX}px`);
+      ambientGlow.style.setProperty('--my', `${e.clientY}px`);
 
-      const actionRegex = /\[ACTION:OPEN_URL\|(.*?)\]/;
-      const match = output.match(actionRegex);
-      const cleanText = output.replace(actionRegex, '').trim();
-      let triggeredUrl = null;
-
-      if (match && match[1]) {
-        triggeredUrl = match[1].trim();
-        window.open(triggeredUrl, '_blank');
-        AudioEngine.chirp(1500, 0.06, 'sawtooth');
+      // Dynamic shake window detector
+      mouse.shakeHist.push({ time: now, dist });
+      while (mouse.shakeHist.length > 0 && (now - mouse.shakeHist[0].time) > 350) {
+        mouse.shakeHist.shift();
       }
 
-      appendChatBubble('robo', cleanText, triggeredUrl);
-    } catch (err) {
-      appendChatBubble('robo', `[TELEMETRY FAULT] Communication breakdown: ${err.message}`);
+      let totalDist = 0;
+      for (let i = 0; i < mouse.shakeHist.length; i++) {
+        totalDist += mouse.shakeHist[i].dist;
+      }
+
+      if (totalDist > 380 && mouse.shakeHist.length > 6) {
+        lightningActive = true;
+        lightningEnergy = 1.0;
+        triggerTeslaNetwork(e.clientX, e.clientY, Math.min(totalDist / 500, 2.0));
+        mouse.shakeHist = [];
+      }
+
+      // Magnetic interaction with center title
+      if (isHoveringCenter) {
+        for (let i = 0; i < 2; i++) {
+          spawnCrystallineParticle(e.clientX, e.clientY);
+        }
+      }
+
+      mouse.prevX = e.clientX;
+      mouse.prevY = e.clientY;
+    }, { passive: true });
+
+    // -------------------------------------------------------------
+    // "DO MORE FOCUS" CRYSTALLINE PARTICLE ENGINE
+    // -------------------------------------------------------------
+    const MAX_CRYSTALS = 150;
+    const CRYSTAL_STRIDE = 7; // [x, y, vx, vy, size, alpha, life]
+    const crystalBuffer = new Float32Array(MAX_CRYSTALS * CRYSTAL_STRIDE);
+    let crystalCount = 0;
+    let isHoveringCenter = false;
+
+    function spawnCrystallineParticle(x, y) {
+      if (crystalCount >= MAX_CRYSTALS) return;
+      const o = crystalCount * CRYSTAL_STRIDE;
+      crystalBuffer[o] = x + (Math.random() - 0.5) * 180;
+      crystalBuffer[o + 1] = y + (Math.random() - 0.5) * 50;
+      crystalBuffer[o + 2] = (Math.random() - 0.5) * 2.2;
+      crystalBuffer[o + 3] = -Math.random() * 2.5 - 0.6;
+      crystalBuffer[o + 4] = Math.random() * 2.8 + 1.2;
+      crystalBuffer[o + 5] = Math.random() * 0.8 + 0.2;
+      crystalBuffer[o + 6] = 1.0;
+      crystalCount++;
     }
-  }
 
-  sendChatBtn.addEventListener('click', handleChatExecution);
-  chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') handleChatExecution();
-  });
+    focusCenterBay.addEventListener('mouseenter', () => {
+      isHoveringCenter = true;
+      for (let i = 0; i < 18; i++) {
+        spawnCrystallineParticle(width / 2, height / 2);
+      }
+    });
 
-})();
-</script>
+    focusCenterBay.addEventListener('mouseleave', () => {
+      isHoveringCenter = false;
+    });
+
+    // -------------------------------------------------------------
+    // CLOCK, REAL WINDOWS ON-SCREEN UPTIME & TELEMETRY
+    // -------------------------------------------------------------
+    const daysArr = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const monthsArr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const circumference = 2 * Math.PI * 52;
+
+    function updateClocks(now) {
+      const d = new Date();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      const s = d.getSeconds();
+      const exactSec = s + d.getMilliseconds() / 1000;
+
+      dialTimeDigits.textContent = `${h}:${m}`;
+      dialSecBadge.textContent = `${String(s).padStart(2, '0')}s`;
+
+      const progress = exactSec / 60;
+      dialSecArc.style.strokeDashoffset = circumference * (1 - progress);
+      dialNeedleWrap.style.transform = `rotate(${progress * 360}deg)`;
+
+      dialDay.textContent = daysArr[d.getDay()];
+      dialDate.textContent = `${String(d.getDate()).padStart(2, '0')} ${monthsArr[d.getMonth()]} ${d.getFullYear()}`;
+
+      // In-App Session Uptime
+      const secElapsed = Math.floor((now - sessionStart) / 1000);
+      const sh = String(Math.floor(secElapsed / 3600)).padStart(2, '0');
+      const sm = String(Math.floor((secElapsed % 3600) / 60)).padStart(2, '0');
+      const ss = String(secElapsed % 60).padStart(2, '0');
+      sessionTimer.textContent = `${sh}:${sm}:${ss}`;
+
+      // Actual Windows OS On-Screen Time (Based on DOM high-res hardware clock)
+      const rawPcSec = Math.floor(now / 1000);
+      const ph = String(Math.floor(rawPcSec / 3600)).padStart(2, '0');
+      const pm = String(Math.floor((rawPcSec % 3600) / 60)).padStart(2, '0');
+      const ps = String(rawPcSec % 60).padStart(2, '0');
+      actualUptime.textContent = `${ph}:${pm}:${ps}`;
+    }
+
+    // -------------------------------------------------------------
+    // CLEAN IN-HUD BROWSER (NO REDUNDANT PILLS)
+    // -------------------------------------------------------------
+    let currentBrowserQuery = '';
+
+    function openBrowser(query) {
+      currentBrowserQuery = query;
+      const targetUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+
+      hudOmniUrl.value = targetUrl;
+      btnWinExternalPopout.href = targetUrl;
+      browserFrame.src = targetUrl;
+
+      hudBrowser.classList.remove('minimized');
+      hudBrowser.classList.add('active');
+      minimizedRestoreBtn.classList.remove('active');
+    }
+
+    bingSearchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = bingQuery.value.trim();
+      if (!q) return;
+      openBrowser(q);
+      bingQuery.blur();
+    });
+
+    btnWinClose.addEventListener('click', () => {
+      hudBrowser.classList.remove('active', 'minimized');
+      browserFrame.src = 'about:blank';
+      minimizedRestoreBtn.classList.remove('active');
+    });
+
+    btnWinMinimize.addEventListener('click', () => {
+      hudBrowser.classList.remove('active');
+      hudBrowser.classList.add('minimized');
+      minimizedQueryTag.textContent = currentBrowserQuery.length > 12 
+        ? currentBrowserQuery.slice(0, 10) + '..' 
+        : (currentBrowserQuery || 'Bing');
+      minimizedRestoreBtn.classList.add('active');
+    });
+
+    btnWinExpand.addEventListener('click', () => {
+      hudBrowser.style.inset = (hudBrowser.style.inset === '12px') ? '48px' : '12px';
+    });
+
+    minimizedRestoreBtn.addEventListener('click', () => {
+      hudBrowser.classList.remove('minimized');
+      hudBrowser.classList.add('active');
+      minimizedRestoreBtn.classList.remove('active');
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === '/' || (e.ctrlKey && e.key.toLowerCase() === 'k')) && document.activeElement !== bingQuery) {
+        e.preventDefault();
+        bingQuery.focus();
+        bingQuery.select();
+      }
+      if (e.key === 'Escape' && hudBrowser.classList.contains('active')) {
+        btnWinMinimize.click();
+      }
+    });
+
+    // -------------------------------------------------------------
+    // DOCK & CUSTOM NODES
+    // -------------------------------------------------------------
+    function loadSavedApps() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('aethelgard_nodes_v5') || '[]');
+        saved.forEach(app => renderCustomApp(app));
+      } catch(e) {}
+    }
+
+    function renderCustomApp(app) {
+      const isBiz = app.dock === 'biz';
+      const targetList = isBiz ? document.getElementById('listBiz') : document.getElementById('listApps');
+      const addBtn = isBiz ? addAppBtnBiz : addAppBtnApps;
+
+      const a = document.createElement('a');
+      a.href = app.url;
+      a.className = 'app-btn';
+      a.dataset.tooltip = app.name;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+
+      if (app.icon) {
+        const img = document.createElement('img');
+        img.src = app.icon;
+        img.alt = app.name;
+        a.appendChild(img);
+      } else {
+        a.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>`;
+      }
+
+      targetList.insertBefore(a, addBtn);
+    }
+
+    function saveCustomApp(app) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('aethelgard_nodes_v5') || '[]');
+        saved.push(app);
+        localStorage.setItem('aethelgard_nodes_v5', JSON.stringify(saved));
+        renderCustomApp(app);
+      } catch(e) {}
+    }
+
+    addAppBtnApps.addEventListener('click', () => { dockTargetSelect.value = 'apps'; modalBackdrop.classList.add('open'); appNameInput.focus(); });
+    addAppBtnBiz.addEventListener('click', () => { dockTargetSelect.value = 'biz'; modalBackdrop.classList.add('open'); appNameInput.focus(); });
+
+    btnCancel.addEventListener('click', () => {
+      modalBackdrop.classList.remove('open');
+      appNameInput.value = '';
+      appUrlInput.value = '';
+      appIconUrlInput.value = '';
+    });
+
+    btnSave.addEventListener('click', () => {
+      const name = appNameInput.value.trim();
+      const url = appUrlInput.value.trim();
+      const icon = appIconUrlInput.value.trim();
+      if (!name || !url) return;
+
+      saveCustomApp({ name, url, icon, dock: dockTargetSelect.value });
+      btnCancel.click();
+    });
+
+    function setupDockShakeDetection(dockEl, addBtnEl) {
+      let shakeCount = 0;
+      let lastDir = 0;
+      let lastTime = 0;
+
+      dockEl.addEventListener('mousemove', (e) => {
+        const dx = e.movementX;
+        const now = performance.now();
+        if (Math.abs(dx) > 10) {
+          const dir = Math.sign(dx);
+          if (dir !== lastDir && (now - lastTime) < 320) {
+            shakeCount++;
+            if (shakeCount >= 4) addBtnEl.classList.add('visible');
+          }
+          lastDir = dir;
+          lastTime = now;
+        }
+      });
+    }
+
+    setupDockShakeDetection(document.getElementById('dockApps'), addAppBtnApps);
+    setupDockShakeDetection(document.getElementById('dockBiz'), addAppBtnBiz);
+
+    // -------------------------------------------------------------
+    // STAR DUST BACKGROUND
+    // -------------------------------------------------------------
+    const STAR_COUNT = 70;
+    const starBuffer = new Float32Array(STAR_COUNT * 4);
+    for (let i = 0; i < STAR_COUNT; i++) {
+      starBuffer[i * 4] = Math.random();
+      starBuffer[i * 4 + 1] = Math.random();
+      starBuffer[i * 4 + 2] = Math.random() * 0.0003 + 0.00008;
+      starBuffer[i * 4 + 3] = Math.random() * 0.35 + 0.08;
+    }
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // -------------------------------------------------------------
+    // HIGH PRECISION RENDER LOOP
+    // -------------------------------------------------------------
+    function render(now) {
+      const rawDt = (now - lastTime) / 1000;
+      lastTime = now;
+      const dt = Math.min(rawDt, 0.05);
+
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
+
+      // Background Dust
+      for (let i = 0; i < STAR_COUNT; i++) {
+        const o = i * 4;
+        starBuffer[o + 1] -= starBuffer[o + 2];
+        if (starBuffer[o + 1] < 0) starBuffer[o + 1] = 1;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${starBuffer[o + 3]})`;
+        ctx.fillRect(starBuffer[o] * width, starBuffer[o + 1] * height, 1.2, 1.2);
+      }
+
+      // Crystalline Particle Matrix
+      if (crystalCount > 0) {
+        ctx.save();
+        for (let i = 0; i < crystalCount; i++) {
+          const o = i * CRYSTAL_STRIDE;
+          crystalBuffer[o] += crystalBuffer[o + 2];
+          crystalBuffer[o + 1] += crystalBuffer[o + 3];
+          crystalBuffer[o + 6] -= dt * 1.3;
+
+          if (crystalBuffer[o + 6] <= 0) {
+            const lastO = (crystalCount - 1) * CRYSTAL_STRIDE;
+            for (let k = 0; k < CRYSTAL_STRIDE; k++) {
+              crystalBuffer[o + k] = crystalBuffer[lastO + k];
+            }
+            crystalCount--;
+            i--;
+            continue;
+          }
+
+          const alpha = crystalBuffer[o + 5] * crystalBuffer[o + 6];
+          const sz = crystalBuffer[o + 4];
+
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(crystalBuffer[o], crystalBuffer[o + 1], sz * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = `rgba(56, 189, 248, ${(alpha * 0.5).toFixed(2)})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(crystalBuffer[o] - sz * 2, crystalBuffer[o + 1]);
+          ctx.lineTo(crystalBuffer[o] + sz * 2, crystalBuffer[o + 1]);
+          ctx.moveTo(crystalBuffer[o], crystalBuffer[o + 1] - sz * 2);
+          ctx.lineTo(crystalBuffer[o], crystalBuffer[o + 1] + sz * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // Tesla Lightning Arcs
+      if (lightningActive && lightningEnergy > 0.01) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        lightningEnergy = Math.max(0, lightningEnergy - dt * 1.15);
+
+        lightningChains.forEach((pts) => {
+          if (pts.length < 2) return;
+
+          // Outer Glow
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x, pts[0].y);
+          for (let p = 1; p < pts.length; p++) {
+            const jx = (Math.random() - 0.5) * 3;
+            const jy = (Math.random() - 0.5) * 3;
+            ctx.lineTo(pts[p].x + jx, pts[p].y + jy);
+          }
+          ctx.strokeStyle = `rgba(56, 189, 248, ${(lightningEnergy * 0.45).toFixed(3)})`;
+          ctx.lineWidth = 3.5;
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 14;
+          ctx.stroke();
+
+          // High Voltage White Filament
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x, pts[0].y);
+          for (let p = 1; p < pts.length; p++) {
+            ctx.lineTo(pts[p].x, pts[p].y);
+          }
+          ctx.strokeStyle = `rgba(255, 255, 255, ${(lightningEnergy * 0.95).toFixed(3)})`;
+          ctx.lineWidth = 1.2;
+          ctx.shadowColor = '#ffffff';
+          ctx.shadowBlur = 8;
+          ctx.stroke();
+        });
+
+        ctx.restore();
+      } else {
+        lightningActive = false;
+      }
+
+      updateClocks(now);
+      requestAnimationFrame(render);
+    }
+
+    window.addEventListener('resize', resize, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) lastTime = performance.now();
+    });
+
+    resize();
+    loadSavedApps();
+    requestAnimationFrame(render);
+  </script>
 </body>
 </html>
