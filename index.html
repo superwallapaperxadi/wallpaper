@@ -14,7 +14,7 @@
       --font-mono: 'JetBrains Mono', monospace;
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-light: rgba(255, 255, 255, 0.16);
-      --glass: rgba(255, 255, 255, 0.02);
+      --glass: rgba(255, 255, 255, 0.03);
     }
 
     * {
@@ -36,7 +36,7 @@
       position: relative;
     }
 
-    /* Pixel-Perfect Center-Locked Custom Reticle */
+    /* Pixel-Perfect Custom Cursor */
     .cursor-center-dot {
       position: fixed;
       top: 0;
@@ -46,7 +46,7 @@
       background: #ffffff;
       border-radius: 50%;
       pointer-events: none;
-      z-index: 100;
+      z-index: 200;
       will-change: transform;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
@@ -60,7 +60,7 @@
       border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
       pointer-events: none;
-      z-index: 99;
+      z-index: 199;
       will-change: transform, width, height, border-color;
       transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
                   height 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
@@ -73,6 +73,13 @@
       height: 68px;
       border-color: rgba(255, 255, 255, 0.8);
       background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    body.cursor-interactive .cursor-ambient-halo {
+      width: 54px;
+      height: 54px;
+      border-color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     /* Architectural Frame Lines */
@@ -119,28 +126,111 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      position: relative;
     }
 
-    .brand-cluster {
+    /* Top Left Hover App Drawer */
+    .apps-dock {
+      pointer-events: auto;
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px 6px 8px;
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid var(--border-subtle);
+      border-radius: 40px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      width: fit-content;
     }
 
-    .brand-name {
-      font-size: 0.72rem;
+    .apps-dock:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-light);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .apps-trigger {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 10px;
+      cursor: none;
+    }
+
+    .apps-trigger svg {
+      width: 14px;
+      height: 14px;
+      fill: rgba(255, 255, 255, 0.7);
+      transition: transform 0.3s ease;
+    }
+
+    .apps-dock:hover .apps-trigger svg {
+      transform: rotate(90deg);
+      fill: #ffffff;
+    }
+
+    .apps-label {
+      font-size: 0.68rem;
       font-weight: 800;
-      letter-spacing: 5px;
+      letter-spacing: 3.5px;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.5);
+      transition: color 0.2s ease;
     }
 
-    .brand-sub {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 2px;
-      color: rgba(255, 255, 255, 0.25);
-      text-transform: uppercase;
+    .apps-dock:hover .apps-label {
+      color: #ffffff;
+    }
+
+    .apps-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .apps-dock:hover .apps-list {
+      max-width: 200px;
+      opacity: 1;
+      transform: translateX(0);
+      margin-left: 4px;
+    }
+
+    .app-btn {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: none;
+      text-decoration: none;
+    }
+
+    .app-btn svg {
+      width: 17px;
+      height: 17px;
+      transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .app-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px) scale(1.08);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .app-btn:active {
+      transform: scale(0.94);
     }
 
     /* Minimal Time Block */
@@ -204,7 +294,7 @@
     @media (max-width: 800px) {
       .hud { padding: 36px; }
       .view-frame { inset: 14px; }
-      .brand-sub, .axiom { display: none; }
+      .axiom { display: none; }
       .time-digits { font-size: 1.6rem; }
     }
   </style>
@@ -225,10 +315,53 @@
 
   <div class="hud">
     <div class="row-top">
-      <div class="brand-cluster">
-        <span class="brand-name">Kinetic Frame</span>
-        <span class="brand-sub">Direct GPU Buffer Execution</span>
+      
+      <!-- Top Left Hover Menu -->
+      <div class="apps-dock" id="appsDock">
+        <div class="apps-trigger">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="apps-label">Apps</span>
+        </div>
+
+        <div class="apps-list">
+          <!-- Google Official SVG -->
+          <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="app-btn interactive-target" title="Google">
+            <svg viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+          </a>
+
+          <!-- Pinterest Official SVG -->
+          <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer" class="app-btn interactive-target" title="Pinterest">
+            <svg viewBox="0 0 24 24">
+              <path fill="#E60023" d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.332 1.357-.053.211-.174.256-.402.154-1.498-.697-2.435-2.887-2.435-4.647 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
+            </svg>
+          </a>
+
+          <!-- Instagram Official Multi-Color Gradient SVG -->
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="app-btn interactive-target" title="Instagram">
+            <svg viewBox="0 0 24 24">
+              <defs>
+                <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#FFDC80"/>
+                  <stop offset="25%" stop-color="#FCAF45"/>
+                  <stop offset="50%" stop-color="#F56040"/>
+                  <stop offset="75%" stop-color="#E1306C"/>
+                  <stop offset="100%" stop-color="#C13584"/>
+                </linearGradient>
+              </defs>
+              <path fill="url(#ig-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </a>
+        </div>
       </div>
+
+      <!-- Clock -->
       <div class="clock-cluster">
         <div class="time-digits" id="clockDigits">00:00:00</div>
         <div class="time-date" id="clockDate">INITIALIZING</div>
@@ -253,11 +386,11 @@
     const clockDigits = document.getElementById('clockDigits');
     const clockDate = document.getElementById('clockDate');
     const sessionTimer = document.getElementById('sessionTimer');
+    const appsDock = document.getElementById('appsDock');
 
     let width = 0;
     let height = 0;
 
-    // Mouse Tracking (Target vs Physics Position)
     const mouse = {
       x: -2000,
       y: -2000,
@@ -270,12 +403,10 @@
       prevY: 0
     };
 
-    // Particles Flat Buffer: [x, y, originX, originY, vx, vy, size, alpha]
     const STRIDE = 8;
     let pCount = 0;
     let pBuffer = null;
 
-    // Shockwave Ring Buffer: [x, y, radius, maxRadius, alpha]
     const MAX_SHOCKS = 3;
     const shocks = new Float32Array(MAX_SHOCKS * 5);
     let shockIdx = 0;
@@ -352,9 +483,9 @@
       const o = shockIdx * 5;
       shocks[o] = x;
       shocks[o + 1] = y;
-      shocks[o + 2] = 2;   // radius
-      shocks[o + 3] = 320; // maxRadius
-      shocks[o + 4] = 0.75; // alpha
+      shocks[o + 2] = 2;
+      shocks[o + 3] = 320;
+      shocks[o + 4] = 0.75;
       shockIdx = (shockIdx + 1) % MAX_SHOCKS;
     }
 
@@ -364,21 +495,17 @@
       const dt = Math.min((now - prevTime) / 1000, 0.033);
       prevTime = now;
 
-      // Mouse Interpolation
       mouse.x += (mouse.tx - mouse.x) * 0.22;
       mouse.y += (mouse.ty - mouse.y) * 0.22;
 
-      // Center-Lock Custom Cursor Transform
       cursorDot.style.transform = `translate3d(${mouse.tx - 2.5}px, ${mouse.ty - 2.5}px, 0)`;
       cursorHalo.style.transform = `translate3d(${mouse.x - cursorHalo.offsetWidth * 0.5}px, ${mouse.y - cursorHalo.offsetHeight * 0.5}px, 0)`;
 
-      // Pure Black Canvas Clear
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
 
       updateClock(now);
 
-      // Render Active Shockwaves
       for (let i = 0; i < MAX_SHOCKS; i++) {
         const o = i * 5;
         const alpha = shocks[o + 4];
@@ -396,7 +523,6 @@
         }
       }
 
-      // Particle Physics Engine
       const mx = mouse.x;
       const my = mouse.y;
       const mRad = mouse.radius;
@@ -419,18 +545,15 @@
         const dy = my - py;
         const distSq = dx * dx + dy * dy;
 
-        // Force calculations
         if (distSq < mRadSq && distSq > 0.01) {
           const dist = Math.sqrt(distSq);
           const force = (1 - dist / mRad);
 
           if (isDown) {
-            // Implode / Vortex
             const angle = Math.atan2(dy, dx) + 1.57;
             vx += (dx / dist) * force * 30 + Math.cos(angle) * force * 15;
             vy += (dy / dist) * force * 30 + Math.sin(angle) * force * 15;
           } else {
-            // Explosive dispersal
             const angle = Math.atan2(dy, dx);
             const push = force * (18 + speedMult * 8);
             vx -= Math.cos(angle) * push;
@@ -438,7 +561,6 @@
           }
         }
 
-        // Viscous Spring Damping
         const spring = 8.8;
         const damping = Math.pow(0.83, dt * 60);
 
@@ -455,7 +577,6 @@
         pBuffer[o + 4] = vx;
         pBuffer[o + 5] = vy;
 
-        // Kinetic glow on movement
         const vel = Math.hypot(vx, vy);
         const finalAlpha = Math.min(alpha + vel * 0.05, 1.0);
 
@@ -477,11 +598,14 @@
     });
 
     window.addEventListener('mousedown', (e) => {
+      // Buttons par click hone par particle shockwave suppress ho sake
+      if (e.target.closest('.interactive-target') || e.target.closest('.apps-dock')) {
+        return;
+      }
       mouse.isDown = true;
       mouse.radius = 240;
       addShockwave(e.clientX, e.clientY);
 
-      // Radial shockwave impulse to particles
       for (let i = 0; i < pCount; i++) {
         const o = i * STRIDE;
         const dx = pBuffer[o] - e.clientX;
@@ -505,6 +629,12 @@
       mouse.tx = -2000;
       mouse.ty = -2000;
       mouse.isDown = false;
+    });
+
+    // Custom Interactive Hover Feedback
+    document.querySelectorAll('.interactive-target, .apps-dock').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-interactive'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-interactive'));
     });
 
     initTypography();
