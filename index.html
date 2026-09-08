@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimalist Focus Engine - Ultra Performance</title>
+  <title>Aethelgard Core Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;700;900&family=JetBrains+Mono:wght@300;500;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #020204;
-      --border-subtle: rgba(255, 255, 255, 0.07);
-      --font-display: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --bg: #000000;
+      --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.16);
+      --glass: rgba(255, 255, 255, 0.02);
     }
 
     * {
@@ -28,692 +30,485 @@
       height: 100vh;
       background: var(--bg);
       overflow: hidden;
-      font-family: var(--font-display);
+      font-family: var(--font-main);
+      color: #ffffff;
+      cursor: none;
       position: relative;
-      cursor: crosshair;
     }
 
-    /* Fixed 60FPS Scanline Grid (Zero paint cost) */
-    .scanlines {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
-      background-size: 100% 4px;
-      pointer-events: none;
-      z-index: 6;
-      opacity: 0.35;
-      transform: translateZ(0);
-    }
-
-    /* Architectural Viewport Frame */
-    .frame-border {
-      position: fixed;
-      inset: 24px;
-      border: 1px solid var(--border-subtle);
-      pointer-events: none;
-      z-index: 10;
-      transform: translateZ(0);
-    }
-
-    .corner-tick {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-color: rgba(255, 255, 255, 0.5);
-    }
-    .top-left { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
-    .top-right { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
-    .bottom-left { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
-    .bottom-right { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
-
-    /* Decoupled GPU Spotlight */
-    .spotlight {
+    /* Pixel-Perfect Center-Locked Custom Reticle */
+    .cursor-center-dot {
       position: fixed;
       top: 0;
       left: 0;
-      width: 700px;
-      height: 700px;
-      pointer-events: none;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 65%);
-      z-index: 1;
-      transform: translate(-50%, -50%) translateZ(0);
-      will-change: transform;
-      mix-blend-mode: screen;
-    }
-
-    /* Precision Kinetic Reticle */
-    .cursor-halo {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 44px;
-      height: 44px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 5px;
+      height: 5px;
+      background: #ffffff;
       border-radius: 50%;
       pointer-events: none;
-      transform: translate(-50%, -50%) translateZ(0);
-      z-index: 8;
+      z-index: 100;
       will-change: transform;
-      transition: width 0.25s ease, height 0.25s ease, border-color 0.2s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
 
-    body:active .cursor-halo {
-      width: 70px;
-      height: 70px;
-      border-color: rgba(255, 255, 255, 0.6);
+    .cursor-ambient-halo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99;
+      will-change: transform, width, height, border-color;
+      transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                  height 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                  border-color 0.2s ease,
+                  background-color 0.2s ease;
     }
+
+    body:active .cursor-ambient-halo {
+      width: 68px;
+      height: 68px;
+      border-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Architectural Frame Lines */
+    .view-frame {
+      position: fixed;
+      inset: 28px;
+      border: 1px solid var(--border-subtle);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    .c-tl { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+    .c-tr { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
+    .c-bl { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
+    .c-br { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
 
     canvas#stage {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      z-index: 2;
-      transform: translateZ(0);
+      z-index: 1;
     }
 
-    /* High Density HUD Layer */
-    .hud-layer {
+    /* Swiss Clean HUD */
+    .hud {
       position: absolute;
       inset: 0;
-      pointer-events: none;
-      z-index: 5;
-      padding: 55px 70px;
+      padding: 60px 72px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transform: translateZ(0);
+      pointer-events: none;
+      z-index: 10;
     }
 
-    .top-row {
+    .row-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      position: relative;
     }
 
-    /* Swiss Horology & Mindset Core Cluster */
-    .telemetry-cluster {
-      pointer-events: auto;
+    .brand-cluster {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-    }
-
-    .mindset-block {
-      font-size: 0.82rem;
-      font-weight: 300;
-      letter-spacing: 5px;
-      color: rgba(255, 255, 255, 0.35);
-      line-height: 1.35;
-      text-transform: uppercase;
-    }
-
-    .mindset-block .bold {
-      display: block;
-      font-weight: 900;
-      font-size: 1.5rem;
-      letter-spacing: 2px;
-      color: #ffffff;
-      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
-    }
-
-    .time-card {
-      padding: 14px 20px;
-      background: rgba(255, 255, 255, 0.015);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(14px);
-      border-radius: 6px;
-      display: inline-flex;
-      flex-direction: column;
       gap: 6px;
-      width: fit-content;
     }
 
-    .time-main {
-      font-family: var(--font-mono);
-      font-size: 1.55rem;
+    .brand-name {
+      font-size: 0.72rem;
       font-weight: 800;
-      letter-spacing: 2.5px;
-      color: #ffffff;
-      text-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
     }
 
-    .time-main .ampm {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.45);
-      letter-spacing: 1px;
-    }
-
-    .date-sub {
+    .brand-sub {
       font-family: var(--font-mono);
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 2.5px;
-      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.25);
       text-transform: uppercase;
     }
 
-    /* Sub-second Micro Gauge */
-    .second-progress-track {
-      width: 100%;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-top: 2px;
-    }
-
-    .second-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #ffffff;
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-      transition: width 0.08s linear;
-    }
-
-    .sanskrit-title {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.2rem;
-      letter-spacing: 7px;
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 200;
-      text-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
-      padding: 7px 24px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(14px);
-      border-radius: 40px;
-    }
-
-    .top-right-metrics {
+    /* Minimal Time Block */
+    .clock-cluster {
       display: flex;
-      gap: 12px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .time-digits {
+      font-family: var(--font-mono);
+      font-size: 2.1rem;
+      font-weight: 400;
+      letter-spacing: 3px;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .time-date {
       font-family: var(--font-mono);
       font-size: 0.68rem;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
       color: rgba(255, 255, 255, 0.35);
     }
 
-    .metric-chip {
-      padding: 6px 14px;
-      border: 1px solid var(--border-subtle);
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(12px);
-      border-radius: 4px;
-    }
-
-    .metric-chip span {
-      color: #ffffff;
-      font-weight: 700;
-    }
-
-    .bottom-row {
+    .row-bottom {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
     }
 
-    .system-status {
+    .telemetry {
       font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 2px;
-      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.65rem;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
-      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .pulse-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background: #00ff88;
+    .pip {
+      width: 5px;
+      height: 5px;
+      background: #ffffff;
       border-radius: 50%;
-      margin-right: 8px;
-      box-shadow: 0 0 10px #00ff88;
-      animation: pulse 2.4s infinite ease-in-out;
+      box-shadow: 0 0 10px #ffffff;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 0.3; transform: scale(0.9); }
-      50% { opacity: 1; transform: scale(1.2); }
+    .axiom {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.25);
     }
 
-    .system-status .live-counter {
-      color: #ffffff;
-      font-weight: 700;
-    }
-
-    .dont-quit {
-      text-align: right;
-      font-size: 1.45rem;
-      font-weight: 900;
-      letter-spacing: 3.5px;
-      color: rgba(255, 255, 255, 0.12);
-      line-height: 1.15;
-    }
-
-    .dont-quit span.highlight {
-      color: #ffffff;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-    }
-
-    @media (max-width: 900px) {
-      .hud-layer { padding: 30px; }
-      .sanskrit-title, .top-right-metrics { display: none; }
-      .frame-border { inset: 12px; }
+    @media (max-width: 800px) {
+      .hud { padding: 36px; }
+      .view-frame { inset: 14px; }
+      .brand-sub, .axiom { display: none; }
+      .time-digits { font-size: 1.6rem; }
     }
   </style>
 </head>
 <body>
 
-  <div class="frame-border">
-    <div class="corner-tick top-left"></div>
-    <div class="corner-tick top-right"></div>
-    <div class="corner-tick bottom-left"></div>
-    <div class="corner-tick bottom-right"></div>
+  <div class="cursor-center-dot" id="cursorDot"></div>
+  <div class="cursor-ambient-halo" id="cursorHalo"></div>
+
+  <div class="view-frame">
+    <div class="corner c-tl"></div>
+    <div class="corner c-tr"></div>
+    <div class="corner c-bl"></div>
+    <div class="corner c-br"></div>
   </div>
 
-  <div class="scanlines"></div>
-  <div class="cursor-halo" id="cursorHalo"></div>
-  <div class="spotlight" id="spotlight"></div>
   <canvas id="stage"></canvas>
 
-  <div class="hud-layer">
-    <div class="top-row">
-      <!-- Luxury Left Telemetry & Mindset Block -->
-      <div class="telemetry-cluster">
-        <div class="mindset-block">
-          MINDSET<br>
-          <span class="bold">IS EVERYTHING</span>
-        </div>
-        
-        <div class="time-card">
-          <div class="time-main">
-            <span id="clockTime">00:00:00</span>
-            <span class="ampm" id="clockAmPm">AM</span>
-          </div>
-          <div class="date-sub" id="clockDate">INITIALIZING...</div>
-          <div class="second-progress-track">
-            <div class="second-progress-fill" id="secGauge"></div>
-          </div>
-        </div>
+  <div class="hud">
+    <div class="row-top">
+      <div class="brand-cluster">
+        <span class="brand-name">Kinetic Frame</span>
+        <span class="brand-sub">Direct GPU Buffer Execution</span>
       </div>
-
-      <div class="sanskrit-title">
-        सर्वं सम्भाव्यते त्वयि ।
-      </div>
-
-      <div class="top-right-metrics">
-        <div class="metric-chip">BUFFER <span id="memIndicator">STATIC</span></div>
-        <div class="metric-chip">FPS <span id="fpsCounter">60</span></div>
+      <div class="clock-cluster">
+        <div class="time-digits" id="clockDigits">00:00:00</div>
+        <div class="time-date" id="clockDate">INITIALIZING</div>
       </div>
     </div>
 
-    <div class="bottom-row">
-      <div class="system-status">
-        <span class="pulse-dot"></span>QUANTUM FOCUS ENGINE<br>
-        [SESSION LOCK] <span id="sessionTimer" class="live-counter">00:00:00.0</span>
+    <div class="row-bottom">
+      <div class="telemetry">
+        <span class="pip"></span>
+        <span>UPTIME</span>
+        <span id="sessionTimer" style="color: #ffffff;">00:00:00</span>
       </div>
-
-      <div class="dont-quit">
-        <span class="highlight">DO</span>N'T<br>
-        QU<span class="highlight">IT!</span>
-      </div>
+      <div class="axiom">FOCUS IS A VECTOR</div>
     </div>
   </div>
 
   <script>
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-    const spotlight = document.getElementById('spotlight');
+    const cursorDot = document.getElementById('cursorDot');
     const cursorHalo = document.getElementById('cursorHalo');
-    const timerElem = document.getElementById('sessionTimer');
-    const fpsElem = document.getElementById('fpsCounter');
-    
-    // Live Clock Nodes
-    const clockTimeElem = document.getElementById('clockTime');
-    const clockAmPmElem = document.getElementById('clockAmPm');
-    const clockDateElem = document.getElementById('clockDate');
-    const secGauge = document.getElementById('secGauge');
+    const clockDigits = document.getElementById('clockDigits');
+    const clockDate = document.getElementById('clockDate');
+    const sessionTimer = document.getElementById('sessionTimer');
 
-    let width = 0, height = 0;
-    const mouse = { x: -2000, y: -2000, radius: 150, isDown: false, prevX: 0, prevY: 0, speed: 0 };
+    let width = 0;
+    let height = 0;
 
-    // ==========================================
-    // ZERO-GARBAGE FLAT MEMORY BUFFERS
-    // ==========================================
-    // Particles Buffer: [x, y, originX, originY, vx, vy]
-    let particleCount = 0;
-    let particleBuffer = null;
-    const P_STRIDE = 6;
+    // Mouse Tracking (Target vs Physics Position)
+    const mouse = {
+      x: -2000,
+      y: -2000,
+      tx: -2000,
+      ty: -2000,
+      radius: 155,
+      isDown: false,
+      speed: 0,
+      prevX: 0,
+      prevY: 0
+    };
 
-    // Stars Buffer: [x, y, size, alpha, twinkleSpeed]
-    let starCount = 0;
-    let starBuffer = null;
-    const S_STRIDE = 5;
+    // Particles Flat Buffer: [x, y, originX, originY, vx, vy, size, alpha]
+    const STRIDE = 8;
+    let pCount = 0;
+    let pBuffer = null;
 
-    // Fixed Ring Buffer for Shockwaves (Max 4 concurrent, avoids array allocations)
-    const MAX_SHOCKWAVES = 4;
-    const shockwaveBuffer = new Float32Array(MAX_SHOCKWAVES * 4); // [x, y, radius, alpha]
-    let shockwaveIndex = 0;
+    // Shockwave Ring Buffer: [x, y, radius, maxRadius, alpha]
+    const MAX_SHOCKS = 3;
+    const shocks = new Float32Array(MAX_SHOCKS * 5);
+    let shockIdx = 0;
 
-    // Real-Time Clock & Sub-second Progression
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    let lastClockUpdate = 0;
+    const startTime = performance.now();
 
-    function updateLiveClock(nowMs) {
-      if (nowMs - lastClockUpdate < 100) return;
-      lastClockUpdate = nowMs;
+    function updateClock(now) {
+      const d = new Date();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      const s = String(d.getSeconds()).padStart(2, '0');
 
-      const now = new Date();
-      let hours = now.getHours();
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = now.getSeconds();
-      const ms = now.getMilliseconds();
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      
-      hours = hours % 12 || 12;
-      clockTimeElem.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${String(seconds).padStart(2, '0')}`;
-      clockAmPmElem.textContent = ampm;
+      clockDigits.textContent = `${h}:${m}:${s}`;
+      clockDate.textContent = `${days[d.getDay()]} / ${String(d.getDate()).padStart(2, '0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
 
-      // Smooth 60-second micro-bar
-      const secProgress = ((seconds + ms / 1000) / 60) * 100;
-      secGauge.style.width = `${secProgress.toFixed(1)}%`;
-
-      clockDateElem.textContent = `${days[now.getDay()]} • ${String(now.getDate()).padStart(2, '0')} ${months[now.getMonth()]} ${now.getFullYear()}`;
+      const sec = Math.floor((now - startTime) / 1000);
+      const sh = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const sm = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const ss = String(sec % 60).padStart(2, '0');
+      sessionTimer.textContent = `${sh}:${sm}:${ss}`;
     }
 
-    // Precise Session Watch
-    const sessionStart = performance.now();
-    function updateTimer(now) {
-      const elapsed = now - sessionStart;
-      const ms = Math.floor((elapsed % 1000) / 100);
-      const s = Math.floor((elapsed / 1000) % 60);
-      const m = Math.floor((elapsed / (1000 * 60)) % 60);
-      const h = Math.floor(elapsed / (1000 * 60 * 60));
-      timerElem.textContent = 
-        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${ms}`;
-    }
-
-    // Audio Engine: Single Shared Instance (528Hz Solfeggio)
-    let audioCtx = null;
-    function initAtmosphericAudio() {
-      if (audioCtx) return;
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc1 = audioCtx.createOscillator();
-        const gain1 = audioCtx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(132, audioCtx.currentTime);
-        gain1.gain.setValueAtTime(0.015, audioCtx.currentTime);
-
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(198, audioCtx.currentTime);
-        gain2.gain.setValueAtTime(0.01, audioCtx.currentTime);
-
-        osc1.connect(gain1);
-        osc2.connect(gain2);
-        gain1.connect(audioCtx.destination);
-        gain2.connect(audioCtx.destination);
-
-        osc1.start();
-        osc2.start();
-      } catch(e) {}
-    }
-
-    function init() {
+    function initTypography() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
 
-      // 1. Initialize Flat Memory for Stars
-      starCount = Math.floor((width * height) / 4500);
-      starBuffer = new Float32Array(starCount * S_STRIDE);
-      for (let i = 0; i < starCount; i++) {
-        const offset = i * S_STRIDE;
-        starBuffer[offset] = Math.random() * width;
-        starBuffer[offset + 1] = Math.random() * height;
-        starBuffer[offset + 2] = Math.random() < 0.94 ? Math.random() * 1.0 + 0.3 : Math.random() * 1.8 + 1.0;
-        starBuffer[offset + 3] = Math.random() * 0.6 + 0.1; // Alpha
-        starBuffer[offset + 4] = Math.random() * 0.01 + 0.004; // Speed
-      }
+      const off = document.createElement('canvas');
+      off.width = width;
+      off.height = height;
+      const offCtx = off.getContext('2d');
 
-      // 2. Rasterize Typography to Flat Memory
-      const offscreen = document.createElement('canvas');
-      offscreen.width = width;
-      offscreen.height = height;
-      const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
-
-      const baseFont = Math.min(width * 0.11, 140);
+      const fontSize = Math.min(width * 0.125, 150);
       offCtx.fillStyle = '#ffffff';
       offCtx.textAlign = 'center';
       offCtx.textBaseline = 'middle';
+      offCtx.font = `900 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+      offCtx.fillText('FOCUS', width / 2, height / 2);
 
-      // DO MORE.
-      offCtx.font = `900 ${baseFont * 0.5}px "Plus Jakarta Sans", sans-serif`;
-      offCtx.letterSpacing = "8px";
-      offCtx.fillText("DO MORE.", width / 2, height / 2 - baseFont * 0.42);
-
-      // FOCUS
-      offCtx.font = `900 ${baseFont}px "Plus Jakarta Sans", sans-serif`;
-      offCtx.letterSpacing = "6px";
-      offCtx.fillText("FOCUS", width / 2, height / 2 + baseFont * 0.36);
-
-      const imgData = offCtx.getImageData(0, 0, width, height).data;
-      const step = 6; // Optimized spatial grid for Lively Wallpaper background
-      const tempCoords = [];
+      const img = offCtx.getImageData(0, 0, width, height).data;
+      const step = Math.max(Math.floor(width / 340), 4);
+      const coords = [];
 
       for (let y = 0; y < height; y += step) {
         for (let x = 0; x < width; x += step) {
-          const alphaIndex = (y * width + x) * 4 + 3;
-          if (imgData[alphaIndex] > 140) {
-            tempCoords.push(x, y);
+          const idx = (y * width + x) * 4 + 3;
+          if (img[idx] > 128) {
+            coords.push(x, y);
           }
         }
       }
 
-      particleCount = tempCoords.length / 2;
-      particleBuffer = new Float32Array(particleCount * P_STRIDE);
+      pCount = coords.length / 2;
+      pBuffer = new Float32Array(pCount * STRIDE);
 
-      for (let i = 0; i < particleCount; i++) {
-        const pOffset = i * P_STRIDE;
-        const tx = tempCoords[i * 2];
-        const ty = tempCoords[i * 2 + 1];
+      for (let i = 0; i < pCount; i++) {
+        const o = i * STRIDE;
+        const ox = coords[i * 2];
+        const oy = coords[i * 2 + 1];
 
-        particleBuffer[pOffset] = tx + (Math.random() - 0.5) * 40;     // current x
-        particleBuffer[pOffset + 1] = ty + (Math.random() - 0.5) * 40; // current y
-        particleBuffer[pOffset + 2] = tx;                             // origin x
-        particleBuffer[pOffset + 3] = ty;                             // origin y
-        particleBuffer[pOffset + 4] = 0;                              // vx
-        particleBuffer[pOffset + 5] = 0;                              // vy
+        pBuffer[o] = ox + (Math.random() - 0.5) * 30;
+        pBuffer[o + 1] = oy + (Math.random() - 0.5) * 30;
+        pBuffer[o + 2] = ox;
+        pBuffer[o + 3] = oy;
+        pBuffer[o + 4] = 0;
+        pBuffer[o + 5] = 0;
+        pBuffer[o + 6] = Math.random() * 1.3 + 0.9;
+        pBuffer[o + 7] = Math.random() * 0.35 + 0.55;
       }
     }
 
-    // Trigger Shockwave in Ring Buffer
-    function triggerShockwave(x, y) {
-      const offset = shockwaveIndex * 4;
-      shockwaveBuffer[offset] = x;
-      shockwaveBuffer[offset + 1] = y;
-      shockwaveBuffer[offset + 2] = 5;    // Initial radius
-      shockwaveBuffer[offset + 3] = 0.55; // Initial alpha
-      shockwaveIndex = (shockwaveIndex + 1) % MAX_SHOCKWAVES;
+    function addShockwave(x, y) {
+      const o = shockIdx * 5;
+      shocks[o] = x;
+      shocks[o + 1] = y;
+      shocks[o + 2] = 2;   // radius
+      shocks[o + 3] = 320; // maxRadius
+      shocks[o + 4] = 0.75; // alpha
+      shockIdx = (shockIdx + 1) % MAX_SHOCKS;
     }
 
-    let lastFrame = performance.now();
-    let frameCount = 0;
+    let prevTime = performance.now();
 
-    function animate(now) {
-      // 1. Direct Background Fill (Fastest clear pattern)
-      ctx.fillStyle = '#020204';
+    function render(now) {
+      const dt = Math.min((now - prevTime) / 1000, 0.033);
+      prevTime = now;
+
+      // Mouse Interpolation
+      mouse.x += (mouse.tx - mouse.x) * 0.22;
+      mouse.y += (mouse.ty - mouse.y) * 0.22;
+
+      // Center-Lock Custom Cursor Transform
+      cursorDot.style.transform = `translate3d(${mouse.tx - 2.5}px, ${mouse.ty - 2.5}px, 0)`;
+      cursorHalo.style.transform = `translate3d(${mouse.x - cursorHalo.offsetWidth * 0.5}px, ${mouse.y - cursorHalo.offsetHeight * 0.5}px, 0)`;
+
+      // Pure Black Canvas Clear
+      ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Update Clocks & Timers
-      updateLiveClock(now);
-      updateTimer(now);
+      updateClock(now);
 
-      // 3. Render Stars (Single Batch Loop)
-      for (let i = 0; i < starCount; i++) {
-        const o = i * S_STRIDE;
-        let alpha = starBuffer[o + 3] + starBuffer[o + 4];
-        if (alpha > 0.75 || alpha < 0.08) starBuffer[o + 4] = -starBuffer[o + 4];
-        starBuffer[o + 3] = alpha;
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
-        const size = starBuffer[o + 2];
-        ctx.fillRect(starBuffer[o], starBuffer[o + 1], size, size);
-      }
-
-      // 4. Render Active Shockwaves
-      for (let i = 0; i < MAX_SHOCKWAVES; i++) {
-        const o = i * 4;
-        const alpha = shockwaveBuffer[o + 3];
+      // Render Active Shockwaves
+      for (let i = 0; i < MAX_SHOCKS; i++) {
+        const o = i * 5;
+        const alpha = shocks[o + 4];
         if (alpha > 0.01) {
-          shockwaveBuffer[o + 2] += 12; // radius += speed
-          shockwaveBuffer[o + 3] *= 0.93; // alpha decay
+          shocks[o + 2] += (shocks[o + 3] - shocks[o + 2]) * 0.12;
+          shocks[o + 4] *= 0.93;
 
+          ctx.save();
           ctx.strokeStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
           ctx.lineWidth = 1.2;
           ctx.beginPath();
-          ctx.arc(shockwaveBuffer[o], shockwaveBuffer[o + 1], shockwaveBuffer[o + 2], 0, 6.283);
+          ctx.arc(shocks[o], shocks[o + 1], shocks[o + 2], 0, 6.283);
           ctx.stroke();
+          ctx.restore();
         }
       }
 
-      // 5. Update & Render Kinetic Particle Typography
-      const mRadius = mouse.radius;
-      const mRadiusSq = mRadius * mRadius;
-      const isMouseDown = mouse.isDown;
-      const mX = mouse.x;
-      const mY = mouse.y;
-      const mSpeed = mouse.speed;
+      // Particle Physics Engine
+      const mx = mouse.x;
+      const my = mouse.y;
+      const mRad = mouse.radius;
+      const mRadSq = mRad * mRad;
+      const isDown = mouse.isDown;
+      const speedMult = Math.min(mouse.speed * 0.04, 3.5);
 
-      for (let i = 0; i < particleCount; i++) {
-        const o = i * P_STRIDE;
-        let px = particleBuffer[o];
-        let py = particleBuffer[o + 1];
-        const ox = particleBuffer[o + 2];
-        const oy = particleBuffer[o + 3];
-        let vx = particleBuffer[o + 4];
-        let vy = particleBuffer[o + 5];
+      for (let i = 0; i < pCount; i++) {
+        const o = i * STRIDE;
+        let px = pBuffer[o];
+        let py = pBuffer[o + 1];
+        const ox = pBuffer[o + 2];
+        const oy = pBuffer[o + 3];
+        let vx = pBuffer[o + 4];
+        let vy = pBuffer[o + 5];
+        const size = pBuffer[o + 6];
+        const alpha = pBuffer[o + 7];
 
-        const dx = mX - px;
-        const dy = mY - py;
+        const dx = mx - px;
+        const dy = my - py;
         const distSq = dx * dx + dy * dy;
 
-        if (distSq < mRadiusSq && distSq > 0.01) {
+        // Force calculations
+        if (distSq < mRadSq && distSq > 0.01) {
           const dist = Math.sqrt(distSq);
-          const force = (mRadius - dist) / mRadius;
+          const force = (1 - dist / mRad);
 
-          if (isMouseDown) {
-            // Orbital pull
+          if (isDown) {
+            // Implode / Vortex
             const angle = Math.atan2(dy, dx) + 1.57;
-            vx += (dx / dist) * force * 14 + Math.cos(angle) * force * 10;
-            vy += (dy / dist) * force * 14 + Math.sin(angle) * force * 10;
+            vx += (dx / dist) * force * 30 + Math.cos(angle) * force * 15;
+            vy += (dy / dist) * force * 30 + Math.sin(angle) * force * 15;
           } else {
-            // High velocity repulsion
+            // Explosive dispersal
             const angle = Math.atan2(dy, dx);
-            const push = force * 22 * (1 + mSpeed * 0.04);
+            const push = force * (18 + speedMult * 8);
             vx -= Math.cos(angle) * push;
             vy -= Math.sin(angle) * push;
           }
         }
 
-        // Return vector with friction and spring damping
-        vx += (ox - px) * 0.075;
-        vy += (oy - py) * 0.075;
-        vx *= 0.85;
-        vy *= 0.85;
+        // Viscous Spring Damping
+        const spring = 8.8;
+        const damping = Math.pow(0.83, dt * 60);
+
+        vx += (ox - px) * spring * dt;
+        vy += (oy - py) * spring * dt;
+        vx *= damping;
+        vy *= damping;
 
         px += vx;
         py += vy;
 
-        particleBuffer[o] = px;
-        particleBuffer[o + 1] = py;
-        particleBuffer[o + 4] = vx;
-        particleBuffer[o + 5] = vy;
+        pBuffer[o] = px;
+        pBuffer[o + 1] = py;
+        pBuffer[o + 4] = vx;
+        pBuffer[o + 5] = vy;
 
-        // Chromatic split on fast movement
-        const velSq = vx * vx + vy * vy;
-        if (velSq > 36) {
-          const shift = Math.min(Math.sqrt(velSq) * 0.4, 4.0);
-          ctx.fillStyle = 'rgba(255, 40, 60, 0.65)';
-          ctx.fillRect(px - shift, py, 2.2, 2.2);
-          ctx.fillStyle = 'rgba(30, 200, 255, 0.65)';
-          ctx.fillRect(px + shift, py, 2.2, 2.2);
-        }
+        // Kinetic glow on movement
+        const vel = Math.hypot(vx, vy);
+        const finalAlpha = Math.min(alpha + vel * 0.05, 1.0);
 
-        // Core White Node
-        ctx.fillStyle = distSq < mRadiusSq ? '#ffffff' : 'rgba(255, 255, 255, 0.68)';
-        ctx.fillRect(px - 1.1, py - 1.1, 2.2, 2.2);
+        ctx.fillStyle = finalAlpha > 0.85 ? '#ffffff' : `rgba(255, 255, 255, ${finalAlpha.toFixed(2)})`;
+        ctx.fillRect(px - size * 0.5, py - size * 0.5, size, size);
       }
 
-      mouse.speed *= 0.85;
-
-      // 6. Real-time Framerate Meter
-      frameCount++;
-      if (now - lastFrame >= 1000) {
-        fpsElem.textContent = frameCount;
-        frameCount = 0;
-        lastFrame = now;
-      }
-
-      requestAnimationFrame(animate);
+      mouse.speed *= 0.88;
+      requestAnimationFrame(render);
     }
 
     // Hardware Event Handlers
-    window.addEventListener('resize', init);
+    window.addEventListener('resize', initTypography);
 
     window.addEventListener('mousemove', (e) => {
       mouse.speed = Math.hypot(e.clientX - mouse.prevX, e.clientY - mouse.prevY);
-      mouse.prevX = mouse.x = e.clientX;
-      mouse.prevY = mouse.y = e.clientY;
-
-      // GPU Transform Updates (Bypasses CSS Layout recalculations)
-      spotlight.style.transform = `translate(${e.clientX - 350}px, ${e.clientY - 350}px) translateZ(0)`;
-      cursorHalo.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translateZ(0)`;
+      mouse.prevX = mouse.tx = e.clientX;
+      mouse.prevY = mouse.ty = e.clientY;
     });
 
     window.addEventListener('mousedown', (e) => {
       mouse.isDown = true;
-      initAtmosphericAudio();
-      triggerShockwave(e.clientX, e.clientY);
+      mouse.radius = 240;
+      addShockwave(e.clientX, e.clientY);
 
-      // Radial impulse to particles
-      for (let i = 0; i < particleCount; i++) {
-        const o = i * P_STRIDE;
-        const dx = particleBuffer[o] - e.clientX;
-        const dy = particleBuffer[o + 1] - e.clientY;
+      // Radial shockwave impulse to particles
+      for (let i = 0; i < pCount; i++) {
+        const o = i * STRIDE;
+        const dx = pBuffer[o] - e.clientX;
+        const dy = pBuffer[o + 1] - e.clientY;
         const distSq = dx * dx + dy * dy;
-        if (distSq < 78400 && distSq > 0.01) { // 280px radius squared
+        if (distSq < 62500 && distSq > 1) {
           const dist = Math.sqrt(distSq);
-          const push = (1 - dist / 280) * 45;
-          particleBuffer[o + 4] += (dx / dist) * push;
-          particleBuffer[o + 5] += (dy / dist) * push;
+          const push = (1 - dist / 250) * 48;
+          pBuffer[o + 4] += (dx / dist) * push;
+          pBuffer[o + 5] += (dy / dist) * push;
         }
       }
     });
 
     window.addEventListener('mouseup', () => {
       mouse.isDown = false;
+      mouse.radius = 155;
     });
 
     window.addEventListener('mouseleave', () => {
-      mouse.x = -2000;
-      mouse.y = -2000;
+      mouse.tx = -2000;
+      mouse.ty = -2000;
       mouse.isDown = false;
     });
 
-    init();
-    requestAnimationFrame(animate);
+    initTypography();
+    requestAnimationFrame(render);
   </script>
 </body>
 </html>
