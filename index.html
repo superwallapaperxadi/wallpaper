@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aethelgard Core Engine</title>
+  <title>Aethelgard Monolith Core</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #000000;
       --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-light: rgba(255, 255, 255, 0.16);
-      --glass: rgba(255, 255, 255, 0.03);
+      --border-light: rgba(255, 255, 255, 0.22);
+      --glass: rgba(14, 14, 18, 0.75);
     }
 
     * {
@@ -32,60 +32,31 @@
       overflow: hidden;
       font-family: var(--font-main);
       color: #ffffff;
-      cursor: none;
+      cursor: crosshair;
       position: relative;
     }
 
-    /* Pixel-Perfect Custom Cursor */
-    .cursor-center-dot {
+    /* Ambient Field */
+    .ambient-field {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 5px;
-      height: 5px;
-      background: #ffffff;
-      border-radius: 50%;
+      inset: 0;
       pointer-events: none;
-      z-index: 200;
-      will-change: transform;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      z-index: 1;
+      background: radial-gradient(circle 550px at var(--mx, -500px) var(--my, -500px), rgba(255, 255, 255, 0.04), transparent 75%);
     }
 
-    .cursor-ambient-halo {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 199;
-      will-change: transform, width, height, border-color;
-      transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
-                  height 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
-                  border-color 0.2s ease,
-                  background-color 0.2s ease;
+    canvas#stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
     }
 
-    body:active .cursor-ambient-halo {
-      width: 68px;
-      height: 68px;
-      border-color: rgba(255, 255, 255, 0.8);
-      background-color: rgba(255, 255, 255, 0.03);
-    }
-
-    body.cursor-interactive .cursor-ambient-halo {
-      width: 54px;
-      height: 54px;
-      border-color: rgba(255, 255, 255, 0.9);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    /* Architectural Frame Lines */
+    /* View Frame */
     .view-frame {
       position: fixed;
-      inset: 28px;
+      inset: 24px;
       border: 1px solid var(--border-subtle);
       pointer-events: none;
       z-index: 5;
@@ -93,28 +64,20 @@
 
     .corner {
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-color: rgba(255, 255, 255, 0.4);
     }
-    .c-tl { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
-    .c-tr { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
-    .c-bl { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
-    .c-br { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
+    .c-tl { top: -1px; left: -1px; border-top: 1.5px solid; border-left: 1.5px solid; }
+    .c-tr { top: -1px; right: -1px; border-top: 1.5px solid; border-right: 1.5px solid; }
+    .c-bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+    .c-br { bottom: -1px; right: -1px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
 
-    canvas#stage {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-
-    /* Swiss Clean HUD */
+    /* HUD Architecture */
     .hud {
       position: absolute;
       inset: 0;
-      padding: 60px 72px;
+      padding: 48px 56px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -126,58 +89,66 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+    }
+
+    /* Docks Cluster */
+    .docks-cluster {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .apps-dock {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px 5px 8px;
+      background: var(--glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 40px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      width: fit-content;
       position: relative;
     }
 
-    /* Top Left Hover App Drawer */
-    .apps-dock {
-      pointer-events: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px 6px 8px;
-      background: rgba(255, 255, 255, 0.015);
-      border: 1px solid var(--border-subtle);
-      border-radius: 40px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      width: fit-content;
-    }
-
     .apps-dock:hover {
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(22, 22, 28, 0.94);
       border-color: var(--border-light);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
     }
 
     .apps-trigger {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 4px 10px;
-      cursor: none;
+      gap: 8px;
+      padding: 4px 8px;
+      cursor: pointer;
     }
 
     .apps-trigger svg {
-      width: 14px;
-      height: 14px;
-      fill: rgba(255, 255, 255, 0.7);
-      transition: transform 0.3s ease;
+      width: 13px;
+      height: 13px;
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.6);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      transition: transform 0.3s ease, stroke 0.3s ease;
     }
 
     .apps-dock:hover .apps-trigger svg {
       transform: rotate(90deg);
-      fill: #ffffff;
+      stroke: #ffffff;
     }
 
     .apps-label {
-      font-size: 0.68rem;
+      font-size: 0.64rem;
       font-weight: 800;
-      letter-spacing: 3.5px;
+      letter-spacing: 3px;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.5);
-      transition: color 0.2s ease;
+      transition: color 0.25s ease;
     }
 
     .apps-dock:hover .apps-label {
@@ -189,62 +160,139 @@
       align-items: center;
       gap: 8px;
       max-width: 0;
-      overflow: hidden;
       opacity: 0;
-      transform: translateX(-8px);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      transform: translateX(-10px);
+      transition: max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.3s ease,
+                  transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .apps-dock:hover .apps-list {
-      max-width: 200px;
+      max-width: 580px;
       opacity: 1;
+      pointer-events: auto;
       transform: translateX(0);
-      margin-left: 4px;
+      margin-left: 6px;
     }
 
     .app-btn {
-      width: 34px;
-      height: 34px;
+      position: relative;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border-subtle);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      cursor: none;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
       text-decoration: none;
+      flex-shrink: 0;
     }
 
-    .app-btn svg {
-      width: 17px;
-      height: 17px;
-      transition: transform 0.25s ease, filter 0.25s ease;
+    .app-btn svg, .app-btn img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      transition: transform 0.22s ease;
     }
 
     .app-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.55);
       transform: translateY(-2px) scale(1.08);
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
     }
 
     .app-btn:active {
-      transform: scale(0.94);
+      transform: scale(0.92);
     }
 
-    /* Minimal Time Block */
-    .clock-cluster {
+    .app-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      color: #ffffff;
+      background: rgba(12, 12, 14, 0.95);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 400;
+    }
+
+    .app-btn:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Secret Shake Triggered Add Button */
+    .add-app-btn {
+      width: 32px;
+      height: 32px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px dashed rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .add-app-btn.visible {
+      display: flex;
+    }
+
+    .add-app-btn:hover {
+      background: #ffffff;
+      border-color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    .add-app-btn:hover svg {
+      stroke: #000000;
+    }
+
+    .add-app-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      transition: stroke 0.2s ease;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.6); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Top Right Ephemeris Telemetry */
+    .telemetry-time-block {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 5px;
+      gap: 4px;
     }
 
-    .time-digits {
+    .time-digits-minimal {
       font-family: var(--font-mono);
-      font-size: 2.1rem;
-      font-weight: 400;
+      font-size: 1.8rem;
+      font-weight: 300;
       letter-spacing: 3px;
       color: #ffffff;
       line-height: 1;
@@ -252,7 +300,7 @@
 
     .time-date {
       font-family: var(--font-mono);
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       letter-spacing: 3px;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.35);
@@ -266,13 +314,13 @@
 
     .telemetry {
       font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 2.5px;
+      font-size: 0.64rem;
+      letter-spacing: 2px;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.35);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .pip {
@@ -284,25 +332,166 @@
     }
 
     .axiom {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 6px;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.25);
     }
 
+    /* Glassmorphic Modal for Adding Apps */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .custom-modal {
+      width: 440px;
+      background: rgba(14, 14, 18, 0.95);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes modalSlide {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+    }
+
+    .input-group input, .input-group select {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .input-group input:focus, .input-group select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .file-upload-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .file-upload-wrap input[type="file"] {
+      display: none;
+    }
+
+    .btn-upload {
+      flex: 1;
+      padding: 9px 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-upload:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-action {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-cancel:hover {
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-save {
+      background: #ffffff;
+      border: 1px solid #ffffff;
+      color: #000000;
+    }
+
+    .btn-save:hover {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
     @media (max-width: 800px) {
-      .hud { padding: 36px; }
-      .view-frame { inset: 14px; }
+      .hud { padding: 32px; }
+      .view-frame { inset: 12px; }
       .axiom { display: none; }
-      .time-digits { font-size: 1.6rem; }
     }
   </style>
 </head>
 <body>
 
-  <div class="cursor-center-dot" id="cursorDot"></div>
-  <div class="cursor-ambient-halo" id="cursorHalo"></div>
+  <div class="ambient-field" id="ambientField"></div>
 
   <div class="view-frame">
     <div class="corner c-tl"></div>
@@ -315,55 +504,100 @@
 
   <div class="hud">
     <div class="row-top">
-      
-      <!-- Top Left Hover Menu -->
-      <div class="apps-dock" id="appsDock">
-        <div class="apps-trigger">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <span class="apps-label">Apps</span>
+      <div class="docks-cluster">
+        
+        <!-- Apps Dock -->
+        <div class="apps-dock" id="dockApps">
+          <div class="apps-trigger">
+            <svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
+            <span class="apps-label">Apps</span>
+          </div>
+          <div class="apps-list" id="listApps">
+            <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google">
+              <svg viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+            </a>
+            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="YouTube">
+              <svg viewBox="0 0 24 24">
+                <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                <path fill="#FFFFFF" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Instagram">
+              <svg viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#FFDC80"/>
+                    <stop offset="25%" stop-color="#FCAF45"/>
+                    <stop offset="50%" stop-color="#F56040"/>
+                    <stop offset="75%" stop-color="#E1306C"/>
+                    <stop offset="100%" stop-color="#C13584"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#ig-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+            <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Pinterest">
+              <svg viewBox="0 0 24 24">
+                <path fill="#E60023" d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.332 1.357-.053.211-.174.256-.402.154-1.498-.697-2.435-2.887-2.435-4.647 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
+              </svg>
+            </a>
+            <a href="https://web.snapchat.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Snapchat">
+              <svg viewBox="0 0 24 24">
+                <path fill="#FFFC00" d="M12 2.5c-4.2 0-6.8 3.1-6.8 6.2 0 1.4.6 2.8 1.4 3.6.2.2.3.4.2.6-.2.4-.9 1.5-1.2 1.9-.3.4-.2.7.2.7.4 0 1.2-.1 2-.5.3-.1.6 0 .8.2 1.1.9 2.3 1.4 3.4 1.4 1.1 0 2.3-.5 3.4-1.4.2-.2.5-.3.8-.2.8.4 1.6.5 2 .5.4 0 .5-.3.2-.7-.3-.4-1-1.5-1.2-1.9-.1-.2 0-.4.2-.6.8-.8 1.4-2.2 1.4-3.6 0-3.1-2.6-6.2-6.8-6.2z"/>
+                <path fill="#000000" d="M12 3.8c3.4 0 5.4 2.5 5.4 4.9 0 1.2-.5 2.3-1.2 3-.5.5-.6 1.1-.3 1.7.3.5.8 1.3 1 1.6-.6-.1-1.4-.3-2.1-.7-.7-.4-1.5-.3-2.1.2-.8.6-1.7.9-2.7.9s-1.9-.3-2.7-.9c-.6-.5-1.4-.6-2.1-.2-.7.4-1.5.6-2.1.7.2-.3.7-1.1 1-1.6.3-.6.2-1.2-.3-1.7-.7-.7-1.2-1.8-1.2-3 0-2.4 2-4.9 5.4-4.9z"/>
+              </svg>
+            </a>
+
+            <!-- Secret Add App Button -->
+            <div class="add-app-btn" id="addAppBtn" title="Register Custom Protocol/URL">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+          </div>
         </div>
 
-        <div class="apps-list">
-          <!-- Google Official SVG -->
-          <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="app-btn interactive-target" title="Google">
-            <svg viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-          </a>
-
-          <!-- Pinterest Official SVG -->
-          <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer" class="app-btn interactive-target" title="Pinterest">
-            <svg viewBox="0 0 24 24">
-              <path fill="#E60023" d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.332 1.357-.053.211-.174.256-.402.154-1.498-.697-2.435-2.887-2.435-4.647 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
-            </svg>
-          </a>
-
-          <!-- Instagram Official Multi-Color Gradient SVG -->
-          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="app-btn interactive-target" title="Instagram">
-            <svg viewBox="0 0 24 24">
-              <defs>
-                <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#FFDC80"/>
-                  <stop offset="25%" stop-color="#FCAF45"/>
-                  <stop offset="50%" stop-color="#F56040"/>
-                  <stop offset="75%" stop-color="#E1306C"/>
-                  <stop offset="100%" stop-color="#C13584"/>
-                </linearGradient>
-              </defs>
-              <path fill="url(#ig-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
+        <!-- Business Dock -->
+        <div class="apps-dock" id="dockBiz">
+          <div class="apps-trigger">
+            <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zm-11 0h7v7H3z"/></svg>
+            <span class="apps-label">Business</span>
+          </div>
+          <div class="apps-list">
+            <a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Meta Ads">
+              <svg viewBox="0 0 24 24"><path fill="#0081FB" d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/></svg>
+            </a>
+            <a href="https://ads.google.com?subid=xs-ip-gemini-adlc" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Google Ads">
+              <svg viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M3.88 12.87L9.67 2.84c.71-1.23 2.28-1.65 3.51-.94l2.12 1.22c1.23.71 1.65 2.28.94 3.51L10.45 16.66c-.71 1.23-2.28 1.65-3.51.94l-2.12-1.22c-1.23-.71-1.65-2.28-.94-3.51z"/>
+                <path fill="#FABB05" d="M20.12 16.88L14.33 6.85c-.71-1.23-2.28-1.65-3.51-.94l-2.12 1.22c-1.23.71-1.65 2.28-.94 3.51l5.79 10.03c.71 1.23 2.28 1.65 3.51.94l2.12-1.22c1.23-.71 1.65-2.28.94-3.51z"/>
+                <circle fill="#34A853" cx="5.5" cy="18.5" r="3.5"/>
+              </svg>
+            </a>
+            <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Analytics">
+              <svg viewBox="0 0 24 24">
+                <path fill="#F9AB00" d="M21.5 19.5h-3a1.5 1.5 0 0 1-1.5-1.5v-12a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 23 6v12a1.5 1.5 0 0 1-1.5 1.5z"/>
+                <path fill="#E37400" d="M13.5 19.5h-3A1.5 1.5 0 0 1 9 18v-6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 12v6a1.5 1.5 0 0 1-1.5 1.5z"/>
+                <circle fill="#E37400" cx="4" cy="17" r="2.5"/>
+              </svg>
+            </a>
+            <a href="https://dashboard.stripe.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Stripe">
+              <svg viewBox="0 0 24 24"><path fill="#635BFF" d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C17.652.759 14.85 0 11.802 0 4.887 0 .546 3.633.546 9.878c0 7.747 10.664 6.552 10.664 9.932 0 .979-.89 1.423-2.133 1.423-2.52 0-5.376-1.12-7.228-2.147l-.92 5.568C2.85 25.59 5.892 26.5 8.94 26.5c7.228 0 11.756-3.488 11.756-9.843 0-8.083-10.72-6.704-10.72-9.507z"/></svg>
+            </a>
+            <a href="https://admin.shopify.com" target="_blank" rel="noopener noreferrer" class="app-btn" data-tooltip="Shopify">
+              <svg viewBox="0 0 24 24"><path fill="#95BF47" d="M19.34 6.72c-.11-.3-.39-.48-.68-.45-.29.02-4.08.34-4.08.34s-2.7-2.67-2.98-2.95c-.29-.28-.83-.19-1.04.14l-1.44 2.25-3.02.94c-.38.12-.55.57-.38.93l3.68 12.04 10.37-2.18-2.43-11.06zm-7.79 1.34l1.32-2.07c.8 1.15 1.83 2.19 2.08 2.45l-3.4-.38zm-1.87 2.14l2.79.31-2.16 8.54-1.85-6.05 1.22-.8-.2-.36-.2.36 1.4-2.8z"/></svg>
+            </a>
+          </div>
         </div>
+
       </div>
 
-      <!-- Clock -->
-      <div class="clock-cluster">
-        <div class="time-digits" id="clockDigits">00:00:00</div>
+      <!-- Minimal Ephemeris -->
+      <div class="telemetry-time-block">
+        <div class="time-digits-minimal" id="timeDigitsMinimal">00:00</div>
         <div class="time-date" id="clockDate">INITIALIZING</div>
       </div>
     </div>
@@ -371,273 +605,433 @@
     <div class="row-bottom">
       <div class="telemetry">
         <span class="pip"></span>
-        <span>UPTIME</span>
+        <span>QUANTUM EPHEMERIS</span>
         <span id="sessionTimer" style="color: #ffffff;">00:00:00</span>
       </div>
       <div class="axiom">FOCUS IS A VECTOR</div>
     </div>
   </div>
 
+  <!-- Custom App Registration Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="custom-modal">
+      <div class="modal-title">Deploy Custom Node</div>
+      
+      <div class="input-group">
+        <label>App Name / Tooltip</label>
+        <input type="text" id="appName" placeholder="e.g., Terminal or Notion" />
+      </div>
+
+      <div class="input-group">
+        <label>Target URL or Windows Protocol</label>
+        <input type="text" id="appUrl" placeholder="e.g., https://notion.so or spotify:" />
+      </div>
+
+      <div class="input-group">
+        <label>Icon Vector / File</label>
+        <div class="file-upload-wrap">
+          <input type="file" id="appIconFile" accept=".svg,image/png,image/jpeg,image/webp" />
+          <button type="button" class="btn-upload" id="triggerFileUpload">Select File (SVG/PNG)</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Target Dock</label>
+        <select id="dockTarget">
+          <option value="apps">Apps Shelf</option>
+          <option value="biz">Business Shelf</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-action btn-cancel" id="btnCancel">Cancel</button>
+        <button class="btn-action btn-save" id="btnSave">Deploy</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-    const cursorDot = document.getElementById('cursorDot');
-    const cursorHalo = document.getElementById('cursorHalo');
-    const clockDigits = document.getElementById('clockDigits');
+    const ambientField = document.getElementById('ambientField');
+    const timeDigitsMinimal = document.getElementById('timeDigitsMinimal');
     const clockDate = document.getElementById('clockDate');
     const sessionTimer = document.getElementById('sessionTimer');
-    const appsDock = document.getElementById('appsDock');
+    
+    // Modal Nodes
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const addAppBtn = document.getElementById('addAppBtn');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnSave = document.getElementById('btnSave');
+    const appNameInput = document.getElementById('appName');
+    const appUrlInput = document.getElementById('appUrl');
+    const appIconFileInput = document.getElementById('appIconFile');
+    const triggerFileUpload = document.getElementById('triggerFileUpload');
+    const dockTargetSelect = document.getElementById('dockTarget');
 
+    let customIconDataUrl = '';
     let width = 0;
     let height = 0;
 
+    // -------------------------------------------------------------
+    // 3D QUANTUM SPHERE CLOCK MATRIX CONFIGURATION
+    // -------------------------------------------------------------
+    // Sphere consists of nodes on Fibonacci lattice
+    const SPHERE_COUNT = 340;
+    const SPHERE_STRIDE = 7; // [x, y, z, charCode, phase, speed, isFocal]
+    const sphereBuffer = new Float32Array(SPHERE_COUNT * SPHERE_STRIDE);
+    const goldenRatio = (1 + Math.sqrt(5)) / 2;
+
+    for (let i = 0; i < SPHERE_COUNT; i++) {
+      const o = i * SPHERE_STRIDE;
+      const theta = 2 * Math.PI * i / goldenRatio;
+      const phi = Math.acos(1 - 2 * (i + 0.5) / SPHERE_COUNT);
+
+      sphereBuffer[o] = Math.cos(theta) * Math.sin(phi);     // unit x
+      sphereBuffer[o + 1] = Math.sin(theta) * Math.sin(phi); // unit y
+      sphereBuffer[o + 2] = Math.cos(phi);                  // unit z
+      sphereBuffer[o + 3] = Math.floor(Math.random() * 10);  // current digit
+      sphereBuffer[o + 4] = Math.random() * Math.PI * 2;    // phase
+      sphereBuffer[o + 5] = Math.random() * 0.04 + 0.01;    // twinkle speed
+      sphereBuffer[o + 6] = Math.random() < 0.2 ? 1 : 0;     // focal flag
+    }
+
+    // Shrinking Trail Buffer
+    const TRAIL_MAX = 20;
+    const trail = new Float32Array(TRAIL_MAX * 3);
+    let trailHead = 0;
+
     const mouse = {
-      x: -2000,
-      y: -2000,
-      tx: -2000,
-      ty: -2000,
-      radius: 155,
-      isDown: false,
-      speed: 0,
-      prevX: 0,
-      prevY: 0
+      x: -1000,
+      y: -1000,
+      prevX: -1000,
+      prevY: -1000,
+      rotX: 0,
+      rotY: 0,
+      hasMoved: false
     };
 
-    const STRIDE = 8;
-    let pCount = 0;
-    let pBuffer = null;
-
-    const MAX_SHOCKS = 3;
-    const shocks = new Float32Array(MAX_SHOCKS * 5);
-    let shockIdx = 0;
+    // Shake Gesture Tracker inside Dock
+    let shakeCount = 0;
+    let lastShakeDir = 0;
+    let lastShakeTime = 0;
 
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
     const startTime = performance.now();
 
-    function updateClock(now) {
+    // -------------------------------------------------------------
+    // LOCAL STORAGE CUSTOM APPS HYDRATION
+    // -------------------------------------------------------------
+    function loadSavedApps() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('aethelgard_custom_nodes') || '[]');
+        saved.forEach(app => renderCustomApp(app));
+      } catch(e) {}
+    }
+
+    function renderCustomApp(app) {
+      const targetList = app.dock === 'biz' 
+        ? document.querySelector('#dockBiz .apps-list')
+        : document.querySelector('#dockApps .apps-list');
+
+      const a = document.createElement('a');
+      a.href = app.url;
+      a.className = 'app-btn';
+      a.dataset.tooltip = app.name;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+
+      if (app.icon.startsWith('data:image') || app.icon.startsWith('http')) {
+        const img = document.createElement('img');
+        img.src = app.icon;
+        a.appendChild(img);
+      } else {
+        // Fallback Vector
+        a.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>`;
+      }
+
+      if (app.dock === 'apps') {
+        targetList.insertBefore(a, addAppBtn);
+      } else {
+        targetList.appendChild(a);
+      }
+    }
+
+    function saveCustomApp(app) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('aethelgard_custom_nodes') || '[]');
+        saved.push(app);
+        localStorage.setItem('aethelgard_custom_nodes', JSON.stringify(saved));
+        renderCustomApp(app);
+      } catch(e) {}
+    }
+
+    // File selection handling
+    triggerFileUpload.addEventListener('click', () => appIconFileInput.click());
+    appIconFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        triggerFileUpload.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          customIconDataUrl = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Modal Events
+    addAppBtn.addEventListener('click', () => {
+      modalBackdrop.classList.add('open');
+      appNameInput.focus();
+    });
+
+    btnCancel.addEventListener('click', () => {
+      modalBackdrop.classList.remove('open');
+      customIconDataUrl = '';
+      appNameInput.value = '';
+      appUrlInput.value = '';
+      triggerFileUpload.textContent = 'Select File (SVG/PNG)';
+    });
+
+    btnSave.addEventListener('click', () => {
+      const name = appNameInput.value.trim();
+      const url = appUrlInput.value.trim();
+      if (!name || !url) return;
+
+      saveCustomApp({
+        name,
+        url,
+        icon: customIconDataUrl,
+        dock: dockTargetSelect.value
+      });
+
+      btnCancel.click();
+    });
+
+    // -------------------------------------------------------------
+    // SHAKE DETECTION INSIDE APPS DOCK
+    // -------------------------------------------------------------
+    const dockApps = document.getElementById('dockApps');
+    dockApps.addEventListener('mousemove', (e) => {
+      const dx = e.movementX;
+      const now = performance.now();
+
+      if (Math.abs(dx) > 12) {
+        const dir = Math.sign(dx);
+        if (dir !== lastShakeDir && (now - lastShakeTime) < 350) {
+          shakeCount++;
+          if (shakeCount >= 4) {
+            addAppBtn.classList.add('visible');
+          }
+        }
+        lastShakeDir = dir;
+        lastShakeTime = now;
+      }
+    });
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+
+    function addTrailPoint(x, y) {
+      const o = trailHead * 3;
+      trail[o] = x;
+      trail[o + 1] = y;
+      trail[o + 2] = 1.0;
+      trailHead = (trailHead + 1) % TRAIL_MAX;
+    }
+
+    let rotY = 0;
+    let rotX = 0;
+
+    function render(now) {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
+
+      // System Time Gathering
       const d = new Date();
       const h = String(d.getHours()).padStart(2, '0');
       const m = String(d.getMinutes()).padStart(2, '0');
       const s = String(d.getSeconds()).padStart(2, '0');
-
-      clockDigits.textContent = `${h}:${m}:${s}`;
+      const ms = d.getMilliseconds();
+      
+      timeDigitsMinimal.textContent = `${h}:${m}`;
       clockDate.textContent = `${days[d.getDay()]} / ${String(d.getDate()).padStart(2, '0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
 
-      const sec = Math.floor((now - startTime) / 1000);
-      const sh = String(Math.floor(sec / 3600)).padStart(2, '0');
-      const sm = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
-      const ss = String(sec % 60).padStart(2, '0');
+      const secElapsed = Math.floor((now - startTime) / 1000);
+      const sh = String(Math.floor(secElapsed / 3600)).padStart(2, '0');
+      const sm = String(Math.floor((secElapsed % 3600) / 60)).padStart(2, '0');
+      const ss = String(secElapsed % 60).padStart(2, '0');
       sessionTimer.textContent = `${sh}:${sm}:${ss}`;
-    }
 
-    function initTypography() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      // -------------------------------------------------------------
+      // 3D QUANTUM ROTATING NUMBER SPHERE CLOCK
+      // -------------------------------------------------------------
+      const cx = width / 2;
+      const cy = height / 2;
+      const sphereRadius = Math.min(width, height) * 0.28;
 
-      const off = document.createElement('canvas');
-      off.width = width;
-      off.height = height;
-      const offCtx = off.getContext('2d');
+      // Mathematical smooth rotation driven by time + mouse inertia
+      rotY += 0.0035;
+      rotX += 0.0018;
 
-      const fontSize = Math.min(width * 0.125, 150);
-      offCtx.fillStyle = '#ffffff';
-      offCtx.textAlign = 'center';
-      offCtx.textBaseline = 'middle';
-      offCtx.font = `900 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-      offCtx.fillText('FOCUS', width / 2, height / 2);
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
 
-      const img = offCtx.getImageData(0, 0, width, height).data;
-      const step = Math.max(Math.floor(width / 340), 4);
-      const coords = [];
+      // Render Ring Trails / Orbit Field
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '600 13px "JetBrains Mono", monospace';
 
-      for (let y = 0; y < height; y += step) {
-        for (let x = 0; x < width; x += step) {
-          const idx = (y * width + x) * 4 + 3;
-          if (img[idx] > 128) {
-            coords.push(x, y);
+      // Sort or direct project (Z-buffer style alpha)
+      for (let i = 0; i < SPHERE_COUNT; i++) {
+        const o = i * SPHERE_STRIDE;
+        let x = sphereBuffer[o];
+        let y = sphereBuffer[o + 1];
+        let z = sphereBuffer[o + 2];
+
+        // 3D Rotation Y
+        let x1 = x * cosY - z * sinY;
+        let z1 = z * cosY + x * sinY;
+
+        // 3D Rotation X
+        let y2 = y * cosX - z1 * sinX;
+        let z2 = z1 * cosX + y * sinX;
+
+        // Perspective Projection
+        const fov = 2.4;
+        const scale = fov / (fov + z2);
+        const projX = cx + x1 * sphereRadius * scale;
+        const projY = cy + y2 * sphereRadius * scale;
+
+        // Depth Alpha mapping
+        const depthAlpha = Math.max((z2 + 1) / 2, 0.06);
+        sphereBuffer[o + 4] += sphereBuffer[o + 5];
+        const twinkle = Math.sin(sphereBuffer[o + 4]) * 0.3 + 0.7;
+        const finalAlpha = depthAlpha * twinkle;
+
+        // Clock Number Matrix logic
+        let displayChar;
+        if (i % 6 === 0) {
+          displayChar = s[0]; // Second Tens
+        } else if (i % 6 === 1) {
+          displayChar = s[1]; // Second Units
+        } else if (i % 6 === 2) {
+          displayChar = m[0];
+        } else if (i % 6 === 3) {
+          displayChar = m[1];
+        } else {
+          displayChar = sphereBuffer[o + 3]; // Digital noise matrix
+        }
+
+        const fontSize = Math.max(Math.floor(14 * scale), 7);
+        ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha.toFixed(2)})`;
+        ctx.fillText(displayChar, projX, projY);
+      }
+      ctx.restore();
+
+      // -------------------------------------------------------------
+      // CENTER CHRONO CORE
+      // -------------------------------------------------------------
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Time Sub-second Micro Gauge Ring
+      const secProgress = (d.getSeconds() + ms / 1000) / 60;
+      ctx.beginPath();
+      ctx.arc(cx, cy, sphereRadius * 0.52, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * secProgress);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Center Core Digital Time
+      ctx.font = '800 clamp(2.4rem, 6vw, 4.8rem) "JetBrains Mono", monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+      ctx.shadowBlur = 18;
+      ctx.fillText(`${h}:${m}:${s}`, cx, cy - 8);
+
+      // Micro Fractions / System Status
+      ctx.font = '500 0.7rem "JetBrains Mono", monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.shadowBlur = 0;
+      ctx.letterSpacing = "6px";
+      ctx.fillText(`UTC+05:30 • SEC ${(ms).toString().padStart(3, '0')}`, cx, cy + 34);
+      ctx.restore();
+
+      // -------------------------------------------------------------
+      // MAGICAL SHRINKING RIBBON TRAIL
+      // -------------------------------------------------------------
+      if (mouse.hasMoved) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        for (let i = 0; i < TRAIL_MAX - 1; i++) {
+          const idxA = ((trailHead - i - 1 + TRAIL_MAX) % TRAIL_MAX) * 3;
+          const idxB = ((trailHead - i - 2 + TRAIL_MAX) % TRAIL_MAX) * 3;
+
+          const lifeA = trail[idxA + 2];
+          const lifeB = trail[idxB + 2];
+
+          if (lifeA > 0.05 && lifeB > 0.05) {
+            const progress = 1 - (i / TRAIL_MAX);
+            const lineWidth = Math.max(progress * 3.5, 0.4);
+            const alpha = Math.min(lifeA * progress * 0.85, 0.9);
+
+            ctx.beginPath();
+            ctx.moveTo(trail[idxA], trail[idxA + 1]);
+            ctx.lineTo(trail[idxB], trail[idxB + 1]);
+
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
           }
+          trail[idxA + 2] *= 0.88;
         }
+        ctx.restore();
       }
 
-      pCount = coords.length / 2;
-      pBuffer = new Float32Array(pCount * STRIDE);
-
-      for (let i = 0; i < pCount; i++) {
-        const o = i * STRIDE;
-        const ox = coords[i * 2];
-        const oy = coords[i * 2 + 1];
-
-        pBuffer[o] = ox + (Math.random() - 0.5) * 30;
-        pBuffer[o + 1] = oy + (Math.random() - 0.5) * 30;
-        pBuffer[o + 2] = ox;
-        pBuffer[o + 3] = oy;
-        pBuffer[o + 4] = 0;
-        pBuffer[o + 5] = 0;
-        pBuffer[o + 6] = Math.random() * 1.3 + 0.9;
-        pBuffer[o + 7] = Math.random() * 0.35 + 0.55;
-      }
-    }
-
-    function addShockwave(x, y) {
-      const o = shockIdx * 5;
-      shocks[o] = x;
-      shocks[o + 1] = y;
-      shocks[o + 2] = 2;
-      shocks[o + 3] = 320;
-      shocks[o + 4] = 0.75;
-      shockIdx = (shockIdx + 1) % MAX_SHOCKS;
-    }
-
-    let prevTime = performance.now();
-
-    function render(now) {
-      const dt = Math.min((now - prevTime) / 1000, 0.033);
-      prevTime = now;
-
-      mouse.x += (mouse.tx - mouse.x) * 0.22;
-      mouse.y += (mouse.ty - mouse.y) * 0.22;
-
-      cursorDot.style.transform = `translate3d(${mouse.tx - 2.5}px, ${mouse.ty - 2.5}px, 0)`;
-      cursorHalo.style.transform = `translate3d(${mouse.x - cursorHalo.offsetWidth * 0.5}px, ${mouse.y - cursorHalo.offsetHeight * 0.5}px, 0)`;
-
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, width, height);
-
-      updateClock(now);
-
-      for (let i = 0; i < MAX_SHOCKS; i++) {
-        const o = i * 5;
-        const alpha = shocks[o + 4];
-        if (alpha > 0.01) {
-          shocks[o + 2] += (shocks[o + 3] - shocks[o + 2]) * 0.12;
-          shocks[o + 4] *= 0.93;
-
-          ctx.save();
-          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.arc(shocks[o], shocks[o + 1], shocks[o + 2], 0, 6.283);
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-
-      const mx = mouse.x;
-      const my = mouse.y;
-      const mRad = mouse.radius;
-      const mRadSq = mRad * mRad;
-      const isDown = mouse.isDown;
-      const speedMult = Math.min(mouse.speed * 0.04, 3.5);
-
-      for (let i = 0; i < pCount; i++) {
-        const o = i * STRIDE;
-        let px = pBuffer[o];
-        let py = pBuffer[o + 1];
-        const ox = pBuffer[o + 2];
-        const oy = pBuffer[o + 3];
-        let vx = pBuffer[o + 4];
-        let vy = pBuffer[o + 5];
-        const size = pBuffer[o + 6];
-        const alpha = pBuffer[o + 7];
-
-        const dx = mx - px;
-        const dy = my - py;
-        const distSq = dx * dx + dy * dy;
-
-        if (distSq < mRadSq && distSq > 0.01) {
-          const dist = Math.sqrt(distSq);
-          const force = (1 - dist / mRad);
-
-          if (isDown) {
-            const angle = Math.atan2(dy, dx) + 1.57;
-            vx += (dx / dist) * force * 30 + Math.cos(angle) * force * 15;
-            vy += (dy / dist) * force * 30 + Math.sin(angle) * force * 15;
-          } else {
-            const angle = Math.atan2(dy, dx);
-            const push = force * (18 + speedMult * 8);
-            vx -= Math.cos(angle) * push;
-            vy -= Math.sin(angle) * push;
-          }
-        }
-
-        const spring = 8.8;
-        const damping = Math.pow(0.83, dt * 60);
-
-        vx += (ox - px) * spring * dt;
-        vy += (oy - py) * spring * dt;
-        vx *= damping;
-        vy *= damping;
-
-        px += vx;
-        py += vy;
-
-        pBuffer[o] = px;
-        pBuffer[o + 1] = py;
-        pBuffer[o + 4] = vx;
-        pBuffer[o + 5] = vy;
-
-        const vel = Math.hypot(vx, vy);
-        const finalAlpha = Math.min(alpha + vel * 0.05, 1.0);
-
-        ctx.fillStyle = finalAlpha > 0.85 ? '#ffffff' : `rgba(255, 255, 255, ${finalAlpha.toFixed(2)})`;
-        ctx.fillRect(px - size * 0.5, py - size * 0.5, size, size);
-      }
-
-      mouse.speed *= 0.88;
       requestAnimationFrame(render);
     }
 
-    // Hardware Event Handlers
-    window.addEventListener('resize', initTypography);
+    // Hardware Listeners
+    window.addEventListener('resize', resize, { passive: true });
 
     window.addEventListener('mousemove', (e) => {
-      mouse.speed = Math.hypot(e.clientX - mouse.prevX, e.clientY - mouse.prevY);
-      mouse.prevX = mouse.tx = e.clientX;
-      mouse.prevY = mouse.ty = e.clientY;
-    });
+      mouse.hasMoved = true;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
 
-    window.addEventListener('mousedown', (e) => {
-      // Buttons par click hone par particle shockwave suppress ho sake
-      if (e.target.closest('.interactive-target') || e.target.closest('.apps-dock')) {
-        return;
-      }
-      mouse.isDown = true;
-      mouse.radius = 240;
-      addShockwave(e.clientX, e.clientY);
+      ambientField.style.setProperty('--mx', `${e.clientX}px`);
+      ambientField.style.setProperty('--my', `${e.clientY}px`);
 
-      for (let i = 0; i < pCount; i++) {
-        const o = i * STRIDE;
-        const dx = pBuffer[o] - e.clientX;
-        const dy = pBuffer[o + 1] - e.clientY;
-        const distSq = dx * dx + dy * dy;
-        if (distSq < 62500 && distSq > 1) {
-          const dist = Math.sqrt(distSq);
-          const push = (1 - dist / 250) * 48;
-          pBuffer[o + 4] += (dx / dist) * push;
-          pBuffer[o + 5] += (dy / dist) * push;
-        }
-      }
-    });
+      // Gentle interactive 3D rotation bias
+      rotY += (e.clientX - mouse.prevX) * 0.0005;
+      rotX += (e.clientY - mouse.prevY) * 0.0005;
 
-    window.addEventListener('mouseup', () => {
-      mouse.isDown = false;
-      mouse.radius = 155;
-    });
+      mouse.prevX = e.clientX;
+      mouse.prevY = e.clientY;
+
+      addTrailPoint(e.clientX, e.clientY);
+    }, { passive: true });
 
     window.addEventListener('mouseleave', () => {
-      mouse.tx = -2000;
-      mouse.ty = -2000;
-      mouse.isDown = false;
+      mouse.hasMoved = false;
+      ambientField.style.setProperty('--mx', `-500px`);
+      ambientField.style.setProperty('--my', `-500px`);
     });
 
-    // Custom Interactive Hover Feedback
-    document.querySelectorAll('.interactive-target, .apps-dock').forEach(el => {
-      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-interactive'));
-      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-interactive'));
-    });
-
-    initTypography();
+    resize();
+    loadSavedApps();
     requestAnimationFrame(render);
   </script>
 </body>
