@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KINETIC // ULTRA-LUXURY FOCUS ENGINE</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --text-main: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.4);
+      --text-faint: rgba(255, 255, 255, 0.18);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Neue Haas Grotesk", "Helvetica Neue", sans-serif;
+      --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      cursor: none !important; /* System cursor hidden for bespoke luxury rig */
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: var(--font-display);
+      color: var(--text-main);
+      position: relative;
+    }
+
+    /* Ambient Cursor Spotlight */
+    .cinematic-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(
+        750px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.045),
+        transparent 70%
+      );
+      z-index: 1;
+    }
+
+    /* Screen Edge Grain / Film Noise */
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+      z-index: 2;
+    }
+
+    /* Core Canvas */
+    canvas#stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+    }
+
+    /* Luxury Telemetry & Navigation Grid */
+    .luxury-hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      padding: 48px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Top Grid Header */
+    .hud-top {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: flex-start;
+    }
+
+    .mindset-mark {
+      font-size: 0.95rem;
+      font-weight: 300;
+      letter-spacing: 5px;
+      color: var(--text-dim);
+      line-height: 1.35;
+      text-transform: uppercase;
+      pointer-events: auto;
+      transition: color 0.4s ease;
+    }
+
+    .mindset-mark strong {
+      display: block;
+      font-weight: 900;
+      font-size: 1.55rem;
+      letter-spacing: 3px;
+      color: #ffffff;
+    }
+
+    .mindset-mark:hover {
+      color: #ffffff;
+    }
+
+    .sanskrit-core {
+      font-size: 1.45rem;
+      letter-spacing: 6px;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 300;
+      text-align: center;
+      text-shadow: 0 0 35px rgba(255, 255, 255, 0.45);
+      white-space: nowrap;
+    }
+
+    /* Top Right: Real-time Telemetry Terminal */
+    .telemetry-tray {
+      justify-self: flex-end;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      border-left: 1px solid var(--border-subtle);
+      padding-left: 20px;
+    }
+
+    .telemetry-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .telemetry-row .val {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .perf-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .perf-dot {
+      width: 5px;
+      height: 5px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ff88;
+    }
+
+    /* Bottom Grid Footer */
+    .hud-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .system-coords {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      color: var(--text-faint);
+      line-height: 1.6;
+    }
+
+    .system-coords span {
+      color: var(--text-dim);
+    }
+
+    /* Bottom Right: Iconic Split Motivation */
+    .dont-quit-matrix {
+      text-align: right;
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: var(--text-faint);
+      line-height: 1.15;
+      pointer-events: auto;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dont-quit-matrix span.lit {
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    }
+
+    .dont-quit-matrix:hover {
+      transform: scale(1.05);
+    }
+
+    /* Bespoke Precision Cursor Rig */
+    .custom-cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 4px;
+      background: #ffffff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.2s ease;
+      box-shadow: 0 0 10px #ffffff;
+    }
+
+    .custom-cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .cursor-active .custom-cursor-ring {
+      width: 64px;
+      height: 64px;
+      border-color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    @media (max-width: 900px) {
+      .luxury-hud { padding: 30px; }
+      .sanskrit-core { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cinematic-vignette" id="vignette"></div>
+  <div class="film-grain"></div>
+
+  <!-- Custom Master Cursor -->
+  <div class="custom-cursor-dot" id="cursorDot"></div>
+  <div class="custom-cursor-ring" id="cursorRing"></div>
+
+  <!-- Realtime Kinetic Surface -->
+  <canvas id="stage"></canvas>
+
+  <!-- Luxury Monospaced / Minimal HUD Overlay -->
+  <div class="luxury-hud">
+    <div class="hud-top">
+      <div class="mindset-mark">
+        MINDSET<br>
+        <strong>IS</strong>
+        EVERYTHING
+      </div>
+
+      <div class="sanskrit-core">
+        सर्वं सम्भाव्यते त्वयि ।
+      </div>
+
+      <div class="telemetry-tray">
+        <div class="telemetry-row">
+          <span>FPS:</span>
+          <span class="val" id="fpsVal">120.0</span>
+        </div>
+        <div class="telemetry-row">
+          <span>FRAMETIME:</span>
+          <span class="val" id="frameTimeVal">8.3 ms</span>
+        </div>
+        <div class="telemetry-row">
+          <span>LATENCY:</span>
+          <span class="val" id="jitterVal">0.4 ms</span>
+        </div>
+        <div class="perf-badge">
+          <span class="perf-dot" id="statusDot"></span>
+          PC PERFORMANCE: <span id="perfVal">99.8% [OPTIMAL]</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="system-coords">
+        CORE // VECTOR FIELD GENERATION<br>
+        STARS // <span id="starCount">1,000</span> PARTICLES ACTIVE<br>
+        WARP // <span id="warpMetric">2.0</span> LY/S
+      </div>
+
+      <div class="dont-quit-matrix" id="dontQuitTrigger">
+        <span class="lit">DO</span>N'T<br>
+        QU<span class="lit">IT!</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    const vignette = document.getElementById('vignette');
+    const cursorDot = document.getElementById('cursorDot');
+    const cursorRing = document.getElementById('cursorRing');
+    const fpsVal = document.getElementById('fpsVal');
+    const frameTimeVal = document.getElementById('frameTimeVal');
+    const jitterVal = document.getElementById('jitterVal');
+    const perfVal = document.getElementById('perfVal');
+    const warpMetric = document.getElementById('warpMetric');
+
+    let width, height, dpr;
+    let stars = [];
+    let textParticles = [];
+
+    // Cursor position and smooth physics lag
+    const mouse = { x: -2000, y: -2000, targetX: -2000, targetY: -2000, radius: 140 };
+    let ringX = -2000, ringY = -2000;
+
+    // Warp Physics
+    const STAR_COUNT = 1000;
+    const MAX_DEPTH = 1800;
+    let baseSpeed = 2.2;
+    let currentSpeed = 2.2;
+    let targetSpeed = 2.2;
+
+    // Web Audio Precision Sub-Bass Clicker (Tactile luxury feel)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playHapticThud() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    }
+
+    // 3D Star Vector with Velocity Streaking
+    class Star3D {
+      constructor() {
+        this.reset(true);
+      }
+
+      reset(initial = false) {
+        this.x = (Math.random() - 0.5) * width * 2.5;
+        this.y = (Math.random() - 0.5) * height * 2.5;
+        this.z = initial ? Math.random() * MAX_DEPTH : MAX_DEPTH;
+        this.pz = this.z;
+        this.size = Math.random() * 1.2 + 0.3;
+      }
+
+      update(speed) {
+        this.pz = this.z;
+        this.z -= speed;
+
+        if (this.z <= 1) {
+          this.reset(false);
+          this.pz = this.z;
+        }
+      }
+
+      draw() {
+        const fov = 420;
+        // Parallax drift with cursor
+        const cx = width / 2 + (mouse.x !== -2000 ? (mouse.x - width / 2) * 0.045 : 0);
+        const cy = height / 2 + (mouse.y !== -2000 ? (mouse.y - height / 2) * 0.045 : 0);
+
+        const k = fov / this.z;
+        const px = this.x * k + cx;
+        const py = this.y * k + cy;
+
+        const prevK = fov / this.pz;
+        const prevPx = this.x * prevK + cx;
+        const prevPy = this.y * prevK + cy;
+
+        const alpha = Math.min(1, Math.max(0.06, (1 - this.z / MAX_DEPTH) * 1.3));
+
+        if (px >= 0 && px <= width && py >= 0 && py <= height) {
+          ctx.beginPath();
+          ctx.moveTo(prevPx, prevPy);
+          ctx.lineTo(px, py);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
+          ctx.lineWidth = Math.max(0.5, (1 - this.z / MAX_DEPTH) * 2.2);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(px, py, this.size * ((MAX_DEPTH - this.z) / MAX_DEPTH + 0.4), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.fill();
+        }
+      }
+    }
+
+    // High Density Kinetic Text Particle
+    class KineticVector {
+      constructor(targetX, targetY) {
+        this.originX = targetX;
+        this.originY = targetY;
+        this.x = targetX + (Math.random() - 0.5) * 80;
+        this.y = targetY + (Math.random() - 0.5) * 80;
+        this.vx = 0;
+        this.vy = 0;
+        this.size = 2.4;
+        this.friction = 0.86;
+        this.spring = 0.075;
+      }
+
+      update() {
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Repel from precision cursor
+        if (dist < mouse.radius) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          const angle = Math.atan2(dy, dx);
+          const push = force * 26;
+          this.vx -= Math.cos(angle) * push;
+          this.vy -= Math.sin(angle) * push;
+        }
+
+        // Elastic recovery
+        this.vx += (this.originX - this.x) * this.spring;
+        this.vy += (this.originY - this.y) * this.spring;
+
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+
+        this.x += this.vx;
+        this.y += this.vy;
+      }
+
+      draw() {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+      }
+    }
+
+    function initScene() {
+      dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+
+      // Starfield instantiation
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push(new Star3D());
+      }
+
+      // Exact Layout "DO MORE. FOCUS" text rasterization
+      textParticles = [];
+      const offscreen = document.createElement('canvas');
+      offscreen.width = width;
+      offscreen.height = height;
+      const offCtx = offscreen.getContext('2d');
+
+      const baseFont = Math.min(width * 0.125, 145);
+      offCtx.fillStyle = '#ffffff';
+      offCtx.textAlign = 'center';
+      offCtx.textBaseline = 'middle';
+
+      // DO MORE.
+      offCtx.font = `900 ${baseFont * 0.52}px var(--font-display)`;
+      offCtx.letterSpacing = "6px";
+      offCtx.fillText("DO MORE.", width / 2, height / 2 - baseFont * 0.44);
+
+      // FOCUS
+      offCtx.font = `900 ${baseFont}px var(--font-display)`;
+      offCtx.letterSpacing = "4px";
+      offCtx.fillText("FOCUS", width / 2, height / 2 + baseFont * 0.38);
+
+      const imgData = offCtx.getImageData(0, 0, width, height).data;
+      const step = 6; // Grid gap for pure Swiss matrix finish
+
+      for (let y = 0; y < height; y += step) {
+        for (let x = 0; x < width; x += step) {
+          const alphaIndex = (y * width + x) * 4 + 3;
+          if (imgData[alphaIndex] > 130) {
+            textParticles.push(new KineticVector(x, y));
+          }
+        }
+      }
+    }
+
+    function triggerHyperspace() {
+      playHapticThud();
+      targetSpeed = 28.0; // Instant Warp Acceleration
+      for (let p of textParticles) {
+        p.vx += (Math.random() - 0.5) * 60;
+        p.vy += (Math.random() - 0.5) * 60;
+      }
+    }
+
+    // Telemetry Engine (Hardware profiling & frametime jitter)
+    let frameTimes = [];
+    let lastTimestamp = performance.now();
+
+    function updateTelemetry(now) {
+      const delta = now - lastTimestamp;
+      lastTimestamp = now;
+
+      frameTimes.push(delta);
+      if (frameTimes.length > 50) frameTimes.shift();
+
+      const avgDelta = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+      const currentFps = 1000 / avgDelta;
+      const jitter = Math.abs(delta - avgDelta);
+
+      fpsVal.textContent = currentFps.toFixed(1);
+      frameTimeVal.textContent = `${avgDelta.toFixed(1)} ms`;
+      jitterVal.textContent = `${jitter.toFixed(1)} ms`;
+
+      // True PC Performance Evaluation Formula
+      // 16.6ms is target 60FPS. < 8.3ms is 120FPS+
+      let performanceIndex = 100 - (avgDelta > 8.3 ? (avgDelta - 8.3) * 2.5 : 0);
+      performanceIndex = Math.max(78, Math.min(99.9, performanceIndex));
+
+      if (performanceIndex > 95) {
+        perfVal.textContent = `${performanceIndex.toFixed(1)}% [OPTIMAL]`;
+        document.getElementById('statusDot').style.background = "#00ff88";
+      } else {
+        perfVal.textContent = `${performanceIndex.toFixed(1)}% [STABLE]`;
+        document.getElementById('statusDot').style.background = "#ffbb00";
+      }
+    }
+
+    // Main Engine Loop
+    function frame(now) {
+      ctx.clearRect(0, 0, width, height);
+
+      updateTelemetry(now);
+
+      // Smooth custom cursor lerping
+      mouse.x += (mouse.targetX - mouse.x) * 0.35;
+      mouse.y += (mouse.targetY - mouse.y) * 0.35;
+
+      ringX += (mouse.targetX - ringX) * 0.15;
+      ringY += (mouse.targetY - ringY) * 0.15;
+
+      cursorDot.style.transform = `translate3d(${mouse.targetX}px, ${mouse.targetY}px, 0) translate(-50%, -50%)`;
+      cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+
+      // Warp Speed Deceleration
+      currentSpeed += (targetSpeed - currentSpeed) * 0.05;
+      if (targetSpeed > baseSpeed) {
+        targetSpeed -= 0.45;
+        if (targetSpeed < baseSpeed) targetSpeed = baseSpeed;
+      }
+      warpMetric.textContent = currentSpeed.toFixed(1);
+
+      // Draw 3D Continuous Starfield
+      for (let s of stars) {
+        s.update(currentSpeed);
+        s.draw();
+      }
+
+      // Draw Kinetic Vector Text
+      for (let p of textParticles) {
+        p.update();
+        p.draw();
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    // Window & Mouse Interaction Bindings
+    window.addEventListener('resize', initScene);
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
+      vignette.style.setProperty('--mouse-x', `${e.clientX}px`);
+      vignette.style.setProperty('--mouse-y', `${e.clientY}px`);
+    });
+
+    window.addEventListener('mousedown', () => {
+      document.body.classList.add('cursor-active');
+      triggerHyperspace();
+    });
+
+    window.addEventListener('mouseup', () => {
+      document.body.classList.remove('cursor-active');
+    });
+
+    document.querySelectorAll('.mindset-mark, .dont-quit-matrix').forEach(elem => {
+      elem.addEventListener('mouseenter', () => document.body.classList.add('cursor-active'));
+      elem.addEventListener('mouseleave', () => document.body.classList.remove('cursor-active'));
+    });
+
+    initScene();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
